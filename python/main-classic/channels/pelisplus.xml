@@ -31,6 +31,203 @@
 		<enabled>false</enabled>
 		<visible>false</visible>
 	</settings>
+	
+	<settings>
+		<id>label1</id>
+		<type>label</type>
+		<label>Opciones de AutoPlay</label>
+		<color>0xffffffff</color>
+		<default>None</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>autoplay</id>
+		<label> - AutoPlay (activar/desactivar la auto-reproduccion)</label>
+		<color>0xffffff99</color>
+		<type>bool</type>
+		<default>true</default>
+		<enabled>true</enabled>
+ 		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>lang</id>
+		<type>list</type>
+		<label> - Idioma Preferido</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>false</enabled>
+		<visible>true</visible>
+		<lvalues>latino</lvalues>
+		<lvalues>latino</lvalues>
+	</settings>
+
+	<settings>
+		<id>auto_config</id>
+		<label> - Auto-Configurar (Solo elige el idioma, activalo y disfruta de AutoPlay)</label>
+		<color>0xff00ff00</color>
+		<type>bool</type>
+		<default>true</default>
+		<enabled>true</enabled>
+ 		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>label2</id>
+		<type>label</type>
+		<label></label>
+		<default>None</default>
+		<enabled>false</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>label3</id>
+		<type>label</type>
+		<label>Configuracion Personalizada (Define tus Preferencias)</label>
+		<color>0xff66ffcc</color>
+		<default>None</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>priority</id>
+		<type>list</type>
+		<label> - Prioridad (Indica el orden para Auto-Reproducir)</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>Servidor y Calidad</lvalues>
+		<lvalues>Servidor</lvalues>
+		<lvalues>Calidad</lvalues>
+	</settings>
+
+	<settings>
+		<id>label4</id>
+		<type>label</type>
+		<label></label>
+		<default>None</default>
+		<enabled>false</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>server_1</id>
+		<type>list</type>
+		<label> - Servidor Favorito 1</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+		<lvalues>openload</lvalues>
+		<lvalues>thevideos</lvalues>
+	</settings>
+	
+	<settings>
+		<id>server_2</id>
+		<type>list</type>
+		<label> - Servidor Favorito 2</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+		<lvalues>openload</lvalues>
+		<lvalues>thevideos</lvalues>
+	</settings>
+	
+	<settings>
+		<id>server_3</id>
+		<type>list</type>
+		<label> - Servidor Favorito 3</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+		<lvalues>openload</lvalues>
+		<lvalues>thevideos</lvalues>
+	</settings>
+
+	<settings>
+		<id>label5</id>
+		<type>label</type>
+		<label></label>
+		<default>None</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>quality_1</id>
+		<type>list</type>
+		<label> - Calidad Favorita 1</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+		<lvalues>240p</lvalues>
+		<lvalues>default</lvalues>
+	</settings>
+
+	<settings>
+		<id>quality_2</id>
+		<type>list</type>
+		<label> - Calidad Favorita 2</label>
+		<color>0xffffff99</color>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+		<lvalues>240p</lvalues>
+		<lvalues>default</lvalues>
+	</settings>
+
+	<settings>
+		<id>quality_3</id>
+		<type>list</type>
+		<label> - Calidad Favorita 3</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+		<lvalues>240p</lvalues>
+		<lvalues>default</lvalues>
+	</settings>
+
+	<settings>
+		<id>label6</id>
+		<type>label</type>
+		<label></label>
+		<default>None</default>
+		<enabled>false</enabled>
+		<visible>true</visible>
+	</settings>
+	
+	<settings>
+		<id>label7</id>
+		<type>label</type>
+		<label>Opciones de Novedades</label>
+		<default>None</default>
+		<enabled>false</enabled>
+		<visible>true</visible>
+	</settings>
+
 	<settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>

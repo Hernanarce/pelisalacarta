@@ -14,6 +14,13 @@ from core.item import Item
 from core import servertools
 from core import tmdb
 
+
+### Requerido para AutoPlay ###
+import xbmc
+from platformcode import platformtools
+from core import channeltools
+
+
 host = 'http://doomtv.net/'
 headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
           ['Referer', host]]
@@ -61,6 +68,9 @@ def mainlist(item):
     itemlist.append( item.clone (title="Por año", action="seccion", thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png', fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png',url = host, extra ='poraño'))
 
     itemlist.append( item.clone (title="Buscar", action="search", url='http://doomtv.net/?s=', thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png', fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
+
+    plot_autoplay='AutoPlay permite auto reproducir los enlaces directamente, basandose en la configuracion de tus servidores y calidades preferidas.'
+    itemlist.append(item.clone (title="[COLOR yellow]Configurar AutoPlay[/COLOR]", action="configuracion", thumbnail='https://s7.postimg.org/ff7ssxed7/autoplay.png', fanart='https://s7.postimg.org/ff7ssxed7/autoplay.png', plot = plot_autoplay))
 
     return itemlist
 
@@ -184,6 +194,44 @@ def unpack(packed):
         p = p.decode('string_escape')
     return p
 
+def getinfo(page_url):
+    info =()
+    logger.info()
+    data = httptools.downloadpage(page_url).data
+    thumbnail = scrapertools.find_single_match(data,'<div class="cover" style="background-image: url\((.*?)\);')
+    plot = scrapertools.find_single_match(data,'<h2>Synopsis<\/h2>\s*<p>(.*?)<\/p>')
+    info = (plot,thumbnail)
+
+    return info
+
+def search(item,texto):
+    logger.info()
+    texto = texto.replace(" ","+")
+    item.url = item.url+texto
+    if texto!='':
+       return lista(item)
+
+def newest(categoria):
+    logger.info()
+    itemlist = []
+    item = Item()
+    #categoria='peliculas'
+    try:
+        if categoria == 'peliculas':
+            item.url = host
+        elif categoria == 'infantiles':
+            item.url = host+'category/animacion/'
+        itemlist = lista(item)
+        if itemlist[-1].title == 'Siguiente >>>':
+                itemlist.pop()
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
+
 def get_url(item):
     logger.info()
     itemlist=[]
@@ -214,22 +262,10 @@ def get_url(item):
           calidad = dato_a
         title = item.contentTitle+' ('+calidad+')'
         if url not in duplicado:
-          itemlist.append( Item(channel=item.channel, action='play' , title=title , url=url, thumbnail=item.thumbnail, plot=item.plot, fanart=item.fanart, contentTitle = item.contentTitle, calidad = calidad))
+          itemlist.append( Item(channel=item.channel, action='play' , title=title , url=url, thumbnail=item.thumbnail, plot=item.plot, fanart=item.fanart, contentTitle = item.contentTitle, lang= 'latino', server='directo', quality=calidad))
           duplicado.append(url)
 
       return itemlist
-
-
-def getinfo(page_url):
-    info =()
-    logger.info()
-    data = httptools.downloadpage(page_url).data
-    thumbnail = scrapertools.find_single_match(data,'<div class="cover" style="background-image: url\((.*?)\);')
-    plot = scrapertools.find_single_match(data,'<h2>Synopsis<\/h2>\s*<p>(.*?)<\/p>')
-    info = (plot,thumbnail)
-
-    return info
-
 
 def findvideos (item):
     logger.info()
@@ -238,33 +274,122 @@ def findvideos (item):
     if config.get_library_support() and len(itemlist) > 0 and item.extra !='findvideos' :
         itemlist.append(Item(channel=item.channel, title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]', url=item.url,
                              action="add_pelicula_to_library", extra="findvideos", contentTitle = item.contentTitle))
-    return itemlist
+    ### Requerido para AutoPlay ###
 
-def search(item,texto):
-    logger.info()
-    texto = texto.replace(" ","+")
-    item.url = item.url+texto
-    if texto!='':
-       return lista(item)
-
-def newest(categoria):
-    logger.info()
-    itemlist = []
-    item = Item()
-    #categoria='peliculas'
-    try:
-        if categoria == 'peliculas':
-            item.url = host
-        elif categoria == 'infantiles':
-            item.url = host+'category/animacion/'
-        itemlist = lista(item)
-        if itemlist[-1].title == 'Siguiente >>>':
-                itemlist.pop()
-    except:
-        import sys
-        for line in sys.exc_info():
-            logger.error("{0}".format(line))
-        return []
+    autoplay_enabled = config.get_setting("autoplay", item.channel)
+    if autoplay_enabled:
+        autoplay(itemlist, item)
 
     return itemlist
+
+### Requerido para AutoPlay ###
+
+def configuracion(item):
+    ret = platformtools.show_channel_settings()
+    platformtools.itemlist_refresh()
+    return ret
+
+def autoplay (itemlist, item):
+    logger.info()
+
+    duplicados=[] 
+    autoplay_list = []
+    favorite_servers=[]
+    favorite_quality=[]
+    servidores = []
+    lang=[]
+
+    info_dialog = platformtools.dialog_notification('AutoPlay Activo','', sound=False)
+
+### Verifica el estado de la configuracion automatica ###
+
+    auto_config = config.get_setting("auto_config", item.channel)
+
+    if auto_config:
+        favorite_priority = 2                                           ### Si esta activa la auto-configuracion la prioridad se fija en calidad ###
+
+    else:
+
+        favorite_priority = config.get_setting("priority",item.channel) ### Ordena los enlaces por la prioridad Servidor/Calidad la lista de favoritos ###
+
+### Obtiene las listas servidores, calidades e idiomas disponibles esde el xml del canal ###
+
+    settings_list, actual_settings = channeltools.get_channel_controls_settings(item.channel)
+    
+    for setting in settings_list:
+        for id_setting, name_setting in setting.items():
+
+            if name_setting == 'server_1':
+                server_list = setting['lvalues']
+            
+            elif name_setting == 'lang':
+                lang_list = setting['lvalues']
+            
+            elif name_setting == 'quality_1':
+                quality_list = setting['lvalues']
+
+
+    
+### Se obtienen desde el archivo de configuracion los servidores y calidades favoritos ###
+
+    for num in range (1,4):
+        favorite_servers.append(server_list[config.get_setting("server_"+str(num),item.channel)])
+        favorite_quality.append(quality_list[config.get_setting("quality_"+str(num),item.channel)])
+
+    lang = lang_list[(config.get_setting("lang", item.channel))]                                # Se obtiene el idioma favorito ###
+
+### Se crea la lista de enlaces que cumplen los requisitos de los favoritos y no esten repetidos ###
+
+    
+    for item in itemlist:
+        ### Se crea la lista para configuracion automatica
+        if auto_config:     
+            for quality in quality_list:
+                if item.quality == quality and item.lang == lang and item.server in server_list:
+                    autoplay_list.append([server_list.index(item.server), item, quality_list.index(quality),item.quality, item.server])
+            
+        
+        else:
+        ### Se crea la lista de enlaces que cumplen los requisitos de los favoritos ###
+
+            for favorite in favorite_servers:
+                if item.server == favorite and item.lang == lang and item.quality in favorite_quality and item.url not in duplicados:
+                    autoplay_list.append([favorite_servers.index(favorite), item, favorite_quality.index(item.quality),item.quality, item.server])
+                    duplicados.append(item.url)
+
+    if favorite_priority == 2: 
+        autoplay_list.sort(key=lambda priority: priority[2])            ### Se ordena la lista solo por calidad ###
+    
+    elif favorite_priority == 1: 
+        autoplay_list.sort(key=lambda priority: priority[0])            ### Se ordena la lista solo por servidor ###
+    
+    elif favorite_priority == 0:
+        autoplay_list.sort(key=lambda priority: priority[2])
+        ordered_list = sorted(autoplay_list, key=lambda priority:priority[0])  ### Se ordena la lista por servidor y calidad
+        autoplay_list = ordered_list
+    
+    #logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
+    
+### Si hay elementos en la lista de autoplay se intenta reproducir cada elemento, hasta encontrar uno funcional o fallen todos  ###
+
+    if autoplay_list:
+        played = False
+        
+        for indice in autoplay_list:
+            if not xbmc.Player().isPlaying() and not played:
+                info_dialog = platformtools.dialog_notification('AutoPlay iniciado en:',indice[1].server.upper()+' '+lang+' '+str(indice[3]).upper(), sound=False)
+                platformtools.play_video(indice[1])
+                try:
+                    total_time = xbmc.Player().getTotalTime()
+                    played = True
+                    
+                except:                                         ### TODO evitar el informe de que el conector fallo o el video no se encuentra ###
+                    logger.debug(str(len(autoplay_list)))
+    else:
+        info_dialog = platformtools.dialog_notification('AutoPlay No Fue Posible','No Hubo Coincidencias')
+
+### devuelve la lista de enlaces para la eleccion manual ###
+
+    return itemlist
+
 
