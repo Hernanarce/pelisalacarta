@@ -1,176 +1,233 @@
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------
-# Gestión de parámetros de configuración - xbmc
-#------------------------------------------------------------
-# tvalacarta
-# http://blog.tvalacarta.info/plugin-xbmc/tvalacarta/
-#------------------------------------------------------------
-# Creado por: Jesús (tvalacarta@gmail.com)
-# Licencia: GPL (http://www.gnu.org/licenses/gpl-3.0.html)
-#------------------------------------------------------------
+# ------------------------------------------------------------
+# pelisalacarta 4
+# Copyright 2015 tvalacarta@gmail.com
+# http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
+#
+# Distributed under the terms of GNU General Public License v3 (GPLv3)
+# http://www.gnu.org/licenses/gpl-3.0.html
+# ------------------------------------------------------------
+# This file is part of pelisalacarta 4.
+#
+# pelisalacarta 4 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pelisalacarta 4 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pelisalacarta 4.  If not, see <http://www.gnu.org/licenses/>.
+# ------------------------------------------------------------
+# Parámetros de configuración (XBMC)
+# ------------------------------------------------------------
 
-import sys
 import os
-
-import xbmcplugin
+import sys
 import xbmc
+import xbmcplugin
 
 PLATFORM_NAME = "xbmc-plugin"
 PLUGIN_NAME = "pelisalacarta"
 
-def get_platform():
-    return PLATFORM_NAME
+def get_platform(full_version=False):
+    #full_version solo es util en xbmc/kodi
+    ret = {
+        'num_version': 9.0 ,
+        'name_version': PLATFORM_NAME ,
+        'video_db': "",
+        'plaform': PLATFORM_NAME
+        }
+
+    if full_version:
+        return ret
+    else:
+        return PLATFORM_NAME
+
 
 def is_xbmc():
     return True
 
+
 def get_library_support():
     return True
 
+
 def get_system_platform():
     """ fonction: pour recuperer la platform que xbmc tourne """
-    import xbmc
     platform = "unknown"
-    if xbmc.getCondVisibility( "system.platform.linux" ):
+    if xbmc.getCondVisibility("system.platform.linux"):
         platform = "linux"
-    elif xbmc.getCondVisibility( "system.platform.xbox" ):
+    elif xbmc.getCondVisibility("system.platform.xbox"):
         platform = "xbox"
-    elif xbmc.getCondVisibility( "system.platform.windows" ):
+    elif xbmc.getCondVisibility("system.platform.windows"):
         platform = "windows"
-    elif xbmc.getCondVisibility( "system.platform.osx" ):
+    elif xbmc.getCondVisibility("system.platform.osx"):
         platform = "osx"
     return platform
 
+
 def open_settings():
-    xbmcplugin.openSettings( sys.argv[ 0 ] )
+    xbmcplugin.openSettings(sys.argv[0])
 
-def get_setting(name):
-    return xbmcplugin.getSetting(name)
 
-def set_setting(name,value):
-    try:
-        xbmcplugin.setSetting(name,value)
-    except:
-        pass
+def get_setting(name, channel=""):
+    """
+    Retorna el valor de configuracion del parametro solicitado.
+
+    Devuelve el valor del parametro 'name' en la configuracion global o en la configuracion propia del canal 'channel'.
+
+    Si se especifica el nombre del canal busca en la ruta \addon_data\plugin.video.pelisalacarta\settings_channels el
+    archivo channel_data.json y lee el valor del parametro 'name'. Si el archivo channel_data.json no existe busca en la
+     carpeta channels el archivo channel.xml y crea un archivo channel_data.json antes de retornar el valor solicitado.
+    Si el parametro 'name' no existe en channel_data.json lo busca en la configuracion global y si ahi tampoco existe
+    devuelve un str vacio.
+
+    Parametros:
+    name -- nombre del parametro
+    channel [opcional] -- nombre del canal
+
+    Retorna:
+    value -- El valor del parametro 'name'
+
+    """
+
+    # Specific channel setting
+    if channel:
+
+        # logger.info("config.get_setting reading channel setting '"+name+"' from channel xml")
+        from core import channeltools
+        value = channeltools.get_channel_setting(name, channel)
+        # logger.info("config.get_setting -> '"+repr(value)+"'")
+
+        if value is not None:
+            return value
+        else:
+            return ""
+
+    # Global setting
+    else:
+        # logger.info("config.get_setting reading main setting '"+name+"'")
+        value = xbmcplugin.getSetting(channel + name)
+        # Translate Path if start with "special://"
+        if value.startswith("special://") and "librarypath" not in name:
+            value = xbmc.translatePath(value)
+
+        # logger.info("config.get_setting -> '"+value+"'")
+        return value
+
+
+def set_setting(name, value, channel=""):
+    """
+    Fija el valor de configuracion del parametro indicado.
+
+    Establece 'value' como el valor del parametro 'name' en la configuracion global o en la configuracion propia del
+    canal 'channel'.
+    Devuelve el valor cambiado o None si la asignacion no se ha podido completar.
+
+    Si se especifica el nombre del canal busca en la ruta \addon_data\plugin.video.pelisalacarta\settings_channels el
+    archivo channel_data.json y establece el parametro 'name' al valor indicado por 'value'. Si el archivo
+    channel_data.json no existe busca en la carpeta channels el archivo channel.xml y crea un archivo channel_data.json
+    antes de modificar el parametro 'name'.
+    Si el parametro 'name' no existe lo añade, con su valor, al archivo correspondiente.
+
+
+    Parametros:
+    name -- nombre del parametro
+    value -- valor del parametro
+    channel [opcional] -- nombre del canal
+
+    Retorna:
+    'value' en caso de que se haya podido fijar el valor y None en caso contrario
+
+    """
+    if channel:
+        from core import channeltools
+        return channeltools.set_channel_setting(name, value, channel)
+    else:
+        try:
+            xbmcplugin.setSetting(name, value)
+        except:
+            return None
+
+        return value
+
 
 def get_localized_string(code):
-    dev = xbmc.getLocalizedString( code )
+    dev = xbmc.getLocalizedString(code)
 
     try:
-        dev = dev.encode ("utf-8") #This only aplies to unicode strings. The rest stay as they are.
+        dev = dev.encode("utf-8")
     except:
         pass
-    
+
     return dev
 
-def get_library_path():
-    #return os.path.join( get_data_path(), 'library' )
-    default = os.path.join( get_data_path(), 'library' )
 
+def get_library_config_path():
     value = get_setting("librarypath")
-    if value=="":
-        value=default
+    if value == "":
+        verify_directories_created()
+        value = get_setting("librarypath")
     return value
 
+def get_library_path():
+    return xbmc.translatePath(get_library_config_path())
+
+
 def get_temp_file(filename):
-    return xbmc.translatePath( os.path.join( "special://temp/", filename ))
+    return xbmc.translatePath(os.path.join("special://temp/", filename))
+
 
 def get_runtime_path():
     return os.getcwd()
 
+
 def get_data_path():
-    devuelve = xbmc.translatePath( os.path.join("special://home/","userdata","plugin_data","video",PLUGIN_NAME) )
-    
-    # XBMC en modo portable
-    if devuelve.startswith("special:"):
-        devuelve = xbmc.translatePath( os.path.join("special://xbmc/","userdata","plugin_data","video",PLUGIN_NAME) )
+    dev = xbmc.translatePath("special://profile/plugin_data/video/pelisalacarta")
 
-    # Plex 8
-    if devuelve.startswith("special:"):
-        devuelve = os.getcwd()
+    #Crea el directorio si no existe
+    if not os.path.exists(dev):
+        os.makedirs(dev)
 
-    return devuelve
+    return dev
+
 
 def get_cookie_data():
     import os
-    ficherocookies = os.path.join( get_data_path(), 'cookies.dat' )
+    ficherocookies = os.path.join(get_data_path(), 'cookies.dat')
 
-    cookiedatafile = open(ficherocookies,'r')
+    cookiedatafile = open(ficherocookies, 'r')
     cookiedata = cookiedatafile.read()
-    cookiedatafile.close();
+    cookiedatafile.close()
 
     return cookiedata
 
+
 # Test if all the required directories are created
 def verify_directories_created():
-    import logger
-    import os
-    logger.info("pelisalacarta.core.config.verify_directories_created")
+    from core import logger
+    from core import filetools
 
-    # Force download path if empty
-    download_path = get_setting("downloadpath")
-    if download_path=="":
-        download_path = os.path.join( get_data_path() , "downloads")
-        set_setting("downloadpath" , download_path)
+    config_paths = [["librarypath",      "library"],
+                    ["downloadpath",     "downloads"],
+                    ["downloadlistpath", "downloads/list"],
+                    ["settings_path",    "settings_channels"]]
 
-    # Force download list path if empty
-    download_list_path = get_setting("downloadlistpath")
-    if download_list_path=="":
-        download_list_path = os.path.join( get_data_path() , "downloads" , "list")
-        set_setting("downloadlistpath" , download_list_path)
+    for path, default in config_paths:
+        saved_path = get_setting(path)
+        if not saved_path:
+            saved_path = "special://profile/plugin_data/video/pelisalacarta/" + default
+            set_setting(path, saved_path)
 
-    # Force bookmark path if empty
-    bookmark_path = get_setting("bookmarkpath")
-    if bookmark_path=="":
-        bookmark_path = os.path.join( get_data_path() , "bookmarks")
-        set_setting("bookmarkpath" , bookmark_path)
+        saved_path = xbmc.translatePath(saved_path)
+        if not filetools.exists(saved_path):
+            logger.debug("Creating %s: %s" % (path, saved_path))
+            filetools.mkdir(saved_path)
 
-    # Create data_path if not exists
-    if not os.path.exists(get_data_path()):
-        logger.debug("Creating data_path "+get_data_path())
-        try:
-            os.mkdir(get_data_path())
-        except:
-            pass
-
-    # Create download_path if not exists
-    if not download_path.lower().startswith("smb") and not os.path.exists(download_path):
-        logger.debug("Creating download_path "+download_path)
-        try:
-            os.mkdir(download_path)
-        except:
-            pass
-
-    # Create download_list_path if not exists
-    if not download_list_path.lower().startswith("smb") and not os.path.exists(download_list_path):
-        logger.debug("Creating download_list_path "+download_list_path)
-        try:
-            os.mkdir(download_list_path)
-        except:
-            pass
-
-    # Create bookmark_path if not exists
-    if not bookmark_path.lower().startswith("smb") and not os.path.exists(bookmark_path):
-        logger.debug("Creating bookmark_path "+bookmark_path)
-        try:
-            os.mkdir(bookmark_path)
-        except:
-            pass
-
-    # Create library_path if not exists
-    if not get_library_path().lower().startswith("smb") and not os.path.exists(get_library_path()):
-        logger.debug("Creating library_path "+get_library_path())
-        try:
-            os.mkdir(get_library_path())
-        except:
-            pass
-
-    # Checks that a directory "xbmc" is not present on platformcode
-    old_xbmc_directory = os.path.join( get_runtime_path() , "platformcode" , "xbmc" )
-    if os.path.exists( old_xbmc_directory ):
-        logger.debug("Removing old platformcode.xbmc directory")
-        try:
-            import shutil
-            shutil.rmtree(old_xbmc_directory)
-        except:
-            pass
+        # Biblioteca
+        if path == "librarypath":
+            set_setting("library_version", "v4")

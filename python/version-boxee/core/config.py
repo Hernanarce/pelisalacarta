@@ -23,8 +23,19 @@ import mc
 
 PLUGIN_NAME = "pelisalacarta"
 
-def get_platform():
-    return PLATFORM_NAME
+def get_platform(full_version=False):
+    #full_version solo es util en xbmc/kodi
+    ret = {
+        'num_version': float(TAG_VERSION) ,
+        'name_version': PLATFORM_NAME ,
+        'video_db': "",
+        'plaform': PLATFORM_NAME
+        }
+
+    if full_version:
+        return ret
+    else:
+        return PLATFORM_NAME
 
 def get_version():
     return TAG_VERSION
@@ -117,7 +128,6 @@ def set_setting(name,value, channel=""):
             import xbmcplugin
             xbmcplugin.setSetting(name, value)
         except:
-            # xbmc.log("[config.py] ERROR al fijar el parametro global {0}= {1}".format(name, value))
             return None
 
         return value

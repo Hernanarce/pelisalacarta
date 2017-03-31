@@ -7,6 +7,7 @@
 import sys, os
 from core import config
 from core import logger
+from core import versiontools
 from controller import Controller
 from controller import Platformtools
 from platformcode import platformtools
@@ -18,6 +19,7 @@ import random
 from platformcode import launcher
 from core.tmdb import Tmdb
 import time
+import channelselector
 
 class html(Controller):
     pattern = re.compile("##")
@@ -29,7 +31,7 @@ class html(Controller):
         self.data = {}
         if self.handler:
             self.client_ip = handler.client.getpeername()[0]
-            self.send_message({"action": "connect", "data":{"version": "pelisalacarta %s" % config.get_plugin_version(), "date":config.get_plugin_date()}})
+            self.send_message({"action": "connect", "data":{"version": "pelisalacarta %s" % versiontools.get_current_plugin_version_tag(), "date":versiontools.get_current_plugin_date()}})
             t = threading.Thread(target=launcher.start, name=ID)
             t.setDaemon(True)
             t.start()
@@ -97,7 +99,8 @@ class platform(Platformtools):
           parent_item.viewmode = "banner"
         elif parent_item.channel == "channelselector" and  parent_item.action == "filterchannels":
           parent_item.viewmode = "channel"
-
+        if not parent_item.viewmode:
+          parent_item.viewmode = "list"
         
         #Item Atrás
         if not (parent_item.channel=="channelselector" and parent_item.action=="mainlist") and not itemlist[0].action=="go_back":
@@ -117,15 +120,15 @@ class platform(Platformtools):
         # Recorremos el itemlist
         for item in itemlist:
                 
-            if not item.thumbnail and item.action == "search": item.thumbnail = config.get_thumbnail_path() + "thumb_buscar.png"
+            if not item.thumbnail and item.action == "search": item.thumbnail = channelselector.get_thumbnail_path() + "thumb_buscar.png"
             if not item.thumbnail and item.folder == True: item.thumbnail = "http://media.tvalacarta.info/pelisalacarta/thumb_folder.png"
             if not item.thumbnail and item.folder == False: item.thumbnail = "http://media.tvalacarta.info/pelisalacarta/thumb_nofolder.png"
             if "http://media.tvalacarta.info/" in item.thumbnail and not item.thumbnail.startswith("http://media.tvalacarta.info/pelisalacarta/thumb_"):
             
               if parent_item.viewmode in ["banner", "channel"]: 
-                item.thumbnail = config.get_thumbnail_path("bannermenu") + os.path.basename(item.thumbnail)
+                item.thumbnail = channelselector.get_thumbnail_path("bannermenu") + os.path.basename(item.thumbnail)
               else:
-                item.thumbnail = config.get_thumbnail_path() + os.path.basename(item.thumbnail)
+                item.thumbnail = channelselector.get_thumbnail_path() + os.path.basename(item.thumbnail)
             
             #Estas imagenes no estan en bannermenu, asi que si queremos bannermenu, para que no se vean mal las quitamos    
             elif parent_item.viewmode in ["banner", "channel"] and item.thumbnail.startswith("http://media.tvalacarta.info/pelisalacarta/thumb_"):
@@ -140,7 +143,8 @@ class platform(Platformtools):
             if item.fanart == "":
                 item.fanart = parent_item.fanart
             
-            title = item.title.replace(" ", "&nbsp;")
+            title = item.title.replace(item.title.lstrip(), ""). replace(" ", "&nbsp;") + item.title.lstrip()
+            
             # Formatear titulo
             if item.text_color:
                 title = '[COLOR %s]%s[/COLOR]' % (item.text_color, title)
@@ -149,19 +153,13 @@ class platform(Platformtools):
             if item.text_italic:
                 title = '[I]%s[/I]' % title
             
+            title = self.kodi_labels_to_html(title)
             
-            matches = re.compile("(\[I\])(?:.*?)(\[\/I\])").findall(title)
-            for match in matches:
-              title=title.replace(match[0], "<i>").replace(match[1],"</i>")
-              
-            matches = re.compile("(\[B\])(?:.*?)(\[\/B\])").findall(title)
-            for match in matches:
-              title=title.replace(match[0], "<b>").replace(match[1],"</b>")
-              
-            matches = re.compile("(\[COLOR ([^\]]+)\])(?:.*?)(\[\/COLOR\])").findall(title)
-            for match in matches:
-              title=title.replace(match[0],"<span style='color:"+match[1]+"'>").replace(match[2],"</span>")
-              
+            #Añade headers a las imagenes si estan en un servidor con cloudflare    
+            from core import httptools
+            item.thumbnail = httptools.get_url_headers(item.thumbnail)
+            item.fanart = httptools.get_url_headers(item.fanart)
+          
             JsonItem = {}
             JsonItem["title"]=title
             JsonItem["thumbnail"]= item.thumbnail
@@ -285,6 +283,7 @@ class platform(Platformtools):
         text = line1
         if line2: text += "\n" + line2
         if line3: text += "\n" + line3
+        text = self.kodi_labels_to_html(text)
         JsonData = {}
         JsonData["action"]="Alert" 
         JsonData["data"]={}
@@ -302,6 +301,8 @@ class platform(Platformtools):
         text = line1
         if line2: text += "\n" + line2
         if line3: text += "\n" + line3
+        text = self.kodi_labels_to_html(text)
+        heading = self.kodi_labels_to_html(heading)
         JsonData = {}
         JsonData["action"]="AlertYesNo" 
         JsonData["data"]={}
@@ -313,12 +314,13 @@ class platform(Platformtools):
       
     def dialog_select(self, heading, list): 
         JsonData = {}
+        heading = self.kodi_labels_to_html(heading)
         JsonData["action"]="List"
         JsonData["data"]={}
         JsonData["data"]["title"]=heading
         JsonData["data"]["list"]=[]
         for Elemento in list:
-          JsonData["data"]["list"].append(Elemento)
+          JsonData["data"]["list"].append(self.kodi_labels_to_html(Elemento))
         ID = self.send_message(JsonData)
         response = self.get_data(ID)
 
@@ -329,11 +331,11 @@ class platform(Platformtools):
             def __init__(self, heading, line1, line2, line3, platformtools):
                 self.platformtools = platformtools
                 self.closed = False
-                self.heading = heading
+                self.heading  = self.kodi_labels_to_html(heading)
                 text = line1
                 if line2: text += "\n" + line2
                 if line3: text += "\n" + line3
-                
+                text = self.kodi_labels_to_html(text)
                 JsonData = {}
                 JsonData["action"]="Progress" 
                 JsonData["data"]={}
@@ -357,6 +359,7 @@ class platform(Platformtools):
                 text = line1
                 if line2: text += "\n" + line2
                 if line3: text += "\n" + line3
+                text = self.kodi_labels_to_html(text)
                 JsonData = {}
                 JsonData["action"]="ProgressUpdate" 
                 JsonData["data"]={}
@@ -381,7 +384,8 @@ class platform(Platformtools):
             def __init__(self, heading, message, platformtools):
                 self.platformtools = platformtools
                 self.closed = False
-                self.heading = heading
+                self.heading  = self.kodi_labels_to_html(heading)
+                message = self.kodi_labels_to_html(message)
                 JsonData = {}
                 JsonData["action"]="ProgressBG" 
                 JsonData["data"]={}
@@ -398,6 +402,7 @@ class platform(Platformtools):
 
             def update(self, percent=0, heading="", message=""):
                 JsonData = {}
+                message = self.kodi_labels_to_html(message)
                 JsonData["action"]="ProgressBGUpdate" 
                 JsonData["data"]={}
                 JsonData["data"]["title"]=heading
@@ -419,7 +424,7 @@ class platform(Platformtools):
         JsonData = {}
         JsonData["action"]="Keyboard" 
         JsonData["data"]={}
-        JsonData["data"]["title"]=heading
+        JsonData["data"]["title"] = self.kodi_labels_to_html(heading)
         JsonData["data"]["text"]=default
         JsonData["data"]["password"]=hidden
         ID = self.send_message(JsonData)
@@ -639,7 +644,7 @@ class platform(Platformtools):
       JsonData = {}
       JsonData["action"]="OpenConfig"   
       JsonData["data"]={}
-      JsonData["data"]["title"]=caption
+      JsonData["data"]["title"] = self.kodi_labels_to_html(caption)
       JsonData["data"]["custom_button"]=custom_button
       JsonData["data"]["items"]=[]
       
@@ -671,7 +676,9 @@ class platform(Platformtools):
                   else:
                       lvalues.append(li)
               c['lvalues'] = lvalues
-
+              
+          c["label"] = self.kodi_labels_to_html(c["label"])
+          
           JsonData["data"]["items"].append(c)
         
       ID = self.send_message(JsonData)
@@ -716,3 +723,11 @@ class platform(Platformtools):
     def show_video_info(self,data, caption="", item=None, scraper=Tmdb):
         from platformcode import html_info_window
         return html_info_window.InfoWindow().Start(self, data, caption, item, scraper)
+    
+    def kodi_labels_to_html(self, text):
+      text = re.sub(r"(?:\[I\])(.*?)(?:\[/I\])", r"<i>\1</i>", text)
+      text = re.sub(r"(?:\[B\])(.*?)(?:\[/B\])", r"<b>\1</b>", text)
+      text = re.sub(r"(?:\[COLOR (?:0x)?([0-f]{2})([0-f]{2})([0-f]{2})([0-f]{2})\])(.*?)(?:\[/COLOR\])", lambda m: "<span style='color: rgba(%s,%s,%s,%s)'>%s</span>" %(int(m.group(2),16), int(m.group(3),16), int(m.group(4),16), int(m.group(1),16) / 255.0, m.group(5)), text)
+      text = re.sub(r"(?:\[COLOR (?:0x)?([0-f]{2})([0-f]{2})([0-f]{2})\])(.*?)(?:\[/COLOR\])", r"<span style='color: #\1\2\3'>\4</span>", text)
+      text = re.sub(r"(?:\[COLOR (?:0x)?([a-z|A-Z]+)\])(.*?)(?:\[/COLOR\])", r"<span style='color: \1'>\2</span>", text)
+      return text

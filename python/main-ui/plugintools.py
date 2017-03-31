@@ -67,6 +67,8 @@
 # 1.1.1
 # - Added show_notification
 # - Bug fixes
+# 1.1.2
+# - Added readfile
 #---------------------------------------------------------------------------
 
 import xbmc
@@ -164,12 +166,12 @@ ALL_VIEW_CODES = {
 # Write something on XBMC log
 def log(message):
     if application_log_enabled:
-        xbmc.log(message)
+        xbmc.log(message, xbmc.LOGNOTICE)
 
 # Write this module messages on XBMC log
 def _log(message):
     if module_log_enabled:
-        xbmc.log("plugintools."+message)
+        xbmc.log("plugintools."+message, xbmc.LOGNOTICE)
 
 # Parse XBMC params - based on script.module.parsedom addon    
 def get_params():
@@ -203,6 +205,15 @@ def read(url):
     _log("read "+url)
 
     f = urllib2.urlopen(url)
+    data = f.read()
+    f.close()
+    
+    return data
+
+def readfile(path):
+    _log("readfile "+path)
+
+    f = open(path)
     data = f.read()
     f.close()
     

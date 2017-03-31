@@ -42,8 +42,6 @@ from core import logger
 from core.item import Item
 from core.tmdb import Tmdb
 
-DEBUG = config.get_setting("debug")
-
 
 def dialog_ok(heading, line1, line2="", line3=""):
     dialog = xbmcgui.Dialog()
@@ -52,8 +50,11 @@ def dialog_ok(heading, line1, line2="", line3=""):
 
 def dialog_notification(heading, message, icon=0, time=5000, sound=True):
     dialog = xbmcgui.Dialog()
-    l_icono = xbmcgui.NOTIFICATION_INFO, xbmcgui.NOTIFICATION_WARNING, xbmcgui.NOTIFICATION_ERROR
-    dialog.notification(heading, message, l_icono[icon], time, sound)
+    try:
+        l_icono = xbmcgui.NOTIFICATION_INFO, xbmcgui.NOTIFICATION_WARNING, xbmcgui.NOTIFICATION_ERROR
+        dialog.notification(heading, message, l_icono[icon], time, sound)
+    except:
+        dialog_ok(heading, message)
 
 
 def dialog_yesno(heading, line1, line2="", line3="", nolabel="No", yeslabel="Si", autoclose=""):
@@ -75,9 +76,13 @@ def dialog_progress(heading, line1, line2=" ", line3=" "):
 
 
 def dialog_progress_bg(heading, message=""):
-    dialog = xbmcgui.DialogProgressBG()
-    dialog.create(heading, message)
-    return dialog
+    try:
+      dialog = xbmcgui.DialogProgressBG()
+      dialog.create(heading, message)
+      return dialog
+    except:
+      return dialog_progress(heading, message)
+      
 
 
 def dialog_input(default="", heading="", hidden=False):
@@ -141,6 +146,11 @@ def render_items(itemlist, parent_item):
             item.title = '[B]%s[/B]' % item.title
         if item.text_italic:
             item.title = '[I]%s[/I]' % item.title
+
+        #Añade headers a las imagenes si estan en un servidor con cloudflare    
+        from core import httptools
+        item.thumbnail = httptools.get_url_headers(item.thumbnail)
+        item.fanart = httptools.get_url_headers(item.fanart)
 
         # IconImage para folder y video
         if item.folder:
@@ -260,20 +270,22 @@ def set_infolabels(listitem, item, player=False):
     @type item: item
     """
     if item.infoLabels:
-      listitem.setInfo("video", item.infoLabels)
+        if 'mediatype' not in item.infoLabels:
+            item.infoLabels['mediatype'] = item.contentType
+        listitem.setInfo("video", item.infoLabels)
       
     if player and not item.contentTitle:
         if item.fulltitle:
-          listitem.setInfo("video", {"Title": item.fulltitle})
+            listitem.setInfo("video", {"Title": item.fulltitle})
         else:
-          listitem.setInfo("video", {"Title": item.title})
+            listitem.setInfo("video", {"Title": item.title})
           
     elif not player:
         listitem.setInfo("video", {"Title": item.title})
         
     # Añadido para Kodi Krypton (v17)
-    if int(xbmc.getInfoLabel("System.BuildVersion").split(".", 1)[0]) > 16:
-      listitem.setArt({"poster": item.thumbnail})
+    if config.get_platform(True)['num_version'] >= 17.0:
+        listitem.setArt({"poster": item.thumbnail})
 
 
 def set_context_commands(item, parent_item):
@@ -288,14 +300,18 @@ def set_context_commands(item, parent_item):
 
                 - dict(): Se cargara el item actual modificando los campos que se incluyan en el dict() en caso de
                     modificar los campos channel y action estos serán guardados en from_channel y from_action.
-                    item.context = [{"title":"Nombre del menu", "action": "action del menu", "channel",
-                                    "channel del menu"}, {...}]
+                    item.context = [{"title":"Nombre del menu", "action": "action del menu",
+                                        "channel":"channel del menu"}, {...}]
 
         2. Añadiendo opciones segun criterios
-            Se pueden añadir opciones al menu contextual a items que cumplan ciertas condiciones
+            Se pueden añadir opciones al menu contextual a items que cumplan ciertas condiciones.
+
 
         3. Añadiendo opciones a todos los items
             Se pueden añadir opciones al menu contextual para todos los items
+
+        4. Se pueden deshabilitar las opciones del menu contextual añadiendo un comando 'no_context' al item.context.
+            Las opciones que Kodi, el skin u otro añadido añada al menu contextual no se pueden deshabilitar.
 
     @param item: elemento que contiene los menu contextuales
     @type item: item
@@ -303,7 +319,7 @@ def set_context_commands(item, parent_item):
     @type parent_item: item
     """
     context_commands = []
-    version_xbmc = int(xbmc.getInfoLabel("System.BuildVersion").split(".", 1)[0])
+    num_version_xbmc = config.get_platform(True)['num_version']
 
     # Creamos un list con las diferentes opciones incluidas en item.context
     if type(item.context) == str:
@@ -317,6 +333,8 @@ def set_context_commands(item, parent_item):
     for command in context:
         # Predefinidos
         if type(command) == str:
+            if command == "no_context":
+                return []
             if command == "buscar_trailer" or item.action == "findvideos":
                 context_commands.append(("Buscar Trailer", "XBMC.RunPlugin(%s?%s)" % (sys.argv[0], item.clone(
                     channel="trailertools",
@@ -332,17 +350,23 @@ def set_context_commands(item, parent_item):
                 command["from_action"] = item.action
             if "channel" in command:
                 command["from_channel"] = item.channel
-            context_commands.append(
-                (command["title"], "XBMC.RunPlugin(%s?%s)" % (sys.argv[0], item.clone(**command).tourl())))
 
-    # Opciones segun criterios, solo si el item no es un tag (etiqueta), ni es "Añadir a la biblioteca"
-    if item.action and item.action not in ["add_pelicula_to_library", "add_serie_to_library"]:
+            if "goto" in command:
+                context_commands.append((command["title"], "XBMC.Container.Refresh (%s?%s)" %
+                                         (sys.argv[0], item.clone(**command).tourl())))
+            else:
+                context_commands.append(
+                    (command["title"], "XBMC.RunPlugin(%s?%s)" % (sys.argv[0], item.clone(**command).tourl())))
+
+    # Opciones segun criterios, solo si el item no es un tag (etiqueta), ni es "Añadir a la biblioteca", etc...
+    if item.action and item.action not in ["add_pelicula_to_library", "add_serie_to_library", "buscartrailer"]:
         # Mostrar informacion: si el item tiene plot suponemos q es una serie, temporada, capitulo o pelicula
-        if item.infoLabels['plot']:
+        if item.infoLabels['plot'] and (num_version_xbmc < 17.0 or item.contentType == 'season'):
             context_commands.append(("Información", "XBMC.Action(Info)"))
 
         # ExtendedInfo: Si esta instalado el addon y se cumplen una serie de condiciones
-        if xbmc.getCondVisibility('System.HasAddon(script.extendedinfo)') and config.get_setting("extended_info") == "true":
+        if xbmc.getCondVisibility('System.HasAddon(script.extendedinfo)') \
+                and config.get_setting("extended_info") == "true":
             if item.contentType == "episode" and item.contentEpisodeNumber and item.contentSeason \
                     and (item.infoLabels['tmdb_id'] or item.contentSerieName):
                 param = "tvshow_id =%s, tvshow=%s, season=%s, episode=%s" \
@@ -387,55 +411,67 @@ def set_context_commands(item, parent_item):
                                      (sys.argv[0], Item(channel=item.channel, action="mainlist").tourl())))
 
         # Añadir a Favoritos
-        if version_xbmc < 17 and (item.channel not in ["favoritos", "biblioteca", "ayuda",
-                                                       "configuracion", ""] and not parent_item.channel == "favoritos"):
+        if num_version_xbmc < 17.0 and ((item.channel not in ["favoritos", "biblioteca", "ayuda", ""] or
+                                    item.action in ["update_biblio"]) and not parent_item.channel == "favoritos"):
             context_commands.append((config.get_localized_string(30155), "XBMC.RunPlugin(%s?%s)" %
                                      (sys.argv[0], item.clone(channel="favoritos", action="addFavourite",
-                                                        from_channel=item.channel, from_action=item.action).tourl())))
-
-        # Añadimos opción contextual para Añadir la serie completa a la biblioteca
-        if item.channel != "biblioteca" and item.action in ["episodios", "get_episodios"] \
-                and item.contentSerieName:
-            context_commands.append(("Añadir Serie a Biblioteca", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(action="add_serie_to_library",
+                                                              from_channel=item.channel,
                                                               from_action=item.action).tourl())))
 
-        # Añadir Pelicula a Biblioteca
-        if item.channel != "biblioteca" and item.action in ["detail", "findvideos"] \
-                and item.contentType == 'movie':
-            context_commands.append(("Añadir Pelicula a Biblioteca", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(action="add_pelicula_to_library",
-                                                              from_action=item.action).tourl())))
+        if item.channel != "biblioteca":
+            # Añadir Serie a la biblioteca
+            if item.action in ["episodios", "get_episodios"] and item.contentSerieName:
+                context_commands.append(("Añadir Serie a Biblioteca", "XBMC.RunPlugin(%s?%s)" %
+                                         (sys.argv[0], item.clone(action="add_serie_to_library",
+                                                                  from_action=item.action).tourl())))
+            # Añadir Pelicula a Biblioteca
+            elif item.action in ["detail", "findvideos"] and item.contentType == 'movie' and item.contentTitle:
+                context_commands.append(("Añadir Pelicula a Biblioteca", "XBMC.RunPlugin(%s?%s)" %
+                                         (sys.argv[0], item.clone(action="add_pelicula_to_library",
+                                                                  from_action=item.action).tourl())))
 
-        # Descargar pelicula
-        if item.contentType == "movie" and not item.channel == "descargas":
-            context_commands.append(("Descargar Pelicula", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                        from_channel=item.channel, from_action=item.action).tourl())))
+        if item.channel != "descargas":
+            # Descargar pelicula
+            if item.contentType == "movie" and item.contentTitle:
+                context_commands.append(("Descargar Pelicula", "XBMC.RunPlugin(%s?%s)" %
+                                         (sys.argv[0], item.clone(channel="descargas", action="save_download",
+                                                                  from_channel=item.channel, from_action=item.action)
+                                          .tourl())))
 
-        # Descargar serie
-        if item.contentType == "tvshow" and not item.channel == "descargas":
-            context_commands.append(("Descargar Serie", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                        from_channel=item.channel, from_action=item.action).tourl())))
+            elif item.contentSerieName:
+                # Descargar serie
+                if item.contentType == "tvshow":
+                    context_commands.append(("Descargar Serie", "XBMC.RunPlugin(%s?%s)" %
+                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
+                                                                      from_channel=item.channel,
+                                                                      from_action=item.action).tourl())))
 
-        # Descargar episodio
-        if item.contentType == "episode" and not item.channel == "descargas":
-            context_commands.append(("Descargar Episodio", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                         from_channel=item.channel, from_action=item.action).tourl())))
+                # Descargar episodio
+                if item.contentType == "episode":
+                    context_commands.append(("Descargar Episodio", "XBMC.RunPlugin(%s?%s)" %
+                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
+                                                                      from_channel=item.channel,
+                                                                      from_action=item.action).tourl())))
 
-        # Descargar temporada
-        if item.contentType == "season" and not item.channel == "descargas":
-            context_commands.append(("Descargar Temporada", "XBMC.RunPlugin(%s?%s)" %
-                                     (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                        from_channel=item.channel, from_action=item.action).tourl())))
+                # Descargar temporada
+                if item.contentType == "season":
+                    context_commands.append(("Descargar Temporada", "XBMC.RunPlugin(%s?%s)" %
+                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
+                                                                      from_channel=item.channel,
+                                                                      from_action=item.action).tourl())))
+
         # Abrir configuración
         if parent_item.channel not in ["configuracion", "novedades", "buscador"]:
             context_commands.append(("Abrir Configuración", "XBMC.Container.Update(%s?%s)" %
                                      (sys.argv[0], Item(channel="configuracion", action="mainlist").tourl())))
 
-    #context_commands.append((item.contentType, "XBMC.Action(Info)")) # For debug
+    # Añadir SuperFavourites al menu contextual (1.0.53 o superior necesario)
+    sf_file_path = xbmc.translatePath("special://home/addons/plugin.program.super.favourites/LaunchSFMenu.py")
+    check_sf = os.path.exists(sf_file_path)
+    if check_sf and xbmc.getCondVisibility('System.HasAddon("plugin.program.super.favourites")'):
+        context_commands.append(("Super Favourites Menu",
+                                 "XBMC.RunScript(special://home/addons/plugin.program.super.favourites/LaunchSFMenu.py)"))
+
     return sorted(context_commands, key=lambda comand: comand[0])
 
 
@@ -445,7 +481,7 @@ def is_playing():
 
 def play_video(item, strm=False):
     logger.info("pelisalacarta.platformcode.platformtools play_video")
-    #logger.debug(item.tostring('\n'))
+    # logger.debug(item.tostring('\n'))
 
     if item.channel == 'descargas':
         logger.info("Reproducir video local: %s [%s]" % (item.title, item.url))
@@ -476,13 +512,19 @@ def play_video(item, strm=False):
         return
 
     # obtenemos el video seleccionado
-    mediaurl, view = get_video_seleccionado(item, seleccion, video_urls)
+    mediaurl, view, mpd = get_video_seleccionado(item, seleccion, video_urls)
     if mediaurl == "":
         return
 
     # se obtiene la información del video.
     xlistitem = xbmcgui.ListItem(path=mediaurl, thumbnailImage=item.thumbnail)
     set_infolabels(xlistitem, item, True)
+
+    # si se trata de un vídeo en formato mpd, se configura el listitem para reproducirlo
+    # con el addon inpustreamaddon implementado en Kodi 17
+    if mpd:
+        xlistitem.setProperty('inputstreamaddon', 'inputstream.adaptive')
+        xlistitem.setProperty('inputstream.adaptive.manifest_type', 'mpd')
 
     # se lanza el reproductor
     set_player(item, xlistitem, mediaurl, view, strm)
@@ -677,8 +719,12 @@ def get_dialogo_opciones(item, default_action, strm):
     muestra_dialogo = (config.get_setting("player_mode") == "0" and not strm)
 
     # Extrae las URL de los vídeos, y si no puedes verlo te dice el motivo
-    video_urls, puedes, motivo = servertools.resolve_video_urls_for_playing(
-        item.server, item.url, item.password, muestra_dialogo)
+    #Permitir varias calidades para server "directo"
+    if item.video_urls:
+      video_urls, puedes, motivo = item.video_urls, True, ""
+    else:
+      video_urls, puedes, motivo = servertools.resolve_video_urls_for_playing(
+          item.server, item.url, item.password, muestra_dialogo)
 
     seleccion = 0
     # Si puedes ver el vídeo, presenta las opciones
@@ -814,11 +860,16 @@ def get_video_seleccionado(item, seleccion, video_urls):
     mediaurl = ""
     view = False
     wait_time = 0
+    mpd = False
 
     # Ha elegido uno de los vídeos
     if seleccion < len(video_urls):
         mediaurl = video_urls[seleccion][1]
-        if len(video_urls[seleccion]) > 3:
+        if len(video_urls[seleccion]) > 4:
+            wait_time = video_urls[seleccion][2]
+            item.subtitle = video_urls[seleccion][3]
+            mpd = True
+        elif len(video_urls[seleccion]) > 3:
             wait_time = video_urls[seleccion][2]
             item.subtitle = video_urls[seleccion][3]
         elif len(video_urls[seleccion]) > 2:
@@ -839,7 +890,7 @@ def get_video_seleccionado(item, seleccion, video_urls):
         if not continuar:
             mediaurl = ""
 
-    return mediaurl, view
+    return mediaurl, view, mpd
 
 
 def set_player(item, xlistitem, mediaurl, view, strm):
@@ -955,9 +1006,13 @@ def play_torrent(item, xlistitem, mediaurl):
         # Importamos el cliente
         from btserver import Client
 
+        clientTmpPath = config.get_setting("downloadpath")
+        if not clientTmpPath:
+            clientTmpPath = config.get_data_path()
+
         # Iniciamos el cliente:
         c = Client(url=mediaurl, is_playing_fnc=xbmc.Player().isPlaying, wait_time=None, timeout=10,
-                   temp_path=os.path.join(config.get_data_path(), "torrent"), print_status=debug)
+                   temp_path=os.path.join(clientTmpPath, "pelisalacarta-torrent"), print_status=debug)
 
         # Mostramos el progreso
         progreso = dialog_progress("Pelisalacarta - Torrent", "Iniciando...")
@@ -1040,7 +1095,6 @@ def play_torrent(item, xlistitem, mediaurl):
                 import traceback
                 logger.info(traceback.format_exc())
                 break
-            
 
         progreso.update(100, "Terminando y eliminando datos", " ", " ")
 

@@ -37,13 +37,12 @@ from core import servertools
 from core import library
 
 def start():
-    ''' Primera funcion que se ejecuta al entrar en el plugin.
+    """ Primera funcion que se ejecuta al entrar en el plugin.
     Dentro de esta funcion deberian ir todas las llamadas a las
     funciones que deseamos que se ejecuten nada mas abrir el plugin.
-    
-    '''
+    """
     logger.info("pelisalacarta.platformcode.launcher start")
-    
+
     # Test if all the required directories are created
     config.verify_directories_created()
     import library_service
@@ -79,8 +78,15 @@ def run(item):
       if hasattr(channelmodule, 'play'):
           logger.info("pelisalacarta.platformcode.launcher executing channel 'play' method")
           itemlist = channelmodule.play(item)
-          if len(itemlist)>0:
-              play_menu(itemlist)
+          b_favourite = item.isFavourite
+          if len(itemlist)>0 and isinstance(itemlist[0], Item):
+              item = itemlist[0]
+              if b_favourite:
+                  item.isFavourite = True
+              play_menu(item)
+          elif len(itemlist)>0 and isinstance(itemlist[0], list):
+              item.video_urls = itemlist
+              play_menu(item)
           else:
               platformtools.dialog_ok("plugin", "No hay nada para reproducir")
       else:
@@ -550,30 +556,12 @@ def check_video_options(item, video_urls):
 #play_menu, abre el menu con las opciones para reproducir
 def play_menu(item):
 
-    if type(item) ==list and len(item)==1:
-      item = item[0]
-      
-    #Modo Normal
-    if type(item) == Item: 
-      if item.server=="": item.server="directo"
-      video_urls,puedes,motivo = servertools.resolve_video_urls_for_playing(item.server,item.url,item.password,True)
-      
-    #Modo "Play" en canal, puede devolver varias url
-    elif type(item) ==list and len(item)>1:
+    if item.server=="": item.server="directo"
     
-      itemlist = item     #En este caso en el argumento item, en realidad hay un itemlist
-      item = itemlist[0]  #Se asigna al item, el item primero del itemlist
-      
-      video_urls = []
-      for videoitem in itemlist:
-        if videoitem.server=="": videoitem.server="directo"
-        opcion_urls,puedes,motivo = servertools.resolve_video_urls_for_playing(videoitem.server,videoitem.url)
-        opcion_urls[0][0] = opcion_urls[0][0] + " [" + videoitem.fulltitle + "]"
-        video_urls.extend(opcion_urls)
-      item = itemlist[0]
-      puedes = True
-      motivo = ""
-      
+    if item.video_urls:
+      video_urls,puedes,motivo = item.video_urls, True, ""
+    else:
+      video_urls,puedes,motivo = servertools.resolve_video_urls_for_playing(item.server,item.url,item.password,True)
       
     if not "strmfile" in item: item.strmfile=False   
     #TODO: unificar show y Serie ya que se usan indistintamente.

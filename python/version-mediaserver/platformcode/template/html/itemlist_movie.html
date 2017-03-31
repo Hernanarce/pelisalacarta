@@ -1,11 +1,10 @@
-<li class="ListItem">
-  <a onblur="unload_info(this)" oncontextmenu="dialog.menu('Menu','%menu_items');return false" onfocus="focused_item=this; load_info(this, 'movie')" onmouseover="this.focus()" class="ListItem %item_class" href="javascript:void(0)" onclick="send_request('%item_url')">
-    <div class="ListItem">
-      <img class="ListItem" onerror="image_error(this)" alt="%item_host" src="%item_thumbnail">
-      <img class="Default" src="http://media.tvalacarta.info/pelisalacarta/squares/thumb_folder.png">
-    </div>
-    <h3 class="ListItem">%item_title</h3>
-    <p class="ListItem"></p>
+<li class="item_movie">
+  <a class="item %item_class" onblur="unload_info(this)" oncontextmenu="dialog.menu('Menu','%menu_items');return false" onfocus="focused_item=this;load_info(this, 'movie')" onmouseover="focus_element(this)" href="javascript:void(0)" onclick="send_request('%item_url')">
+    <h3 class="label">%item_title</h3>
+    <img class="thumbnail" onerror="image_error(this)">
+	<label class="thumbnail">%item_thumbnail</label>
+    <label class="plot">%item_plot</label>
+	<label class="fanart">%item_fanart</label>
   </a>
   %item_menu
 </li>

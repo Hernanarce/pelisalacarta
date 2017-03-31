@@ -6,19 +6,19 @@
 #------------------------------------------------------------
 import bridge
 
-def info(texto):
+def info(texto=""):
     try:
         bridge.log_info( texto )
     except:
         pass
     
-def debug(texto):
+def debug(texto=""):
     try:
         bridge.log_info( texto )
     except:
         pass
 
-def error(texto):
+def error(texto=""):
     try:
         bridge.log_info( texto )
     except:

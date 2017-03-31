@@ -26,11 +26,11 @@
 <project name="pelisalacarta" default="package">
     <description>pelisalacarta</description>
 
-    <property name="version" value="4.2.0-beta2"/>
-    <property name="versionboxee" value="10.26"/>
-    <property name="versiondate" value="01/Enero/2017"/>
-    <property name="channels_version" value="20170105"/>
-    <property name="servers_version" value="20170105"/>
+    <property name="version" value="4.2.0-beta3"/>
+    <property name="versionboxee" value="10.28"/>
+    <property name="versiondate" value="18/Marzo/2017"/>
+    <property name="channels_version" value="20170323"/>
+    <property name="servers_version" value="20170323"/>
 
     <property name="target_base_folder" value="../../target/python"/>
 
@@ -188,15 +188,42 @@
             </fileset>
         </copy>
 
-        <!-- Replace kodi-krypton platform name with current platform name  -->
-        <copy file="main-classic/core/config.py" tofile="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/core/config.py" overwrite="true"/>
-        <replaceregexp file="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/core/config.py" match="kodi-krypton" replace="${target_platform_name}"/>
+        <!-- Duplicate skin files in other resolutions -->
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/1080i"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC16x9"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL16x9"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL"/>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/1080i">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC16x9">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL16x9">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
 
         <!-- Builds zip file -->
         <zip destfile="${target_base_folder}/pelisalacarta-${target_platform_name}-${version}.zip" basedir="${target_base_folder}/${target_platform_folder}"/>
 
         <!-- UI version -->
-
         <echo message="${target_platform_name} UI version"/>
 
         <!-- Creates main folder -->
@@ -238,6 +265,38 @@
         <copy file="main-classic/core/config.py" tofile="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/core/config.py" overwrite="true"/>
         <replaceregexp file="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/core/config.py" match="kodi-krypton" replace="${target_platform_name}"/>
         <replaceregexp file="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/core/config.py" match="PLUGIN_NAME....pelisalacarta." replace="PLUGIN_NAME = &quot;pelisalacarta-ui&quot;"/>
+
+        <!-- Duplicate skin files in other resolutions -->
+        <mkdir dir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/720p"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/NTSC16x9"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/NTSC"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/PAL16x9"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/PAL"/>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/720p">
+            <fileset dir="main-ui/resources/skins/Default/1080i">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/NTSC16x9">
+            <fileset dir="main-ui/resources/skins/Default/1080i">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/NTSC">
+            <fileset dir="main-ui/resources/skins/Default/1080i">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/PAL16x9">
+            <fileset dir="main-ui/resources/skins/Default/1080i">
+            </fileset>
+        </copy>
+
+        <copy todir="${target_base_folder}/${target_platform_folder}-ui/plugin.video.pelisalacarta-ui/resources/skins/Default/PAL">
+            <fileset dir="main-ui/resources/skins/Default/1080i">
+            </fileset>
+        </copy>
 
         <!-- Builds zip file -->
         <zip destfile="${target_base_folder}/pelisalacarta-ui-${target_platform_name}-${version}.zip" basedir="${target_base_folder}/${target_platform_folder}-ui"/>
@@ -342,6 +401,9 @@
                 <exclude name="**/.*/**"/>
             </fileset>
         </copy>
+        <replaceregexp match="&lt;category.*?&gt;" replace="" file="${target_base_folder}/xbmc-09-plugin/plugin.video.pelisalacarta/resources/settings.xml" flags="sg"/>
+        <replaceregexp match="&lt;/category.*?&gt;" replace="" file="${target_base_folder}/xbmc-09-plugin/plugin.video.pelisalacarta/resources/settings.xml" flags="sg"/>
+        <replaceregexp match='type="number"' replace='type="text"' file="${target_base_folder}/xbmc-09-plugin/plugin.video.pelisalacarta/resources/settings.xml" flags="sg"/>
 
         <zip destfile="${target_base_folder}/pelisalacarta-xbmc-plugin-${version}.zip" basedir="${target_base_folder}/xbmc-09-plugin"/>
     </target>
@@ -500,6 +562,8 @@
               <exclude name="fanart.jpg"/>
               <exclude name="addon.xml"/>
               <exclude name="platformcode/**"/>
+              <exclude name="resources/advancedsettings.xml"/>
+              <exclude name="resources/skins/**"/>
               <exclude name="resources/images/bannermenu/**"/>
               <exclude name="resources/images/banners/**"/>
               <exclude name="resources/images/fanart/**"/>

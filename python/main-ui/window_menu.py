@@ -41,8 +41,11 @@ class MenuWindow(xbmcgui.WindowXML):
     def __init__(self, xml_name, fallback_path):
         plugintools.log("MenuWindow.__init__ xml_name="+xml_name+" fallback_path="+fallback_path)
 
+        if self.getResolution()>0:
+            self.setCoordinateResolution(0)
+
         self.first_time = False
-        self.itemlist = []
+        self.itemlist = None
 
     def setParentItem(self,item):
         self.parent_item = item
@@ -66,18 +69,13 @@ class MenuWindow(xbmcgui.WindowXML):
                    
         self.control_list = self.getControl(100)
 
+        if self.itemlist is None:
+            next_items = navigation.get_next_items( self.parent_item )
+            self.setItemlist(next_items)
+
         if len(self.itemlist)>0:
             item = self.itemlist[0]
-
-            if item.hasContentDetails=="true":
-                self.getControl(301).setImage(item.contentThumbnail)
-                self.getControl(302).setText(item.contentTitle)
-                self.getControl(303).setText(item.contentPlot)
-
-            elif item.thumbnail!="" and not "thumb_error" in item.thumbnail and not "thumb_folder" in item.thumbnail and not "thumb_nofolder" in item.thumbnail:
-                self.getControl(301).setImage(item.thumbnail)
-                self.getControl(302).setText(item.title)
-                self.getControl(303).setText(item.plot)
+            self.setContentDetailsFields(item)
 
         for item in self.itemlist:
 
@@ -94,41 +92,72 @@ class MenuWindow(xbmcgui.WindowXML):
         self.getControl(300).setLabel(self.parent_item.channel)
         self.setFocusId(100)
 
+        self.loader = self.getControl(400)
+        self.loader.setVisible(False)
+
+    def setContentDetailsFields(self, item):
+
+        nthumbnail = ""
+        ntitle = ""
+        nplot = ""
+        
+        if item.thumbnail!="" and not "thumb_error" in item.thumbnail and not "thumb_folder" in item.thumbnail and not "thumb_nofolder" in item.thumbnail:
+            nthumbnail = item.thumbnail
+            ntitle=item.title
+            nplot=item.plot
+
+        if item.hasContentDetails=="true":
+
+            if item.contentThumbnail and item.contentThumbnail!="":
+                nthumbnail = item.contentThumbnail
+
+            if item.contentTitle and item.contentTitle!="":
+                ntitle=item.contentTitle
+
+            if item.contentPlot and item.contentPlot!="":
+                nplot=item.contentPlot
+
+        self.getControl(301).setImage(nthumbnail)
+        self.getControl(302).setText(ntitle)
+        self.getControl(303).setText(nplot)
+
     def onAction(self, action):
         plugintools.log("MenuWindow.onAction action.id="+repr(action.getId())+" action.buttonCode="+repr(action.getButtonCode()))
 
         pos = self.control_list.getSelectedPosition()
-        item = self.itemlist[pos]
-        
-        if item.hasContentDetails=="true":
-            self.getControl(301).setImage(item.contentThumbnail)
-            self.getControl(302).setText(item.contentTitle)
-            self.getControl(303).setText(item.contentPlot)
 
-        elif item.thumbnail!="" and not "thumb_error" in item.thumbnail and not "thumb_folder" in item.thumbnail and not "thumb_nofolder" in item.thumbnail:
-            self.getControl(301).setImage(item.thumbnail)
-            self.getControl(302).setText(item.title)
-            self.getControl(303).setText(item.plot)
+        try:
+            item = self.itemlist[pos]
+            self.setContentDetailsFields(item)
+        except:
+            import traceback
+            plugintools.log(traceback.format_exc())
+            self.close()
 
         if action == ACTION_PARENT_DIR or action==ACTION_PREVIOUS_MENU or action==ACTION_PREVIOUS_MENU2:
             self.close()
 
         if action == ACTION_SELECT_ITEM or action == ACTION_MOUSE_LEFT_CLICK:
 
-            loader_image = os.path.join( plugintools.get_runtime_path(), 'resources', 'skins', 'Default', 'media', 'loader.gif')
-            loader = xbmcgui.ControlImage(1200, 19, 40, 40, loader_image)
-            self.addControl(loader)
+            #loader_image = os.path.join( plugintools.get_runtime_path(), 'resources', 'skins', 'Default', 'media', 'loader.gif')
+            #loader = xbmcgui.ControlImage(1200, 19, 40, 40, loader_image)
+            #self.addControl(loader)
+            #loader = self.getControl(400)
+            #self.loader.setVisible(True)
 
             pos = self.control_list.getSelectedPosition()
             item = self.itemlist[pos]
 
-            next_items = navigation.get_next_items( item )
-            loader.setVisible(False)
+            #next_items = navigation.get_next_items( item )
+            self.loader.setVisible(False)
 
-            # Si no hay nada, no muestra la pantalla vacía
-            if len(next_items)>0:
+            if item.action=="play":
+                navigation.play_item(item)
+            else:
+                # Si no hay nada, no muestra la pantalla vacía
+                #if len(next_items)>0:
                 next_window = navigation.get_window_for_item( item )
-                next_window.setItemlist(next_items)
+                #next_window.setItemlist(next_items)
                 next_window.setParentItem(item)
 
                 next_window.doModal()

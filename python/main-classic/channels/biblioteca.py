@@ -182,7 +182,7 @@ def get_temporadas(item):
 
     # Menu contextual: Releer tvshow.nfo
     head_nfo, item_nfo = library.read_nfo(item.nfo)
-            
+
     if config.get_setting("no_pile_on_seasons", "biblioteca") == 2: # Siempre
         return get_episodios(item)
 
@@ -234,10 +234,10 @@ def get_episodios(item):
 
     # Obtenemos los archivos de los episodios
     raiz, carpetas_series, ficheros = filetools.walk(item.path).next()
-    
+
     # Menu contextual: Releer tvshow.nfo
     head_nfo, item_nfo = library.read_nfo(item.nfo)
-    
+
     # Crear un item en la lista para cada strm encontrado
     for i in ficheros:
         if i.endswith('.strm'):
@@ -291,7 +291,7 @@ def get_episodios(item):
 
 def findvideos(item):
     logger.info()
-    # logger.debug("item:\n" + item.tostring('\n'))
+    #logger.debug("item:\n" + item.tostring('\n'))
 
     itemlist = []
     list_canales = {}
@@ -304,30 +304,32 @@ def findvideos(item):
     content_title = filter(lambda c: c not in ":*?<>|\/", item.contentTitle).strip().lower()
 
     if item.contentType == 'movie':
-        item.strm_path = filetools.join(library.MOVIES_PATH, item.strm_path.strip('\/'))
-
+        item.strm_path = filetools.join(library.MOVIES_PATH, item.strm_path)
         path_dir = os.path.dirname(item.strm_path)
         item.nfo = filetools.join(path_dir, os.path.basename(path_dir) + ".nfo")
     else:
-        item.strm_path = filetools.join(library.TVSHOWS_PATH, item.strm_path.strip('\/'))
+        item.strm_path = filetools.join(library.TVSHOWS_PATH, item.strm_path)
         path_dir = os.path.dirname(item.strm_path)
         item.nfo = filetools.join(path_dir, 'tvshow.nfo')
+
 
     for fd in filetools.listdir(path_dir):
         if fd.endswith('.json'):
             contenido, nom_canal = fd[:-6].split('[')
-            if (content_title in contenido.strip() or item.contentType == 'movie') and nom_canal not in \
+            if (contenido.startswith(content_title) or item.contentType == 'movie') and nom_canal not in \
                     list_canales.keys():
                 list_canales[nom_canal] = filetools.join(path_dir, fd)
 
     num_canales = len(list_canales)
+    #logger.debug(str(list_canales))
     if 'descargas' in list_canales:
         json_path = list_canales['descargas']
         item_json = Item().fromjson(filetools.read(json_path))
+        item_json.contentChannel = "local"
         #Soporte para rutas relativas en descargas
         if filetools.is_relative(item_json.url):
           item_json.url = filetools.join(library.LIBRARY_PATH,item_json.url)
-        
+
         del list_canales['descargas']
 
         # Comprobar q el video no haya sido borrado
@@ -400,14 +402,17 @@ def findvideos(item):
             server.channel = "biblioteca"
             server.nfo = item.nfo
             server.strm_path = item.strm_path
-            server.title = "%s: %s" % (nom_canal.capitalize(), server.title)
+
+            # Se añade el nombre del canal si se desea
+            if config.get_setting("quit_channel_name", "biblioteca") == 0:
+                server.title = "%s: %s" % (nom_canal.capitalize(), server.title)
 
             server.infoLabels = item_json.infoLabels
 
             if not server.thumbnail:
                 server.thumbnail = item.thumbnail
 
-            #logger.debug("server:\n%s" % server.tostring('\n'))
+            # logger.debug("server:\n%s" % server.tostring('\n'))
             itemlist.append(server)
 
     # return sorted(itemlist, key=lambda it: it.title.lower())
@@ -416,7 +421,7 @@ def findvideos(item):
 
 def play(item):
     logger.info()
-    #logger.debug("item:\n" + item.tostring('\n'))
+    # logger.debug("item:\n" + item.tostring('\n'))
 
     if not item.contentChannel == "local":
         channel = __import__('channels.%s' % item.contentChannel, fromlist=["channels.%s" % item.contentChannel])
@@ -426,20 +431,26 @@ def play(item):
         else:
             itemlist = [item.clone()]
     else:
-        itemlist = [item.clone(url=item.strm_path, server="local")]
+        itemlist = [item.clone(url=item.url, server="local")]
+
+    # Para enlaces directo en formato lista
+    if isinstance(itemlist[0], list):
+        item.video_urls = itemlist
+        itemlist = [item]
 
     # Esto es necesario por si el play del canal elimina los datos
     for v in itemlist:
-        v.nfo = item.nfo
-        v.strm_path = item.strm_path
-        v.infoLabels = item.infoLabels
-        if item.contentTitle:
-            v.title = item.contentTitle
-        else:
-            if item.contentType == "episode":
-                v.title = "Episodio %s" % item.contentEpisodeNumber
-        v.thumbnail = item.thumbnail
-        v.contentThumbnail = item.thumbnail
+        if isinstance(v, Item):
+            v.nfo = item.nfo
+            v.strm_path = item.strm_path
+            v.infoLabels = item.infoLabels
+            if item.contentTitle:
+                v.title = item.contentTitle
+            else:
+                if item.contentType == "episode":
+                    v.title = "Episodio %s" % item.contentEpisodeNumber
+            v.thumbnail = item.thumbnail
+            v.contentThumbnail = item.thumbnail
 
     return itemlist
 
@@ -486,8 +497,7 @@ def mark_content_as_watched(item):
     # logger.debug("item:\n" + item.tostring('\n'))
 
     if filetools.exists(item.nfo):
-        head_nfo = filetools.read(item.nfo, 0, 1)
-        it = Item().fromjson(filetools.read(item.nfo, 1))
+        head_nfo, it = library.read_nfo(item.nfo)
 
         if item.contentType == 'movie':
             name_file = os.path.splitext(os.path.basename(item.nfo))[0]
@@ -495,7 +505,7 @@ def mark_content_as_watched(item):
             name_file = "%sx%s" % (item.contentSeason, str(item.contentEpisodeNumber).zfill(2))
         else:
             name_file = item.contentTitle
-
+        
         if not hasattr(it, 'library_playcounts'):
             it.library_playcounts = {}
         it.library_playcounts.update({name_file: item.playcount})
@@ -513,7 +523,7 @@ def mark_content_as_watched(item):
                 new_item = item.clone(contentSeason=-1)
                 mark_season_as_watched(new_item)
 
-            if config.is_xbmc():
+            if config.is_xbmc() and item.contentType == 'episode':
                 from platformcode import xbmc_library
                 xbmc_library.mark_content_as_watched_on_kodi(item, item.playcount)
                 platformtools.itemlist_refresh()

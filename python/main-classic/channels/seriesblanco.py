@@ -43,13 +43,14 @@ def mainlist(item):
                          url=HOST , thumbnail=thumb_series))
     itemlist.append(Item(channel=item.channel, title="Último actualizado", action="homeSection", extra="Último Actualizado",
                          url=HOST , thumbnail=thumb_series))
-    itemlist.append(Item(channel=item.channel, title="Series más vistas", action="homeSection", extra="Series Más vistas",
-                         url=HOST , thumbnail=thumb_series))
+    itemlist.append(Item(channel=item.channel, title="Series más vistas", action="series", extra="Series Más vistas",
+                         url=urlparse.urljoin(HOST, "listado-visto/") , thumbnail=thumb_series))
     itemlist.append(Item(channel=item.channel, title="Series menos vistas", action="homeSection", extra="Series Menos vistas",
                          url=HOST , thumbnail=thumb_series))
     itemlist.append(Item(channel=item.channel, title="Últimas fichas creadas", action="series",
                          url=urlparse.urljoin(HOST, "fichas_creadas/"), thumbnail=thumb_series))
-
+    itemlist.append(Item(channel=item.channel, title="Series por género", action="generos",
+                         url=HOST , thumbnail=thumb_series))
     itemlist.append(Item(channel=item.channel, title="Buscar...", action="search", url=HOST, thumbnail=thumb_buscar))
 
     if filtertools.context:
@@ -60,7 +61,7 @@ def mainlist(item):
 def homeSection(item):
     logger.info("section = {0}".format(item.extra))
 
-    pattern = "['\"]panel-title['\"]>{0}(.*?)(?:panel-title|\Z)".format(item.extra)
+    pattern = "['\"]panel-title['\"]>[^/]*{0}(.*?)(?:panel-title|\Z)".format(item.extra)
     logger.debug("pattern = {0}".format(pattern))
 
     data = httptools.downloadpage(item.url).data
@@ -77,7 +78,7 @@ def homeSection(item):
 def extractSeriesFromData(item, data):
     itemlist = []
     episodePattern = re.compile('/capitulo-([0-9]+)/')
-    shows = re.findall("<a.+?href=['\"](?P<url>[^'\"]+)[^<]*<img[^>]*src=['\"](?P<img>http[^'\"]+).*?(?:alt|title)=['\"](?P<name>[^'\"]+)", data, re.MULTILINE | re.DOTALL)
+    shows = re.findall("<a.+?href=['\"](?P<url>[^'\"]+)[^<]*<img[^>]*src=['\"](?P<img>http[^'\"]+).*?(?:alt|title)=['\"](?P<name>[^'\"]+)", data)
     for url, img, name in shows:
         try:
             name.decode('utf-8')
@@ -117,6 +118,14 @@ def series_listado_alfabetico(item):
 
     return [item.clone(action="series", title=letra, url=urlparse.urljoin(HOST, "listado-{0}/".format(letra)))
                 for letra in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
+
+
+def generos(item):
+    logger.info()
+    data = httptools.downloadpage(item.url).data
+
+    result = re.findall("href=['\"](?P<url>/listado/[^'\"]+)['\"][^/]+/i>\s*(?P<genero>[^<]+)", data)
+    return [item.clone(action="series", title=genero, url = urlparse.urljoin(item.url, url)) for url, genero in result]
 
 
 def newest(categoria):
@@ -167,6 +176,14 @@ def episodios(item):
     logger.debug("fanart: {0}".format(fanart))
     logger.debug("plot: {0}".format(plot))
 
+    ajaxSeasons = re.findall("loadSeason\((\d+),(\d+),(\d+)\)", data)
+    ajaxData = ""
+    for showID, seasonNo, userID in ajaxSeasons:
+        logger.debug("Ajax seasson request: Show = {0} - Season = {1}".format(showID, seasonNo))
+        ajaxData += httptools.downloadpage(HOST + '/ajax/load_season.php?season_id=' + showID + '&season_number=' + seasonNo + '&user=' + userID).data
+
+    if ajaxData:
+        data = ajaxData
 
     episodes = re.findall("<tr.*?href=['\"](?P<url>[^'\"]+).+?>(?P<title>.+?)</a>.*?<td>(?P<flags>.*?)</td>", data, re.MULTILINE | re.DOTALL)
     for url, title, flags in episodes:
@@ -259,7 +276,16 @@ def play(item):
     if item.url.startswith(HOST):
         data = httptools.downloadpage(item.url).data
 
-        patron = "<input type='button' value='Ver o Descargar' onclick='window.open\(\"([^\"]+)\"\);'/>"
+        ajaxLink = re.findall("loadEnlace\((\d+),(\d+),(\d+),(\d+)\)", data)
+        ajaxData = ""
+        for serie, temp, cap, linkID in ajaxLink:
+            logger.debug("Ajax link request: Sherie = {0} - Temp = {1} - Cap = {2} - Link = {3}".format(serie, temp, cap, linkID))
+            ajaxData += httptools.downloadpage(HOST + '/ajax/load_enlace.php?serie=' + serie + '&temp=' + temp + '&cap=' + cap + '&id=' + linkID).data
+
+        if ajaxData:
+            data = ajaxData
+
+        patron = "onclick='window.open\(\"([^\"]+)\"\);'/>"
         url = scrapertools.find_single_match(data, patron)
     else:
         url = item.url

@@ -19,14 +19,20 @@ class proxy(Controller):
     def run(self, path):
         url= path.replace("/proxy/","").split("/")[0]
         url = base64.b64decode(urllib.unquote_plus(url))
-        Headers = self.handler.headers.dict
-
-        req = urllib2.Request(url)
-        opener = urllib2.build_opener(urllib2.HTTPHandler(debuglevel=0))
         
-        for header in Headers:
-          if not header in ["host","referer"]:
-            req.add_header(header,Headers[header])
+        request_headers = self.handler.headers.dict
+        
+        if "host" in request_headers: request_headers.pop("host")
+        if "referer" in request_headers: request_headers.pop("referer")
+        if "cookie" in request_headers: request_headers.pop("cookie")
+        
+        if "|" in url:
+          url_headers = dict([[header.split("=")[0].lower(),urllib.unquote_plus("=".join(header.split("=")[1:]))] for header in url.split("|")[1].split("&")])
+          url = url.split("|")[0]
+          request_headers.update(url_headers)
+
+        req = urllib2.Request(url, headers=request_headers)
+        opener = urllib2.build_opener(urllib2.HTTPHandler(debuglevel=0))
           
         try:
           h = opener.open(req)

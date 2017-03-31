@@ -131,8 +131,11 @@ def canal(channel_name="",action="",caller_item_serialized=None, itemlist=""):
             
             itemlist = getattr(channelmodule, action)(caller_item)
 
-            if action=="play" and len(itemlist)>0:
+            if action=="play" and len(itemlist)>0 and isinstance(itemlist[0], Item):
                 itemlist=play_video(itemlist[0])
+            if action=="play" and len(itemlist)>0 and isinstance(itemlist[0], list):
+                item.video_urls = itemlist
+                itemlist=play_video(item)
 
         else:
             Log.Info("El módulo "+caller_item.channel+" *NO* tiene una funcion "+action)
@@ -155,10 +158,6 @@ def canal(channel_name="",action="",caller_item_serialized=None, itemlist=""):
                 Log.Info("item="+unicode( item.tostring(), "utf-8" , errors="replace" ))
             except:
                 pass
-            try:
-                item.title = unicode( item.title, "utf-8" , errors="replace" )
-            except:
-                pass
             
             if action!="play":
                 #if "type" in item and item.type == "input":
@@ -171,7 +170,7 @@ def canal(channel_name="",action="",caller_item_serialized=None, itemlist=""):
                         
                     if Client.Product in DumbKeyboard.clients:
                         DumbKeyboard("/video/pelisalacarta", oc, get_input,
-                                dktitle = item.title,
+                                dktitle = unicode( item.title, "utf-8" , errors="replace" ),
                                 dkitem = item,
                                 dkplaceholder = value,
                                 dkthumb = item.thumbnail
@@ -180,15 +179,15 @@ def canal(channel_name="",action="",caller_item_serialized=None, itemlist=""):
                         dkitem = item.tourl()
                         oc.add(InputDirectoryObject(
                                 key    = Callback(get_input, dkitem = dkitem),
-                                title  = item.title,
+                                title  = unicode( item.title, "utf-8" , errors="replace" ),
                                 prompt = value,
                                 thumb = item.thumbnail
                             ))
                 else:
-                    oc.add(DirectoryObject(key=Callback(canal, channel_name=item.channel, action=item.action, caller_item_serialized=item.tourl()), title=item.title, thumb=item.thumbnail))
+                    oc.add(DirectoryObject(key=Callback(canal, channel_name=item.channel, action=item.action, caller_item_serialized=item.tourl()), title=unicode( item.title, "utf-8" , errors="replace" ), thumb=item.thumbnail))
             else:
                 Log.Info("Llamando a la funcion play comun")
-                videoClipObject = VideoClipObject(title=item.title,thumb=item.thumbnail, url="pelisalacarta://"+item.url )
+                videoClipObject = VideoClipObject(title=unicode( item.title, "utf-8" , errors="replace" ),thumb=item.thumbnail, url="pelisalacarta://"+item.url )
                 oc.add(videoClipObject)
 
     except:
@@ -202,7 +201,11 @@ def resuelve(url):
     return Redirect(url)
 
 def play_video(item):
-    video_urls = servertools.get_video_urls(item.server,item.url)
+    if item.video_urls:
+      video_urls = item.video_urls
+    else:
+      video_urls = servertools.get_video_urls(item.server,item.url)
+      
     itemlist = []
     for video_url in video_urls:
         itemlist.append( Item(channel=item.channel, action="play" , title="Ver el video "+video_url[0] , url=video_url[1], thumbnail=item.thumbnail, plot=item.plot, server=""))

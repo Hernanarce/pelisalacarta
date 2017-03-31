@@ -14,52 +14,55 @@ from core import config
 from core import jsontools
 from core import logger
 from core import scrapertools
+from core import httptools
 from core import servertools
-from core.item import Item
+from core import tmdb
+from core.item import Item, InfoLabels
 
-__url_base__ = "http://pepecine.com"
+
+__url_base__ = "http://pepecine.net"
+__chanel__ = "pepecine"
 fanart_host = "https://d12.usercdn.com/i/02278/u875vjx9c0xs.png"
 
 
 def mainlist(item):
-    logger.info("[pepecine.py] mainlist")
+    logger.info()
 
     itemlist = []
-    itemlist.append( Item(channel=item.channel, action="listado", title="Películas",
-                          text_color="0xFFEB7600", text_blod=True, extra="movie", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=movie&offset=0&limit=30"),
+    url_peliculas = urlparse.urljoin(__url_base__,"plugins/ultimas-peliculas-updated.php")
+    itemlist.append( Item(channel=__chanel__, title="Películas", text_color="0xFFEB7600", text_blod=True, fanart=fanart_host,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/movies.png"))
-    itemlist.append( Item(channel=item.channel, action="sub_filtrar", title="     Filtrar películas por género",
-                          text_color="0xFFEB7600", extra="movie", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=movie&offset=0&limit=30"),
+    itemlist.append(Item(channel=__chanel__, action="listado", title="     Novedades", page=0, viewcontent = "movies",
+                         text_color="0xFFEB7600", extra="movie", fanart=fanart_host, url=url_peliculas,
+                         thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/movies.png"))
+    itemlist.append( Item(channel=__chanel__, action="sub_filtrar", title="     Filtrar películas por género",
+                          text_color="0xFFEB7600", extra="movie", fanart=fanart_host, url= url_peliculas,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/movies_filtrar.png"))
-    itemlist.append( Item(channel=item.channel, action="search", title="     Buscar películas por título",
-                          text_color="0xFFEB7600", extra="movie", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=movie&offset=0&limit=30"),
+    itemlist.append( Item(channel=__chanel__, action="search", title="     Buscar películas por título",
+                          text_color="0xFFEB7600", extra="movie", fanart=fanart_host, url= url_peliculas,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/movies_buscar.png"))
-    
-    itemlist.append( Item(channel=item.channel, action="listado", title="Series",
-                          text_color="0xFFEB7600", text_blod=True, extra="series", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=series&offset=0&limit=30"),
+
+    url_series = urlparse.urljoin(__url_base__, "plugins/series-episodios-updated.php")
+    itemlist.append( Item(channel=__chanel__, title="Series", text_color="0xFFEB7600", text_blod=True, fanart=fanart_host,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv.png"))
-    itemlist.append( Item(channel=item.channel, action="sub_filtrar", title="     Filtrar series por género",
-                          text_color="0xFFEB7600", extra="series", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=series&offset=0&limit=30"),
+    itemlist.append(Item(channel=__chanel__, action="listado", title="     Novedades", page=0, viewcontent = "tvshows",
+                         text_color="0xFFEB7600", extra="series", fanart=fanart_host, url=url_series,
+                         thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv.png"))
+    itemlist.append( Item(channel=__chanel__, action="sub_filtrar", title="     Filtrar series por género",
+                          text_color="0xFFEB7600", extra="series", fanart=fanart_host, url= url_series,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv_filtrar.png"))
-    itemlist.append( Item(channel=item.channel, action="search", title="     Buscar series por título",
-                          text_color="0xFFEB7600", extra="series", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=series&offset=0&limit=30"),
+    itemlist.append( Item(channel=__chanel__, action="search", title="     Buscar series por título",
+                          text_color="0xFFEB7600", extra="series", fanart=fanart_host, url= url_series,
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv_buscar.png"))
-    itemlist.append( Item(channel=item.channel, action="listado", title="     Ultimos capítulos actualizados",
+    itemlist.append( Item(channel=__chanel__, action="listado", title="     Ultimos episodios actualizados",
                           text_color="0xFFEB7600", extra="series_novedades", fanart=fanart_host,
-                          url=urlparse.urljoin(__url_base__,"plugins/combined_json.php?&offset=0&limit=30&type=series"),
+                          url= urlparse.urljoin(__url_base__, "plugins/ultimos-capitulos-updated.php"),
                           thumbnail="https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv.png"))
     
-    #itemlist.append( Item( channel=item.channel, action="test", title="Test", url="http://pepecine.com/series-online/8763-breaking-bad/seasons/1/episodes/7", extra="series", fanart=fanart_host ) )
     return itemlist
  
 def sub_filtrar(item):
-    logger.info("[pepecine.py] sub_filtrar")
+    logger.info()
     itemlist=[]
     generos=("acción","animación","aventura","ciencia ficción","comedia","crimen",
              "documental","drama","familia","fantasía","guerra","historia","misterio",
@@ -84,17 +87,22 @@ def sub_filtrar(item):
                'https://d12.usercdn.com/i/02278/31i1xkd8m30b.jpg',
                'https://d12.usercdn.com/i/02278/af05ulgs20uf.jpg')
 
+    if item.extra == "movie":
+        viewcontent = "movies"
+    else:
+        viewcontent = "tvshows"
+
+
     for g, t in zip(generos,thumbnail):
-        url=item.url + "&genre=" + g
-        itemlist.append( Item(channel=item.channel, action="listado", text_color="0xFFEB7600",
-                              title= g.capitalize(),url=url,extra=item.extra,thumbnail=t,fanart=fanart_host) )
+        itemlist.append(item.clone(action="listado", title= g.capitalize(),filtro=("genero",g),thumbnail=t,
+                                   viewcontent=viewcontent ))
    
     return itemlist 
 
 def search(item,texto):
-    logger.info("[pepecine.py] search:" + texto)
-    texto = texto.replace(" ", "+")
-    item.url = item.url + "&query=" + texto
+    logger.info("search:" + texto)
+    #texto = texto.replace(" ", "+")
+    item.filtro=("search",texto.lower())
     try:
         return listado(item) 
     # Se captura la excepción, para no interrumpir al buscador global si un canal falla
@@ -109,20 +117,22 @@ def newest(categoria):
     item = Item()
     try:
         if categoria == 'peliculas':
-            item.url = urlparse.urljoin(__url_base__,"plugins/last_update_links.php?type=movie&offset=0&limit=30")
+            item.url = urlparse.urljoin(__url_base__,"plugins/ultimas-peliculas-updated.php")
             item.extra = "movie"
 
         elif categoria == 'infantiles':
-            item.url = urlparse.urljoin(__url_base__, "plugins/last_update_links.php?type=movie&offset=0&limit=30&genre=Animación")
+            item.url = urlparse.urljoin(__url_base__, "plugins/ultimas-peliculas-updated.php")
+            item.filtro=("genero","animación")
             item.extra = "movie"
 
         elif categoria == 'series':
-            item.url = urlparse.urljoin(__url_base__,"plugins/combined_json.php?&offset=0&limit=30&type=series")
+            item.url = urlparse.urljoin(__url_base__,"plugins/ultimos-capitulos-updated.php")
             item.extra="series_novedades"
 
         else:
             return []
 
+        item.action = "listado"
         itemlist = listado(item)
         if itemlist[-1].action == "listado":
             itemlist.pop()
@@ -137,43 +147,59 @@ def newest(categoria):
     return itemlist
 
 def listado(item):
-    #import json
-    logger.info("[pepecine.py] listado")
+    logger.info()
     itemlist = []
-    
+
     try:
-        data_dict = jsontools.load_json(scrapertools.cache_page(item.url))
+        data_dict = jsontools.load_json(httptools.downloadpage(item.url).data)
     except:
         return itemlist # Devolvemos lista vacia
-        
-    offset= scrapertools.get_match(item.url,'offset=(\d*)')
-    limit= scrapertools.get_match(item.url,'limit=(\d*)')
+
+    #Filtrado y busqueda
+    if item.filtro:
+        for i in data_dict["result"][:]:
+            if (item.filtro[0] == "genero" and item.filtro[1] not in i['genre'].lower()) or \
+                (item.filtro[0] == "search" and item.filtro[1] not in i['title'].lower()):
+                    data_dict["result"].remove(i)
+
+
+    if not item.page:
+        item.page = 0
+
+    offset= int(item.page) * 30
+    limit= offset + 30
        
-    for i in data_dict["result"]:
-        infoLabels={}
-        idioma =''
-        
-        if item.extra=="movie":
-            action="get_movie"
-            title= i["title"] + ' (' + i['year'] + ')'
-            url= urlparse.urljoin(__url_base__,"peliculas-online/" + str(i["id"])) #+"-"+i["title"]).lower().replace(" ","-")))
+    for i in data_dict["result"][offset:limit]:
+        infoLabels = InfoLabels()
+        idioma = ''
+
+        if item.extra == "movie":
+            action= "findvideos"
+            #viewcontent = 'movies'
+            infoLabels["title"]= i["title"]
+            title= '%s (%s)' % (i["title"], i['year'] )
+            url= urlparse.urljoin(__url_base__,"ver-pelicula-online/" + str(i["id"]))
+
         elif item.extra=="series": 
             action="get_temporadas"
+            #viewcontent = 'seasons'
             title= i["title"]
             infoLabels['tvshowtitle']= i["title"]
-            url= urlparse.urljoin(__url_base__,"series-online/" + str(i["id"])) #+"-"+i["title"]).lower().replace(" ","-")))
+            url= urlparse.urljoin(__url_base__,"episodio-online/" + str(i["id"]))
+
         else: #item.extra=="series_novedades": 
-            action="get_only_episodio"
+            action="findvideos"
+            #viewcontent = 'episodes'
+            infoLabels['tvshowtitle'] = i["title"]
             infoLabels['season']=i['season']
             infoLabels['episode']=i['episode'].zfill(2)
-            item.extra=infoLabels["season"] + "x" + infoLabels["episode"]
-            infoLabels['tvshowtitle']= i["title"]
             flag= scrapertools.find_single_match(i["label"],'(\s*\<img src=.*\>)')
             idioma=i["label"].replace(flag,"")
-            title=i["title"] + ' '  + item.extra + ' (' + idioma + ')'
-            url= urlparse.urljoin(__url_base__,"series-online/" + str(i["id"])) #+"-"+i["title"]).lower().replace(" ","-"))) 
-        
-        if i.has_key("poster") and i["poster"]: 
+            title = '%s %sx%s (%s)' %(i["title"], infoLabels["season"], infoLabels["episode"], idioma)
+            url= urlparse.urljoin(__url_base__,"episodio-online/" + str(i["id"]))
+
+
+        if i.has_key("poster") and i["poster"]:
             thumbnail=re.compile("/w\d{3}/").sub("/w500/",i["poster"])
         else:
             thumbnail= item.thumbnail
@@ -184,10 +210,9 @@ def listado(item):
         
         # Rellenamos el diccionario de infoLabels
         infoLabels['title_id']=i['id'] # title_id: identificador de la pelicula/serie en pepecine.com
-        infoLabels['titleraw']= i["title"] # titleraw: titulo de la pelicula/serie sin formato
         if i['genre']: infoLabels['genre']=i['genre']
         if i['year']: infoLabels['year']=i['year']
-        if i['tagline']: infoLabels['plotoutline']=i['tagline']
+        #if i['tagline']: infoLabels['plotoutline']=i['tagline']
         if i['plot']: 
             infoLabels['plot']=i['plot']
         else:
@@ -197,10 +222,12 @@ def listado(item):
             infoLabels['rating']=i['imdb_rating']
         elif i['tmdb_rating']:
             infoLabels['rating']=i['tmdb_rating']
+        if i['tmdb_id']: infoLabels['tmdb_id'] = i['tmdb_id']
+        if i['imdb_id']: infoLabels['imdb_id'] = i['imdb_id']
 
 
         newItem = Item(channel=item.channel, action=action, title=title, url=url, extra=item.extra,
-                         fanart=fanart, thumbnail=thumbnail, viewmode="movie_with_plot",
+                         fanart=fanart, thumbnail=thumbnail, viewmode="movie_with_plot", #viewcontent=viewcontent,
                          language=idioma, text_color="0xFFFFCE9C", infoLabels=infoLabels)
         newItem.year=i['year']
         newItem.contentTitle=i['title']
@@ -209,289 +236,174 @@ def listado(item):
         if 'episode' in infoLabels and infoLabels['episode']:
             newItem.contentEpisodeNumber = infoLabels['episode']
         itemlist.append(newItem)
+
+    # Obtenemos los datos basicos mediante multihilos
+    tmdb.set_infoLabels(itemlist)
     
     # Paginacion
-    if int(data_dict["total_results"]) == int(limit):
-        url=item.url.replace('offset='+offset,'offset='+ str(int(offset)+ int(limit)))
-        itemlist.append( Item( channel=item.channel, action="listado", text_color="0xFF994D00",
-                               title=">> Pagina siguiente >>", thumbnail=item.thumbnail,
-                               url=url, extra=item.extra, fanart=fanart_host) )
+    if len(data_dict["result"]) > limit:
+        itemlist.append(item.clone(text_color="0xFF994D00", title=">> Pagina siguiente >>", page=item.page + 1) )
     
     return itemlist      
               
-def get_movie(item):
-    logger.info("[pepecine.py] get_movie")
-    itemlist = []
 
-    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)","",scrapertools.cache_page(item.url))
-    patron ='vars.title =(.*?)};'
-    try:
-        data_dict= jsontools.load_json(scrapertools.get_match(data,patron) +'}')
-    except:
-        return itemlist # Devolvemos lista vacia
-    
-    infoLabels=item.infoLabels
-    if data_dict.has_key("actor"):
-        cast=[]
-        rol=[]
-        for actor in data_dict["actor"]:
-            cast.append(actor['name'])
-            rol.append(actor['pivot']['char_name'])
-        infoLabels['cast'] = cast
-        infoLabels['castandrole'] = zip(cast,rol)
-        
-    if data_dict.has_key("writer"):
-        writers_list=[]
-        for writer in data_dict["writer"]:
-            writers_list.append(writer['name'])
-        infoLabels['writer'] = ", ".join(writers_list )
-        
-    if data_dict.has_key("director"):    
-        director_list=[]
-        for director in data_dict["director"]:
-            director_list.append(director['name'])    
-        infoLabels['director'] = ", ".join(director_list )
-    
-
-    item.infoLabels= infoLabels
-    item.url=str(data_dict["link"])
-    
-    return findvideos (item)
-    
 def get_temporadas(item):
-    logger.info("[pepecine.py] get_temporadas")
+    logger.info()
+
     itemlist = []
     infoLabels = {}
-    
-    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)","",scrapertools.cache_page(item.url))
+
+    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)","",httptools.downloadpage(item.url).data)
     patron ='vars.title =(.*?)};'
     try:
         data_dict= jsontools.load_json(scrapertools.get_match(data,patron) +'}')
     except:
         return itemlist # Devolvemos lista vacia
-    
+
     if item.extra == "serie_add":
-        item.extra=str(data_dict['tmdb_id'])
-        item.url=str(data_dict["link"])
-        infoLabels['titleraw'] = data_dict["title"]
-        infoLabels['tvshowtitle'] = data_dict["title"]
-        infoLabels['title_id'] = data_dict['id']
-        item.infoLabels = infoLabels
         itemlist= get_episodios(item)
+
     else:
-        infoLabels = item.infoLabels
-        if data_dict.has_key("actor"):
-            cast=[]
-            rol=[]
-            for actor in data_dict["actor"]:
-                cast.append(actor['name'])
-                rol.append(actor['pivot']['char_name'])
-            infoLabels['cast'] = cast
-            infoLabels['castandrole'] = zip(cast,rol)
-            
-        if data_dict.has_key("writer"):    
-            writers_list=[]
-            for writer in data_dict["writer"]:
-                writers_list.append(writer['name'])
-            infoLabels['writer'] = ", ".join(writers_list )
-        
-        if data_dict.has_key("director"):  
-            director_list=[]
-            for director in data_dict["director"]:
-                director_list.append(director['name'])    
-            infoLabels['director'] = ", ".join(director_list )
-    
         if len(data_dict["season"]) == 1: 
             # Si solo hay una temporada ...
-            item.extra=str(data_dict['tmdb_id'])
-            item.url=str(data_dict["link"])
-            item.infoLabels = infoLabels
+            item.infoLabels['season'] = data_dict["season"][0]["number"]
             itemlist= get_episodios(item)
-        else: #... o si hay mas de una temporada y queremos el listado por temporada...
-            item.extra=str(data_dict['tmdb_id'])
+
+        else: #... o si hay mas de una temporada
+            item.viewcontent = "seasons"
             data_dict["season"].sort(key=lambda x:(x['number'])) # ordenamos por numero de temporada
             for season in data_dict["season"]:
-                url= filter(lambda l: l["season"]== season['number'],data_dict["link"]) #filtramos enlaces por temporada
-                if url:
-                    if season['overview']: infoLabels['plot']=season['overview']
-                    if season['number']: infoLabels['season']=season['number']
-                    if season["poster"]: item.thumbnail=re.compile("/w\d{3}/").sub("/w500/",season["poster"])
-                    if season["release_date"]: infoLabels['premiered']= season['release_date']
+                # filtramos enlaces por temporada
+                enlaces= filter(lambda l: l["season"]== season['number'],data_dict["link"])
+                if enlaces:
+                    item.infoLabels['season'] = season['number']
+                    title= '%s Temporada %s'  % (item.title, season['number'])
 
-                    item.infoLabels = infoLabels
-                    title=item.title + ' ' + season["title"].lower().replace('season','temporada').capitalize()
-                    
-                    itemlist.append( Item( channel=item.channel, action="get_episodios", title=title, url=str(url),
-                                           extra=item.extra, fanart=item.fanart, text_color="0xFFFFCE9C",
-                                           thumbnail=item.thumbnail, viewmode="movie_with_plot",
-                                           infoLabels=item.infoLabels) )
+                    itemlist.append(item.clone(action="get_episodios", title=title,
+                                         text_color="0xFFFFCE9C", viewmode="movie_with_plot"))
+
+                    # Obtenemos los datos de todas las temporadas mediante multihilos
+                    tmdb.set_infoLabels(itemlist)
             
-            if config.get_library_support() and itemlist:
-                url= urlparse.urljoin(__url_base__,"series-online/" + str(data_dict['id']))
-                itemlist.append( Item(channel=item.channel,
-                                      title="Añadir esta serie a la biblioteca", url=url,
-                                      action="add_serie_to_library", extra='episodios###serie_add',
-                                      show= data_dict["title"], text_color="0xFFe5ffcc",
-                                      thumbnail = 'https://d5.usercdn.com/dl/i/02360/a99fzwbqdaen.png'))
+        if config.get_library_support() and itemlist:
+            infoLabels ={'tmdb_id':item.infoLabels['tmdb_id'], 'tvdb_id':item.infoLabels['tvdb_id'],
+                         'imdb_id': item.infoLabels['imdb_id']}
+            itemlist.append(Item(channel= item.channel, title ="Añadir esta serie a la biblioteca", text_color="0xFFe5ffcc",
+                                  action="add_serie_to_library", extra='get_episodios###serie_add', url=item.url,
+                                  contentSerieName= data_dict["title"], infoLabels=infoLabels,
+                                  thumbnail = 'https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv.png'))
 
     return itemlist      
 
-def get_only_episodio(item):
-    logger.info("[pepecine.py] get_only_episodio")
-    itemlist = []
-    plot={}
-    
-    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)","",scrapertools.cache_page(item.url))
-    patron ='vars.title =(.*?)};'
-    try:
-        data_dict= jsontools.load_json(scrapertools.get_match(data,patron) +'}')
-    except:
-        return itemlist # Devolvemos lista vacia
-        
-    try:
-        from core.tmdb import Tmdb
-        oTmdb= Tmdb(id_Tmdb= data_dict['tmdb_id'],tipo="tv")
-    except:
-        pass
-
-    infoLabels = item.infoLabels
-    cast=[]
-    rol=[]
-    for actor in data_dict["actor"]:
-        cast.append(actor['name'])
-        rol.append(actor['pivot']['char_name'])
-    
-    writers_list=[]
-    for writer in data_dict["writer"]:
-        writers_list.append(writer['name'])
-        
-    director_list=[]
-    for director in data_dict["director"]:
-        director_list.append(director['name'])    
-    
-    infoLabels['cast'] = cast
-    infoLabels['castandrole'] = zip(cast,rol)
-    infoLabels['writer'] = ", ".join(writers_list )
-    infoLabels['director'] = ", ".join(director_list )
-    infoLabels['season'], infoLabels['episode']= item.extra.split('x')
-    try:
-        # añadimos sinopsis e imagenes del capitulo
-        datos_tmdb=oTmdb.get_episodio(temporada= infoLabels['season'],capitulo= infoLabels['episode'])
-        if datos_tmdb["episodio_sinopsis"] !="": infoLabels['plot']= datos_tmdb["episodio_sinopsis"]
-        if datos_tmdb["episodio_imagen"] !="": item.thumbnail= datos_tmdb["episodio_imagen"]
-        #if datos_tmdb["episodio_titulo"] !="": title = title + " [COLOR 0xFFFFE6CC]" + datos_tmdb["episodio_titulo"].replace('\t','') + "[/COLOR]"
-    except:
-            pass
-    
-    def cap(l): 
-        try:
-            temporada_link = int(l["season"])
-            capitulo_link = int(l['episode'])
-        except:
-            return False
-        return True if temporada_link== int(infoLabels['season'])  and capitulo_link == int(infoLabels['episode']) else False    
-    item.url= str(filter(cap, data_dict["link"])) #filtramos enlaces por capitulo
-
-    item.infoLabels = infoLabels
-    item.extra=str(data_dict['tmdb_id'])
-    
-    return findvideos(item)
 
 def get_episodios(item):
-    logger.info("[pepecine.py] get_episodios")
+    logger.info()
     itemlist = []
-    plot={}
-    
+    #infoLabels = item.infoLabels
+
+    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)", "", httptools.downloadpage(item.url).data)
+    patron = 'vars.title =(.*?)};'
     try:
-        from core.tmdb import Tmdb
-        oTmdb= Tmdb(id_Tmdb= item.extra,tipo="tv")
+        data_dict = jsontools.load_json(scrapertools.get_match(data, patron) + '}')
     except:
-        pass
+        return itemlist  # Devolvemos lista vacia
 
-    infoLabels = item.infoLabels
 
-    lista_links=ast.literal_eval(item.url) 
-    # Agrupar enlaces por episodios  temXcap
+    # Agrupar enlaces por episodios temXcap
     temXcap_dict={}
-    for link in lista_links:
-        title_id = link['title_id']
+    for link in data_dict['link']:
         try:
             season = str(int(link['season']))
             episode = str(int(link['episode'])).zfill(2)
         except:
             continue
-        id= season + "x" + episode
-        if temXcap_dict.has_key(id):
-            l= temXcap_dict[id]
+
+        if int(season) != item.infoLabels["season"] and item.extra != "serie_add":
+            # Descartamos episodios de otras temporadas, excepto si los queremos todos
+            continue
+
+        title_id = link['title_id']
+        id = season + "x" + episode
+        if id in temXcap_dict:
+            l = temXcap_dict[id]
             l.append(link)
-            temXcap_dict[id]= l
+            temXcap_dict[id] = l
         else:
             temXcap_dict[id]= [link]
             
     # Ordenar lista de enlaces por temporada y capitulo
-    temXcap_list=temXcap_dict.items()
+    temXcap_list = temXcap_dict.items()
     temXcap_list.sort(key=lambda x: (int(x[0].split("x")[0]),int(x[0].split("x")[1])))
     for episodio in temXcap_list:
-        title= infoLabels['titleraw'] + ' (' + episodio[0] + ')'
-        infoLabels['season'], infoLabels['episode']=  episodio[0].split('x')
-        try:
-            # añadimos sinopsis e imagenes para cada capitulo
-            datos_tmdb=oTmdb.get_episodio(temporada= infoLabels['season'],capitulo= infoLabels['episode'])
-            if datos_tmdb["episodio_sinopsis"] !="": infoLabels['plot']= datos_tmdb["episodio_sinopsis"]
-            if datos_tmdb["episodio_imagen"] !="": item.thumbnail= datos_tmdb["episodio_imagen"]
-            if datos_tmdb["episodio_titulo"] !="": title = title + " " + datos_tmdb["episodio_titulo"].replace('\t','')
-        except:
-                pass
+        title = '%s (%s)' % (item.contentSerieName, episodio[0])
+        item.infoLabels['season'], item.infoLabels['episode']=  episodio[0].split('x')
+        itemlist.append(item.clone(action= "findvideos", title=title,
+                                   viewmode="movie_with_plot", text_color="0xFFFFCE9C"))
 
-        itemlist.append( Item( channel=item.channel, action="findvideos", title=title, url=str(episodio[1]),
-                               extra=item.extra, show=infoLabels['tvshowtitle'], fanart=item.fanart,
-                               infoLabels = infoLabels,
-                               thumbnail=item.thumbnail, viewmode="movie_with_plot", text_color="0xFFFFCE9C") )
-    
-    if config.get_library_support() and itemlist:
-        url= urlparse.urljoin(__url_base__,"series-online/" + str(title_id))
-        #url= urlparse.urljoin(__url_base__,"series-online/" + (str(infoLabels['title_id']) +"-"+ infoLabels['titleraw']))
-        itemlist.append( Item(channel=item.channel, title="Añadir esta serie a la biblioteca", url=url,
-                              text_color="0xFFe5ffcc", action="add_serie_to_library", extra='episodios###serie_add',
-                              show= infoLabels['tvshowtitle'],
-                              thumbnail = 'https://d5.usercdn.com/dl/i/02360/a99fzwbqdaen.png'))
 
-    
+    if item.extra != "serie_add":
+        # Obtenemos los datos de todos los capitulos de la temporada mediante multihilos
+        tmdb.set_infoLabels(itemlist)
+        for i in itemlist:
+            # Si el capitulo tiene nombre propio añadirselo al titulo del item
+            title = "%s: %s" % (i.title, i.infoLabels['title'])
+            i.title = title
+
     return itemlist
-       
+
+
 def findvideos(item):
-    logger.info("[pepecine.py] findvideos")
+    logger.info()
     itemlist = []
- 
-    
-    for link in ast.literal_eval(item.url):
-        url= link["url"]
-        flag= scrapertools.find_single_match(link["label"],'(\s*\<img src=.*\>)')
-        idioma=link["label"].replace(flag,"")
-        if link["quality"] !="?":
-          calidad=(' [' +link["quality"]+ ']')
+
+    data = re.sub(r"\n|\r|\t|\s{2}|(<!--.*?-->)", "", httptools.downloadpage(item.url).data)
+    patron = 'vars.title =(.*?)};'
+    try:
+        data_dict = jsontools.load_json(scrapertools.get_match(data, patron) + '}')
+    except:
+        return itemlist  # Devolvemos lista vacia
+
+    lista_servers = servertools.get_servers_list()
+
+    for link in data_dict["link"]:
+        if item.contentType == 'episode' \
+                and (item.contentSeason != link['season'] or item.contentEpisodeNumber != link['episode']):
+            # Si buscamos enlaces de un episodio descartamos los q no sean de este episodio
+            continue
+
+        url = link["url"]
+        flag = scrapertools.find_single_match(link["label"], '(\s*\<img src=.*\>)')
+        idioma = link["label"].replace(flag, "")
+        if link["quality"] != "?":
+            calidad = (' [' + link["quality"] + ']')
         else:
-          calidad=""
-        video= find_videos(link["url"])
-    
-        if video["servidor"]!="":
-            servidor=video["servidor"]
-            url=video["url"]
-            title= "Ver en " + servidor.capitalize() + calidad + ' (' + idioma + ')'
-            itemlist.append( Item(channel=item.channel, action="play", viewmode="list", server=servidor, title=title,
-                                  text_color="0xFF994D00",thumbnail=item.thumbnail, fanart= item.fanart,
-                                  plot= item.plot, url=url, folder=False) )
-            
+            calidad = ""
+        video = find_videos(link["url"], lista_servers)
+
+        if video["servidor"] != "":
+            servidor = video["servidor"]
+            url = video["url"]
+            title = "Ver en " + servidor.capitalize() + calidad + ' (' + idioma + ')'
+            itemlist.append(item.clone(action="play", viewmode="list", server=servidor, title=title,
+                                       text_color="0xFF994D00", url=url, folder=False))
+
+    if config.get_library_support() and itemlist and item.contentType == "movie":
+        infoLabels = {'tmdb_id': item.infoLabels['tmdb_id'],
+                      'title': item.infoLabels['title']}
+        itemlist.append(Item(channel=item.channel, title="Añadir esta película a la biblioteca",
+            action="add_pelicula_to_library", url=item.url, infoLabels=infoLabels, text_color="0xFFe5ffcc",
+            thumbnail='https://raw.githubusercontent.com/master-1970/resources/master/images/channels/pepecine/tv.png'))
+
     return itemlist
-    
-def find_videos(url):
-    #logger.info("[pepecine.py] find_videos") 
+
+
+def find_videos(url, lista_servers):
+    #logger.info()
     ret = {'titulo':"",
            'url':"",
            'servidor':""}
     
     # Ejecuta el find_videos en cada servidor hasta que encuentra una coicidencia
-    lista_servers = servertools.get_servers_list()
     for serverid in lista_servers:
         try:
             servers_module = __import__("servers."+serverid)
@@ -512,15 +424,14 @@ def find_videos(url):
             #import traceback
             #logger.info(traceback.format_exc())
         except:
-            logger.info("Error en el conector #"+serverid+"#")
+            logger.error("Error en el conector #"+serverid+"#")
             import traceback
             logger.info(traceback.format_exc())
     
     return ret
-    
-    pass
+
     
 def episodios(item):
     # Necesario para las actualizaciones automaticas
-    return get_temporadas(Item(url=item.url, show=item.show, extra= "serie_add"))
+    return get_temporadas(Item(channel=__chanel__ ,url=item.url, show=item.show, extra= "serie_add"))
 

@@ -35,14 +35,20 @@ from windowtools import *
 import plugintools
 import navigation
 from core.item import Item
+from core import versiontools
 
 class ChannelWindow(xbmcgui.WindowXML):
 
     def __init__(self, xml_name, fallback_path):
-        plugintools.log("ChannelWindow.__init__ xml_name="+xml_name+" fallback_path="+fallback_path)
+        plugintools.log("ChannelWindow.__init__ xml_name="+xml_name+" fallback_path="+fallback_path+" resolution="+repr(self.getResolution()))
+
+        if self.getResolution()>0:
+            self.setCoordinateResolution(0)
+
+        plugintools.log("MenuWindow.__init__ fonts="+repr(get_fonts()))
 
         self.first_time = False
-        self.itemlist = []
+        self.itemlist = None
 
     def setParentItem(self,item):
         self.parent_item = item
@@ -65,6 +71,11 @@ class ChannelWindow(xbmcgui.WindowXML):
         self.first_time = True
                    
         self.control_list = self.getControl(100)
+
+        if self.itemlist is None:
+            next_items = navigation.get_next_items( self.parent_item )
+            self.setItemlist(next_items)
+
         for item in self.itemlist:
 
             list_item = xbmcgui.ListItem( item.title , iconImage=item.thumbnail, thumbnailImage=item.thumbnail)
@@ -79,6 +90,11 @@ class ChannelWindow(xbmcgui.WindowXML):
 
         self.setFocusId(100)
 
+        self.loader = self.getControl(400)
+        self.loader.setVisible(False)
+
+        self.getControl(401).setText( "pelisalacarta "+versiontools.get_current_plugin_version_tag()+"\n"+versiontools.get_current_plugin_date() )
+
     def onAction(self, action):
         plugintools.log("ChannelWindow.onAction action.id="+repr(action.getId())+" action.buttonCode="+repr(action.getButtonCode()))
         
@@ -87,30 +103,31 @@ class ChannelWindow(xbmcgui.WindowXML):
 
         if action == ACTION_SELECT_ITEM or action == ACTION_MOUSE_LEFT_CLICK:
 
-            loader_image = os.path.join( plugintools.get_runtime_path(), 'resources', 'skins', 'Default', 'media', 'loader.gif')
-            loader = xbmcgui.ControlImage(1200, 19, 40, 40, loader_image)
-            self.addControl(loader)
+            #loader_image = os.path.join( plugintools.get_runtime_path(), 'resources', 'skins', 'Default', 'media', 'loader.gif')
+            #loader = xbmcgui.ControlImage(1200, 19, 40, 40, loader_image)
+            #self.addControl(loader)
+            #self.loader.setVisible(True)
 
             pos = self.control_list.getSelectedPosition()
             item = self.itemlist[pos]
             if item.action.startswith("play_"):
                 play_items = navigation.get_next_items( item )
-                loader.setVisible(False)
+                self.loader.setVisible(False)
 
                 media_url = play_items[0].url
                 plugintools.direct_play(media_url)
             else:
-                next_items = navigation.get_next_items( item )
-                loader.setVisible(False)
+                #next_items = navigation.get_next_items( item )
+                self.loader.setVisible(False)
 
                 # Si no hay nada, no muestra la pantalla vacía
-                if len(next_items)>0:
-                    next_window = navigation.get_window_for_item( item )
-                    next_window.setItemlist(next_items)
-                    next_window.setParentItem(item)
+                #if len(next_items)>0:
+                next_window = navigation.get_window_for_item( item )
+                #next_window.setItemlist(next_items)
+                next_window.setParentItem(item)
 
-                    next_window.doModal()
-                    del next_window
+                next_window.doModal()
+                del next_window
 
     def onFocus( self, control_id ):
         plugintools.log("ChannelWindow.onFocus "+repr(control_id))

@@ -72,41 +72,7 @@ def get_next_items( item ):
 
             from platformcode import platformtools
 
-            if item.action=="play":
-                plugintools.log("navigation.get_next_items play")
-
-                # Si el canal tiene una acción "play" tiene prioridad
-                if hasattr(channel, 'play'):
-                    plugintools.log("navigation.get_next_items play Channel has its own 'play' method")
-                    itemlist = channel.play(item)
-                    if len(itemlist)>0:
-                        item = itemlist[0]
-
-                        # FIXME: Este error ha que tratarlo de otra manera, al dar a volver sin ver el vídeo falla
-                        try:
-                            platformtools.play_video(item)
-                        except:
-                            pass
-
-                    else:
-                        import xbmcgui
-                        ventana_error = xbmcgui.Dialog()
-                        ok = ventana_error.ok ("plugin", "No hay nada para reproducir")
-                else:
-                    plugintools.log("navigation.get_next_items play No channel 'play' method, executing core method")
-
-                    # FIXME: Este error ha que tratarlo de otra manera, por al dar a volver sin ver el vídeo falla
-                    # Mejor hacer el play desde la ventana
-                    try:
-                        platformtools.play_video(item)
-                    except:
-                        import traceback
-                        plugintools.log(traceback.format_exc())
-                        pass
-
-                return []
-
-            elif item.action=="findvideos":
+            if item.action=="findvideos":
                 plugintools.log("navigation.get_next_items findvideos")
 
                 # Si el canal tiene una acción "findvideos" tiene prioridad
@@ -133,7 +99,7 @@ def get_next_items( item ):
                 elif item.channel=="novedades" and item.action=="mainlist":
                     itemlist = channel.mainlist(item,"bannermenu")
                 elif item.channel=="buscador" and item.action=="mainlist":
-                    itemlist = channel.mainlist(item,"bannermenu")
+                    itemlist = channel.mainlist(item)
                 else:
                     exec "itemlist = channel."+item.action+"(item)"
 
@@ -181,3 +147,50 @@ def get_window_for_item( item ):
         window = window_menu.MenuWindow("content.xml",plugintools.get_runtime_path())
 
     return window
+
+def play_item(item):
+    plugintools.log("navigation.play_item Channel code ("+item.channel+"."+item.action+")")
+
+    try:
+        exec "import channels."+item.channel+" as channel"
+    except:
+        exec "import core."+item.channel+" as channel"
+
+    from platformcode import platformtools
+
+    plugintools.log("navigation.get_next_items play")
+
+    # Si el canal tiene una acción "play" tiene prioridad
+    if hasattr(channel, 'play'):
+        plugintools.log("navigation.get_next_items play Channel has its own 'play' method")
+        itemlist = channel.play(item)
+        if len(itemlist)>0:
+            item = itemlist[0]
+            plugintools.log("item="+repr(item))
+
+            try:
+                platformtools.play_video(item)
+            except:
+                import traceback
+                plugintools.log(traceback.format_exc())
+                import xbmcgui
+                ventana_error = xbmcgui.Dialog()
+                ok = ventana_error.ok ("plugin", "No hay nada para reproducir")
+
+        else:
+            import xbmcgui
+            ventana_error = xbmcgui.Dialog()
+            ok = ventana_error.ok ("plugin", "No hay nada para reproducir")
+    else:
+        plugintools.log("navigation.get_next_items play No channel 'play' method, executing core method")
+
+        # FIXME: Este error ha que tratarlo de otra manera, por al dar a volver sin ver el vídeo falla
+        # Mejor hacer el play desde la ventana
+        try:
+            platformtools.play_video(item)
+        except:
+            import traceback
+            plugintools.log(traceback.format_exc())
+            import xbmcgui
+            ventana_error = xbmcgui.Dialog()
+            ok = ventana_error.ok ("plugin", "No hay nada para reproducir")

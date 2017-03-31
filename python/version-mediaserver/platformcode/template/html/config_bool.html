@@ -1,12 +1,7 @@
-<li class="ListItem">
-  <div class="ListItem">
-    <h3 class="Ajuste">
-      <span style='color:%item_color'>%item_label</span>
-    </h3>
-    <span class="Control">
-      <div class="Check">
-        <input class="Check" onchange="" onfocus="this.parentNode.parentNode.parentNode.className=\'ListItem ListItem-hover\'" onblur="this.parentNode.parentNode.parentNode.className=\'ListItem\'" type="checkbox" id="%item_id" %item_value>
-      </div>
-    </span>
+<li onmousemove="focus_element(this.getElementsByTagName('input')[0])">
+  <div class="control">
+    <span class="name" style='color:%item_color'>%item_label</span>
+    <input class="checkbox" onchange="evaluate_controls(this)" onfocus="this.parentNode.className='control control_focused'" onblur="this.parentNode.className='control'" type="checkbox" id="%item_id" %item_value>
+    <label class="checkbox"><i></i></label>
   </div>
 </li>

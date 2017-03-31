@@ -36,8 +36,21 @@ except:
 
 print "Translations file path "+TRANSLATION_FILE_PATH
 
-def get_platform():
-    return PLATFORM_NAME
+
+def get_platform(full_version=False):
+    #full_version solo es util en xbmc/kodi
+    ret = {
+        'num_version': 1.0 ,
+        'name_version': PLATFORM_NAME ,
+        'video_db': "",
+        'plaform': PLATFORM_NAME
+        }
+
+    if full_version:
+        return ret
+    else:
+        return PLATFORM_NAME
+
 
 def is_xbmc():
     return False

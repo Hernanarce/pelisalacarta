@@ -177,22 +177,21 @@ class InfoWindow(object):
                   
     def onClick(self, ID):
         while True:
-          while self.handler.get_data(ID) == None:
-            pass
-          
-          if self.handler.get_data(ID) == "ok":
+          response = self.handler.get_data(ID)
+
+          if response == "ok":
             return self.listData[self.indexList]
             
-          elif self.handler.get_data(ID) == "close":
+          elif response == "close":
             return None
             
-          elif self.handler.get_data(ID) == "next" and self.indexList < len(self.listData) - 1:
+          elif response == "next" and self.indexList < len(self.listData) - 1:
             self.indexList += 1
             self.get_scraper_data(self.listData[self.indexList])
             ID = self.update_window()
             
             
-          elif self.handler.get_data(ID) == "previous" and self.indexList > 0:
+          elif response == "previous" and self.indexList > 0:
             self.indexList -= 1
             self.get_scraper_data(self.listData[self.indexList])
             ID = self.update_window()

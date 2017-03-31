@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-#------------------------------------------------------------
+# ------------------------------------------------------------
 # pelisalacarta - XBMC Plugin
 # Canal para hdfull
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
-#------------------------------------------------------------
+# ------------------------------------------------------------
+
+import base64
 import re
-import sys
 import urllib
 import urlparse
 
 from core import config
+from core import httptools
 from core import jsontools
 from core import logger
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from platformcode import platformtools
-from core import servertools
-
 
 host = "http://hdfull.tv"
-headers = [["user-agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:50.0) Gecko/20100101 Firefox/50.0"]]
 
 if config.get_setting('hdfulluser', 'hdfull'):
     account = True
@@ -27,24 +27,23 @@ else:
     account = False
 
 
-
 def settingCanal(item):
     return platformtools.show_channel_settings()
 
 def login():
-    logger.info("pelisalacarta.channels.hdfull login")
+    logger.info()
 
-    data = agrupa_datos( scrapertools.cache_page(host, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(host).data )
 
     patron = "<input type='hidden' name='__csrf_magic' value=\"([^\"]+)\" />"
     sid = scrapertools.find_single_match(data, patron)
 
     post = urllib.urlencode({'__csrf_magic':sid})+"&username="+config.get_setting('hdfulluser', 'hdfull')+"&password="+config.get_setting('hdfullpassword', 'hdfull')+"&action=login"
 
-    data = scrapertools.cache_page(host,post=post, headers=headers)
+    httptools.downloadpage(host, post=post)
 
 def mainlist(item):
-    logger.info("pelisalacarta.channels.hdfull mainlist")
+    logger.info()
 
     itemlist = []
 
@@ -60,12 +59,13 @@ def mainlist(item):
     return itemlist
 
 def menupeliculas(item):
-    logger.info("pelisalacarta.channels.hdfull menupeliculas")
+    logger.info()
 
     itemlist = []
 
     if account:
         itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Favoritos[/B][/COLOR]"), url=host+"/a/my?target=movies&action=favorite&start=-28&limit=28", folder=True ) )
+        itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Pendientes[/B][/COLOR]"), url=host+"/a/my?target=movies&action=pending&start=-28&limit=28", folder=True ) )
 
     itemlist.append( Item( channel=item.channel, action="fichas", title="ABC", url=host+"/peliculas/abc", folder=True ) )
     itemlist.append( Item( channel=item.channel, action="fichas", title="Últimas películas" , url=host+"/peliculas", folder=True ) )
@@ -73,11 +73,13 @@ def menupeliculas(item):
     itemlist.append( Item( channel=item.channel, action="fichas", title="Películas Actualizadas", url=host+"/peliculas-actualizadas", folder=True ) )
     itemlist.append( Item( channel=item.channel, action="fichas", title="Rating IMDB", url=host+"/peliculas/imdb_rating", folder=True ) )
     itemlist.append( Item( channel=item.channel, action="generos", title="Películas por Género", url=host, folder=True))
+    if account:
+        itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Vistas[/B][/COLOR]"), url=host+"/a/my?target=movies&action=seen&start=-28&limit=28", folder=True ) )
 
     return itemlist
 
 def menuseries(item):
-    logger.info("pelisalacarta.channels.hdfull menuseries")
+    logger.info()
 
     itemlist = []
 
@@ -94,13 +96,17 @@ def menuseries(item):
     itemlist.append( Item(channel=item.channel, action="fichas", title="Rating IMDB", url=host+"/series/imdb_rating", folder=True ) )
     itemlist.append( Item(channel=item.channel, action="generos_series", title="Series por Género", url=host, folder=True ) )
     itemlist.append( Item( channel=item.channel, action="listado_series", title="Listado de todas las series", url=host+"/series/list", folder=True ) )
+    if account:
+        itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Favoritas[/B][/COLOR]"), url=host+"/a/my?target=shows&action=favorite&start=-28&limit=28", folder=True ) )
+        itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Pendientes[/B][/COLOR]"), url=host+"/a/my?target=shows&action=pending&start=-28&limit=28", folder=True ) )
+        itemlist.append( Item( channel=item.channel, action="items_usuario", title=bbcode_kodi2html("[COLOR orange][B]Vistas[/B][/COLOR]"), url=host+"/a/my?target=shows&action=seen&start=-28&limit=28", folder=True ) )
 
     return itemlist
 
 def search(item,texto):
-    logger.info("pelisalacarta.channels.hdfull search")
+    logger.info()
 
-    data = agrupa_datos( scrapertools.cache_page(host, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(host).data )
 
     sid = scrapertools.get_match(data, '.__csrf_magic. value="(sid:[^"]+)"')
     item.extra = urllib.urlencode({'__csrf_magic':sid})+'&menu=search&query='+texto
@@ -117,7 +123,7 @@ def search(item,texto):
         return []
 
 def series_abc(item):
-    logger.info("pelisalacarta.channels.hdfull series_abc")
+    logger.info()
 
     itemlist=[]
 
@@ -129,12 +135,11 @@ def series_abc(item):
     return itemlist
 
 def items_usuario(item):
-    logger.info("pelisalacarta.channels.hdfull menupeliculas")
+    logger.info()
 
     itemlist = []
-
     ## Carga estados
-    status = jsontools.load_json(scrapertools.cache_page(host+'/a/status/all', headers=headers))
+    status = jsontools.load_json(httptools.downloadpage(host+'/a/status/all').data)
 
     ## Fichas usuario
     url = item.url.split("?")[0]
@@ -148,7 +153,7 @@ def items_usuario(item):
     next_page = url + "?" + post
 
     ## Carga las fichas de usuario
-    data = scrapertools.cache_page(url, post=post, headers=headers)
+    data = httptools.downloadpage(url, post=post).data
     fichas_usuario = jsontools.load_json( data )
 
     for ficha in fichas_usuario:
@@ -196,11 +201,11 @@ def items_usuario(item):
     return itemlist
 
 def listado_series(item):
-    logger.info("pelisalacarta.channels.hdfull listado_series")
+    logger.info()
 
     itemlist = []
 
-    data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(item.url).data )
 
     patron = '<div class="list-item"><a href="([^"]+)"[^>]+>([^<]+)</a></div>'
     matches = re.compile(patron,re.DOTALL).findall(data)
@@ -212,14 +217,14 @@ def listado_series(item):
     return itemlist
 
 def fichas(item):
-    logger.info("pelisalacarta.channels.hdfull series")
+    logger.info()
     itemlist = []
 
     ## Carga estados
-    status = jsontools.load_json(scrapertools.cache_page(host+'/a/status/all', headers=headers))
+    status = jsontools.load_json(httptools.downloadpage(host+'/a/status/all').data)
 
     if item.title == "Buscar...":
-        data = agrupa_datos( scrapertools.cache_page(item.url,post=item.extra, headers=headers) )
+        data = agrupa_datos( httptools.downloadpage(item.url, post=item.extra).data )
 
         s_p = scrapertools.get_match(data, '<h3 class="section-title">(.*?)<div id="footer-wrapper">').split('<h3 class="section-title">')
 
@@ -230,7 +235,7 @@ def fichas(item):
         else:
             data = s_p[0]+s_p[1]
     else:
-        data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
+        data = agrupa_datos( httptools.downloadpage(item.url).data )
 
     data = re.sub(
         r'<div class="span-6[^<]+<div class="item"[^<]+' + \
@@ -254,6 +259,7 @@ def fichas(item):
 
         title = scrapedtitle.strip()
         show = title
+        contentTitle = scrapedtitle.strip()
 
         if scrapedlangs != ">":
             textoidiomas = extrae_idiomas(scrapedlangs)
@@ -283,7 +289,7 @@ def fichas(item):
             tag_type = scrapertools.get_match(url,'l.tv/([^/]+)/')
             title+= bbcode_kodi2html(" - [COLOR blue]" + tag_type.capitalize() + "[/COLOR]")
 
-        itemlist.append( Item( channel=item.channel, action=action, title=title, url=url, fulltitle=title, thumbnail=thumbnail, show=show, folder=True, contentType=contentType ) )
+        itemlist.append( Item( channel=item.channel, action=action, title=title, url=url, fulltitle=title, thumbnail=thumbnail, show=show, folder=True, contentType=contentType, contentTitle=contentTitle ) )
 
     ## Paginación
     next_page_url = scrapertools.find_single_match(data,'<a href="([^"]+)">.raquo;</a>')
@@ -293,12 +299,12 @@ def fichas(item):
     return itemlist
 
 def episodios(item):
-    logger.info("pelisalacarta.channels.hdfull episodios")
+    logger.info()
     id = "0"
     itemlist = []
 
     ## Carga estados
-    status = jsontools.load_json(scrapertools.cache_page(host+'/a/status/all', headers=headers))
+    status = jsontools.load_json(httptools.downloadpage(host+'/a/status/all').data)
 
     url_targets = item.url
 
@@ -308,7 +314,7 @@ def episodios(item):
         item.url = item.url.split("###")[0]
 
     ## Temporadas
-    data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(item.url).data )
 
     if id == "0":
         ## Se saca el id de la serie de la página cuando viene de listado_series
@@ -336,7 +342,7 @@ def episodios(item):
     for scrapedurl in matches:
 
         ## Episodios
-        data = agrupa_datos( scrapertools.cache_page(scrapedurl, headers=headers) )
+        data = agrupa_datos( httptools.downloadpage(scrapedurl).data )
 
         sid = scrapertools.get_match(data,"<script>var sid = '(\d+)'")
         ssid = scrapertools.get_match(scrapedurl,"temporada-(\d+)")
@@ -344,7 +350,7 @@ def episodios(item):
 
         url = host+"/a/episodes"
 
-        data = scrapertools.cache_page(url,post=post, headers=headers)
+        data = httptools.downloadpage(url, post=post).data
 
         episodes = jsontools.load_json( data )
 
@@ -392,12 +398,11 @@ def episodios(item):
     return itemlist
 
 def novedades_episodios(item):
-    logger.info("pelisalacarta.channels.hdfull novedades_episodios")
+    logger.info()
 
     itemlist = []
-
     ## Carga estados
-    status = jsontools.load_json(scrapertools.cache_page(host+'/a/status/all', headers=headers))
+    status = jsontools.load_json(httptools.downloadpage(host+'/a/status/all').data)
 
     ## Episodios
     url = item.url.split("?")[0]
@@ -409,7 +414,7 @@ def novedades_episodios(item):
     post = post.replace("start="+old_start, "start="+start)
     next_page = url + "?" + post
 
-    data = scrapertools.cache_page(url, post=post, headers=headers)
+    data = httptools.downloadpage(url, post=post).data
 
     episodes = jsontools.load_json( data )
 
@@ -460,11 +465,11 @@ def novedades_episodios(item):
     return itemlist
 
 def generos(item):
-    logger.info("pelisalacarta.channels.hdfull generos")
+    logger.info()
 
     itemlist = []
 
-    data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(item.url).data )
     data = scrapertools.find_single_match(data,'<li class="dropdown"><a href="http://hdfull.tv/peliculas"(.*?)</ul>')
 
     patron  = '<li><a href="([^"]+)">([^<]+)</a></li>'
@@ -481,11 +486,11 @@ def generos(item):
     return itemlist
 
 def generos_series(item):
-    logger.info("pelisalacarta.channels.hdfull generos_series")
+    logger.info()
 
     itemlist = []
 
-    data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
+    data = agrupa_datos( httptools.downloadpage(item.url).data )
     data = scrapertools.find_single_match(data,'<li class="dropdown"><a href="http://hdfull.tv/series"(.*?)</ul>')
 
     patron  = '<li><a href="([^"]+)">([^<]+)</a></li>'
@@ -502,12 +507,11 @@ def generos_series(item):
     return itemlist
 
 def findvideos(item):
-    logger.info("pelisalacarta.channels.hdfull findvideos")
+    logger.info()
 
     itemlist=[]
-
     ## Carga estados
-    status = jsontools.load_json(scrapertools.cache_page(host+'/a/status/all', headers=headers))
+    status = jsontools.load_json(httptools.downloadpage(host+'/a/status/all').data)
 
     url_targets = item.url
 
@@ -531,47 +535,74 @@ def findvideos(item):
 
         itemlist.append( Item( channel=item.channel, action="set_status", title=title, fulltitle=title, url=url_targets, thumbnail=item.thumbnail, show=item.show, folder=True ) )
 
-    data = agrupa_datos( scrapertools.cache_page(item.url, headers=headers) )
 
-    patron  = '<div class="embed-selector"[^<]+'
-    patron += '<h5 class="left"[^<]+'
-    patron += '<span[^<]+<b class="key">\s*Idioma.\s*</b>([^<]+)</span[^<]+'
-    patron += '<span[^<]+<b class="key">\s*Servidor.\s*</b><b[^>]+>([^<]+)</b[^<]+</span[^<]+'
-    patron += '<span[^<]+<b class="key">\s*Calidad.\s*</b>([^<]+)</span[^<]+</h5.*?'
-    patron += '<a href="(http[^"]+)".*?'
-    patron += '</i>([^<]+)</a>'
+    data_js = httptools.downloadpage("http://hdfull.tv/templates/hdfull/js/jquery.hdfull.view.min.js").data
+    key = scrapertools.find_single_match(data_js, 'JSON.parse\(atob.*?substrings\((.*?)\)')
 
-    matches = re.compile(patron,re.DOTALL).findall(data)
+    data_js = httptools.downloadpage("http://hdfull.tv/js/providers.js").data
+    try:
+        data_js = jhexdecode(data_js)
+    except:
+        from lib.aadecode import decode as aadecode
+        data_js = data_js.split(";ﾟωﾟ")
+        decode_aa = ""
+        for match in data_js:
+            decode_aa += aadecode(match)
+    
+        data_js = re.sub(r':(function.*?\})', r':"\g<1>"', decode_aa)
+        data_js = re.sub(r':(var[^,]+),', r':"\g<1>",', data_js)
 
-    for idioma,servername,calidad,url,opcion in matches:
-        opcion = opcion.strip()
-        if opcion != "Descargar":
-            opcion = "Ver"
-        title = opcion+": "+servername.strip()+" ("+calidad.strip()+")"+" ("+idioma.strip()+")"
-        title = scrapertools.htmlclean(title)
-        #Se comprueba si existe el conector y si se oculta en caso de premium
-        servername = servername.lower().split(".")[0]
+    data = agrupa_datos( httptools.downloadpage(item.url).data )
+    data_obf = scrapertools.find_single_match(data, "var ad\s*=\s*'([^']+)'")
+    data_decrypt = jsontools.load_json(obfs(base64.b64decode(data_obf), 126 - int(key)))
 
+    infolabels = {}
+    year = scrapertools.find_single_match(data, '<span>A&ntilde;o:\s*</span>.*?(\d{4})')
+    infolabels["year"] = year
+
+    var0 = scrapertools.find_single_match(data_js, 'var_0=\[(.*?)\]').split(",")
+    matches = []
+    for match in data_decrypt:
+        prov = eval(scrapertools.find_single_match(data_js, 'p\[%s\]\s*=\s*(\{.*?\}[\'"]\})' % match["provider"]))
+        function = prov["l"].replace("code", match["code"]).replace("var_2", match["code"])
+        index = scrapertools.find_single_match(function, 'var_1\[(\d+)\]')
+        function = function.replace("var_1[%s]" % index, var0[int(index)])
+
+        url = scrapertools.find_single_match(function, "return\s*(.*?)[;]*\}")
+        url = re.sub(r'\'|"|\s|\+', '', url)
+        url = re.sub(r'var_\d+\[\d+\]', '', url)
+        index = scrapertools.find_single_match(prov["e"], 'var_1\[(\d+)\]')
+        embed = prov["e"].replace("var_1[%s]" % index, var0[int(index)])
+
+        matches.append([match["lang"], match["quality"], url, embed])
+
+    enlaces = []
+    for idioma, calidad, url, embed in matches:
+        servername = scrapertools.find_single_match(url, "(?:http:|https:)//(?:www.|)([^.]+).")
         if servername == "streamin": servername = "streaminto"
         if servername== "waaw": servername = "netutv"
-        if servername == "ul": servername = "uploadedto"
+        if servername == "uploaded" or servername == "ul": servername = "uploadedto"
         mostrar_server = True
-        if config.get_setting("hidepremium")=="true":
-            mostrar_server= servertools.is_server_enabled (servername)
+        if config.get_setting("hidepremium") == "true":
+            mostrar_server = servertools.is_server_enabled(servername)
         if mostrar_server:
-            try:
-                servers_module = __import__("servers."+servername)
-                thumbnail = item.thumbnail
-                plot = item.title+"\n\n"+scrapertools.find_single_match(data,'<meta property="og:description" content="([^"]+)"')
-                plot = scrapertools.htmlclean(plot)
-                fanart = scrapertools.find_single_match(data,'<div style="background-image.url. ([^\s]+)')
+            option = "Ver"
+            if re.search(r'return ([\'"]{2,}|\})', embed):
+                option = "Descargar"
+            calidad = unicode(calidad, "utf8").upper().encode("utf8")
+            servername_c = unicode(servername, "utf8").capitalize().encode("utf8")
+            title = option+": "+servername_c+" ("+calidad+")"+" ("+idioma+")"
+            thumbnail = item.thumbnail
+            plot = item.title+"\n\n"+scrapertools.find_single_match(data,'<meta property="og:description" content="([^"]+)"')
+            plot = scrapertools.htmlclean(plot)
+            fanart = scrapertools.find_single_match(data, '<div style="background-image.url. ([^\s]+)')
+            if account:
+                url += "###" + id + ";" + type
 
-                url+= "###" + id + ";" + type
+            enlaces.append(Item(channel=item.channel, action="play", title=title, fulltitle=title, url=url, thumbnail=thumbnail, plot=plot, fanart=fanart, show=item.show, folder=True, server=servername, infoLabels=infolabels, contentTitle=item.contentTitle, contentType=item.contentType, tipo=option))
 
-                itemlist.append( Item( channel=item.channel, action="play", title=title, fulltitle=title, url=url, thumbnail=thumbnail, plot=plot, fanart=fanart, show=item.show, folder=True, server = servername ) )
-            except:
-                pass
-
+    enlaces.sort(key=lambda it:it.tipo, reverse=True)
+    itemlist.extend(enlaces)
     ## 2 = película
     if type == "2" and item.category != "Cine":
         ## STRM para todos los enlaces de servidores disponibles
@@ -624,31 +655,23 @@ def add_file_cine_library(item):
     return
 
 def play(item):
-    logger.info("pelisalacarta.channels.hdfull play")
-
     if "###" in item.url:
         id = item.url.split("###")[1].split(";")[0]
         type = item.url.split("###")[1].split(";")[1]
         item.url = item.url.split("###")[0]
-
-    if "aHR0c" in item.url:
-        import base64
-        item.url = base64.decodestring(item.url.split("/")[-1])
-        if "VideoMega" in item.title and not "videomega" in item.url:
-            item.url = "http://videomega.tv/cdn.php?" + item.url
-
-    itemlist = servertools.find_video_items(data=item.url)
-
-    for videoitem in itemlist:
-        videoitem.title = item.show
-        #videoitem.title = "Enlace encontrado en "+videoitem.server+" ("+scrapertools.get_filename_from_url(videoitem.url)+")"
-        videoitem.fulltitle = item.fulltitle
-        videoitem.thumbnail = item.thumbnail
-        videoitem.channel = item.channel
         post = "target_id=%s&target_type=%s&target_status=1" % (id, type)
-        data = scrapertools.cache_page(host+"/a/status",post=post, headers=headers)
+        data = httptools.downloadpage(host+"/a/status", post=post).data
 
-    return itemlist
+    devuelve = servertools.findvideosbyserver(item.url, item.server)
+    if devuelve:
+        item.url = devuelve[0][1]
+    else:
+        devuelve = servertools.findvideos(item.url, True)
+        if devuelve:
+            item.url = devuelve[0][1]
+            item.server = devuelve[0][2]
+    
+    return [item]
 
 ## --------------------------------------------------------------------------------
 ## --------------------------------------------------------------------------------
@@ -711,7 +734,7 @@ def set_status(item):
         path = "/a/favorite"
         post = "like_id=" + id + "&like_type=" + type + "&like_comment=&vote=-1"
 
-    data = scrapertools.cache_page(host + path, post=post, headers=headers)
+    data = httptools.downloadpage(host + path, post=post).data
 
     title = bbcode_kodi2html("[COLOR green][B]OK[/B][/COLOR]")
 
@@ -746,3 +769,42 @@ def get_status(status,type,id):
 
 ## --------------------------------------------------------------------------------
 ## --------------------------------------------------------------------------------
+
+
+def jhexdecode(t):
+
+    r = re.sub(r'_\d+x\w+x(\d+)', 'var_' + r'\1', t)
+    r = re.sub(r'_\d+x\w+', 'var_0', r)
+
+    def to_hx(c):
+        h = int("%s" % c.groups(0),16)
+        if 19 < h < 160:
+            return chr(h)
+        else:
+            return ""
+
+    r = re.sub(r'(?:\\|)x(\w{2})', to_hx, r).replace('var ','')
+
+    f = eval(scrapertools.get_match(r, '\s*var_0\s*=\s*([^;]+);'))
+    for i, v in enumerate(f):
+        r = r.replace('[[var_0[%s]]' % i, "." + f[i])
+        r = r.replace(':var_0[%s]' % i, ":\"" + f[i] + "\"")
+        r = r.replace(' var_0[%s]' % i, " \"" + f[i] + "\"")
+        r = r.replace('(var_0[%s]' % i, "(\"" + f[i] + "\"")
+        r = r.replace('[var_0[%s]]' % i, "." + f[i])
+        if v == "": r = r.replace('var_0[%s]' % i, '""')
+
+    r = re.sub(r':(function.*?\})', r":'\g<1>'", r)
+    r = re.sub(r':(var[^,]+),', r":'\g<1>',", r)
+
+    return r
+
+def obfs(data, key, n=126):
+    chars = list(data)
+    for i in range(0, len(chars)):
+        c = ord(chars[i])
+        if c <= n:
+            number = (ord(chars[i]) + key) % n
+            chars[i] = chr(number)
+
+    return "".join(chars)
