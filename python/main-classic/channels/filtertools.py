@@ -91,17 +91,111 @@ def context():
 context = context()
 
 
-def show_option(itemlist, channel, list_idiomas, list_calidad):
+def show_option(itemlist, channel, list_language, list_quality):
 
     itemlist.append(Item(channel=__channel__, title="[COLOR {0}]Configurar filtro para series...[/COLOR]".
                          format(COLOR.get("parent_item", "auto")),
-                         action="load", list_idiomas=list_idiomas, list_calidad=list_calidad, from_channel=channel))
+                         action="load", list_language=list_language, list_quality=list_quality, from_channel=channel))
 
     return itemlist
 
 
 def load(item):
-    return mainlist(channel=item.from_channel, list_idiomas=item.list_idiomas, list_calidad=item.list_calidad)
+    return mainlist(channel=item.from_channel, list_language=item.list_language, list_quality=item.list_quality)
+
+
+def get_link(list_item, item):
+    """
+    Devuelve una lista de enlaces filtrados, si el item es correcto se agrega a la lista recibida.
+
+    :param list_item: lista de enlaces
+    :type list_item: list[Item]
+    :param item: elemento a filtrar
+    :type item: Item
+    :return: lista de Item
+    :rtype: list[Item]
+    """
+    logger.info()
+
+    logger.debug("total de items : {0}".format(len(list_item)))
+
+    quality_count = 0
+    language_count = 0
+    _filter = None
+
+    dict_filtered_shows = get_tvshows(item.channel)
+    tvshow = item.show.lower().strip()
+
+    global_filter_language = config.get_setting("filter_languages", item.channel)
+    # logger.debug("filterlanguages : %s " % global_filter_language)
+
+    if tvshow in dict_filtered_shows.keys():
+        _filter = Filter(dict_filtered_shows[tvshow])
+    # opcion general "no filtrar"
+    elif global_filter_language != 0:
+        from core import channeltools
+        list_controls, dict_settings = channeltools.get_channel_controls_settings(item.channel)
+
+        for control in list_controls:
+            if control["id"] == "filterlanguages":
+
+                try:
+                    language = control["lvalues"][global_filter_language]
+                    # logger.debug("language %s" % language)
+                except:
+                    logger.error("No se ha encontrado el valor asociado al codigo 'filterlanguages': %s" %
+                                 global_filter_language)
+                    break
+
+                dict_filter = dict()
+                dict_filter[TAG_ACTIVE] = True
+                dict_filter[TAG_LANGUAGE] = language
+                dict_filter[TAG_QUALITY_NOT_ALLOWED] = []
+                _filter = Filter(dict_filter=dict_filter)
+                break
+
+    if _filter and _filter.active:
+        logger.debug("filter datos: {0}".format(_filter))
+
+        is_language_valid = True
+        if _filter.language:
+
+            # viene de episodios
+            if "[" in item.language:
+                list_language = item.language.replace("[", "").replace("]", "").split(" ")
+                if _filter.language in list_language:
+                    language_count += 1
+                else:
+                    is_language_valid = False
+            # viene de findvideos
+            else:
+                if item.language.lower() == _filter.language.lower():
+                    language_count += 1
+                else:
+                    is_language_valid = False
+
+        is_quality_valid = True
+        quality = ""
+
+        if _filter.quality_not_allowed:
+            if hasattr(item, 'quality'):
+                if item.quality.lower() not in _filter.quality_not_allowed:
+                    quality = item.quality.lower()
+                    quality_count += 1
+                else:
+                    is_quality_valid = False
+
+        if is_language_valid and is_quality_valid:
+            list_item.append(item)
+            logger.debug("{0} | context: {1}".format(item.title, item.context))
+            logger.debug(" -Enlace añadido")
+
+        logger.debug(" idioma valido?: {0}, item.language: {1}, filter.language: {2}"
+                     .format(is_language_valid, item.language, _filter.language))
+        logger.debug(" calidad valida?: {0}, item.quality: {1}, filter.quality_not_allowed: {2}"
+                     .format(is_quality_valid, quality, _filter.quality_not_allowed))
+
+    return list_item
 
 
 def get_links(list_item, channel):
@@ -126,8 +220,34 @@ def get_links(list_item, channel):
 
     dict_filtered_shows = get_tvshows(channel)
     tvshow = list_item[0].show.lower().strip()
+
+    global_filter_language = config.get_setting("filter_languages", channel)
+    # logger.debug("filterlanguages : %s " % global_filter_language)
+
     if tvshow in dict_filtered_shows.keys():
         _filter = Filter(dict_filtered_shows[tvshow])
+    # opcion general "no filtrar"
+    elif global_filter_language != 0:
+        from core import channeltools
+        list_controls, dict_settings = channeltools.get_channel_controls_settings(channel)
+
+        for control in list_controls:
+            if control["id"] == "filterlanguages":
+
+                try:
+                    language = control["lvalues"][global_filter_language]
+                    # logger.debug("language %s" % language)
+                except:
+                    logger.error("No se ha encontrado el valor asociado al codigo 'filterlanguages': %s" %
+                                 global_filter_language)
+                    break
+
+                dict_filter = dict()
+                dict_filter[TAG_ACTIVE] = True
+                dict_filter[TAG_LANGUAGE] = language
+                dict_filter[TAG_QUALITY_NOT_ALLOWED] = []
+                _filter = Filter(dict_filter=dict_filter)
+                break
 
     if _filter and _filter.active:
         logger.debug("filter datos: {0}".format(_filter))
@@ -157,6 +277,7 @@ def get_links(list_item, channel):
             if _filter.quality_not_allowed:
                 if hasattr(item, 'quality'):
                     if item.quality.lower() not in _filter.quality_not_allowed:
+                        quality = item.quality.lower()
                         quality_count += 1
                     else:
                         is_quality_valid = False
@@ -271,16 +392,16 @@ def check_json_file(data, fname, dict_data):
             logger.debug("Está vacío el fichero: {0}".format(fname))
 
 
-def mainlist(channel, list_idiomas, list_calidad):
+def mainlist(channel, list_language, list_quality):
     """
     Muestra una lista de las series filtradas
 
     :param channel: nombre del canal para obtener las series filtradas
     :type channel: str
-    :param list_idiomas: lista de idiomas del canal
-    :type list_idiomas: list
-    :param list_calidad: lista de calidades del canal
-    :type list_calidad: list
+    :param list_language: lista de idiomas del canal
+    :type list_language: list
+    :param list_quality: lista de calidades del canal
+    :type list_quality: list
     :return: lista de Item
     :rtype: list[Item]
     """
@@ -310,7 +431,7 @@ def mainlist(channel, list_idiomas, list_calidad):
         title = "Configurar [COLOR {0}][{1}][/COLOR]{2}".format(tag_color, name, activo)
 
         itemlist.append(Item(channel=__channel__, action="config_item", title=title, show=name,
-                             list_idiomas=list_idiomas, list_calidad=list_calidad, from_channel=channel))
+                             list_language=list_language, list_quality=list_quality, from_channel=channel))
 
     if len(itemlist) == 0:
         itemlist.append(Item(channel=channel, action="mainlist",
