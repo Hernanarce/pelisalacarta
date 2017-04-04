@@ -56,6 +56,9 @@ class Filter:
         self.language = dict_filter[TAG_LANGUAGE]
         self.quality_not_allowed = dict_filter[TAG_QUALITY_NOT_ALLOWED]
 
+    def __str__(self):
+        return "{active:'%s', \nlanguage: '%s', \nquality_not_allowed: '%s'}" % (self.active, self.language, self.quality_not_allowed)
+
 # TODO echar un ojo a https://pyformat.info/, se puede formatear el estilo y hacer referencias directamente a elementos
 
 __channel__ = "filtertools"
@@ -137,13 +140,13 @@ def get_link(list_item, item):
         list_controls, dict_settings = channeltools.get_channel_controls_settings(item.channel)
 
         for control in list_controls:
-            if control["id"] == "filterlanguages":
+            if control["id"] == "filter_languages":
 
                 try:
                     language = control["lvalues"][global_filter_language]
                     # logger.debug("language %s" % language)
                 except:
-                    logger.error("No se ha encontrado el valor asociado al codigo 'filterlanguages': %s" %
+                    logger.error("No se ha encontrado el valor asociado al codigo 'filter_languages': %s" %
                                  global_filter_language)
                     break
 
@@ -232,13 +235,13 @@ def get_links(list_item, channel):
         list_controls, dict_settings = channeltools.get_channel_controls_settings(channel)
 
         for control in list_controls:
-            if control["id"] == "filterlanguages":
+            if control["id"] == "filter_languages":
 
                 try:
                     language = control["lvalues"][global_filter_language]
                     # logger.debug("language %s" % language)
                 except:
-                    logger.error("No se ha encontrado el valor asociado al codigo 'filterlanguages': %s" %
+                    logger.error("No se ha encontrado el valor asociado al codigo 'filter_languages': %s" %
                                  global_filter_language)
                     break
 
