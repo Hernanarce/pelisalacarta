@@ -14,6 +14,7 @@ from core.item import Item
 from core import servertools
 from core import httptools
 from channels import autoplay
+from channels import filtertools
 
 host = "http://mundoflv.com"
 thumbmx = 'http://flags.fmcdn.net/data/flags/normal/mx.png'
@@ -22,6 +23,9 @@ thumben = 'http://flags.fmcdn.net/data/flags/normal/gb.png'
 thumbsub = 'https://s32.postimg.org/nzstk8z11/sub.png'
 thumbtodos = 'https://s29.postimg.org/4p8j2pkdj/todos.png'
 patrones = ['<<meta property="og:image" content="([^"]+)" \/>" \/>', '\/><\/a>([^*]+)<p><\/p>.*']
+
+IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub':'Subtitulado', 'en': 'Original', 'vosi': 'VOSI'}
+list_idiomas = IDIOMAS.values()
 
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
@@ -64,6 +68,9 @@ def mainlist(item):
                          thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
                          fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
 
+    if autoplay.context:
+        autoplay.show_option(item.channel, itemlist)
+
     return itemlist
 
 
@@ -94,7 +101,7 @@ def todas(item):
 
         fanart = 'https://s32.postimg.org/h1ewz9hhx/mundoflv.png'
         itemlist.append(
-            Item(channel=item.channel, action="idioma", title=title, url=url, thumbnail=thumbnail, plot=plot,
+            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=title, infoLabels={'year': year}))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -197,8 +204,9 @@ def masvistas(item):
         thumbnail = ''
         plot = 'nada'
         itemlist.append(
-            Item(channel=item.channel, action="idioma", title=title, url=url, thumbnail=thumbnail, plot=plot,
+            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=contentSerieName, infoLabels={'year': year}))
+
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
@@ -223,7 +231,7 @@ def recomendadas(item):
         title = title = scrapertools.decodeHtmlentities(title)
         fanart = item.fanart
         itemlist.append(
-            Item(channel=item.channel, action="idioma", title=title, url=url, thumbnail=thumbnail, plot=plot,
+            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=title))
 
     return itemlist
@@ -251,6 +259,7 @@ def ultimas(item):
         itemlist.append(
             Item(channel=item.channel, action="idioma", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=title))
+
 
     return itemlist
 
@@ -328,6 +337,9 @@ def episodiosxtemp(item):
                              contentSerieName=item.contentSerieName, contentSeasonNumber=item.contentSeasonNumber,
                              infoLabels=infoLabels))
 
+    #if len(itemlist) > 0 and filtertools.context:
+    #        itemlist = filtertools.get_links(itemlist, item.channel)
+
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     return itemlist
 
@@ -369,7 +381,6 @@ def idioma(item):
 
     return itemlist
 
-
 def busqueda(item):
     logger.info()
     itemlist = []
@@ -390,6 +401,8 @@ def busqueda(item):
         itemlist.append(
             Item(channel=item.channel, action="idioma", title=title, fulltitle=title, url=url, thumbnail=thumbnail,
                  plot=plot, contentSerieName=title, infoLabels={'year': year}))
+
+
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
 
@@ -428,11 +441,16 @@ def findvideos(item):
         server = scrapedserver.strip(' ')
         title = item.contentSerieName + ' ' + str(item.contentSeasonNumber) + 'x' + str(
             item.contentEpisodeNumber) + ' ' + idioma + ' (' + server + ')'
-        if scrapedidioma == item.extra1 or item.extra1 == 'all':
-            itemlist.append(item.clone(title=title, url=url, action="play", language=scrapedidioma,
-                                       server=server, fulltitle=item.ContentSeriename, quality='default'))
+
+        new_item = item.clone(title=title, url=url, action="play", language=IDIOMAS[scrapedidioma],
+                                   server=server,
+                                   fulltitle=item.ContentSeriename, quality='default', context=autoplay.context,
+                                   list_idiomas=list_idiomas)
+
+        itemlist = filtertools.get_link(itemlist, new_item)
 
     for videoitem in itemlist:
+
         videoitem.infoLabels = item.infoLabels
         videoitem.thumbnail = servertools.guess_server_thumbnail(videoitem.server)
 
