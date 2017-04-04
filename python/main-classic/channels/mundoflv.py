@@ -102,7 +102,9 @@ def todas(item):
         fanart = 'https://s32.postimg.org/h1ewz9hhx/mundoflv.png'
         itemlist.append(
             Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentSerieName=title, infoLabels={'year': year}))
+                 fanart=fanart, contentSerieName=title, infoLabels={'year': year},
+                 show=title, list_idiomas=list_idiomas,
+                 context=filtertools.context))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
@@ -453,6 +455,9 @@ def findvideos(item):
 
         videoitem.infoLabels = item.infoLabels
         videoitem.thumbnail = servertools.guess_server_thumbnail(videoitem.server)
+
+    if itemlist ==[]:
+        itemlist.append(Item(channel=item.channel, title='No hay enlaces compatibles con filtro'))
 
     # Requerido para AutoPlay
 
