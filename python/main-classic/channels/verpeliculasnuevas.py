@@ -14,8 +14,12 @@ from core import servertools
 from core import tmdb
 from core import httptools
 from channels import autoplay
+from channels import filtertools
 
 host = 'http://verpeliculasnuevas.com'
+
+IDIOMA = {'latino':'Latino', 'Castellano':'Español', 'sub':'Subtitulado'}
+list_idiomas = IDIOMA.values()
 
 taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]', 'castellano': '[COLOR yellow]ESPAÑOL[/COLOR]',
           'sub': '[COLOR red]ORIGINAL SUBTITULADO[/COLOR]', 'castellanolatinosub': '[COLOR orange]MULTI[/COLOR]',
@@ -24,6 +28,11 @@ taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]', 'castellano': '[COLOR yel
 thumbaudio = {'latino': 'http://flags.fmcdn.net/data/flags/normal/mx.png',
               'castellano': 'http://flags.fmcdn.net/data/flags/normal/es.png',
               'sub': 'https://s32.postimg.org/nzstk8z11/sub.png'}
+
+
+CALIDADES = {'hq':'HQ', 'hd':'HD', 'hd-1080':'HD-1080', 'dvd':'DVD', 'cam':'CAM' }
+list_calidad = CALIDADES.values()
+
 
 tcalidad = {'hq': '[COLOR limegreen]HQ[/COLOR]', 'hd': '[COLOR limegreen]HD[/COLOR]',
             'hd-1080': '[COLOR limegreen]HD-1080[/COLOR]', 'dvd': '[COLOR limegreen]DVD[/COLOR]',
@@ -262,7 +271,10 @@ def findvideos(item):
         url = scrapedurl
         itemlist.append(
             Item(channel=item.channel, action='play', idioma=idioma, calidad=calidad, url=url, language=scrapedidioma,
-                 quality=scrapedcalidad.lower(), context=autoplay.context))
+                 quality=scrapedcalidad.lower(), list_idiomas=list_idiomas, list_calidad=CALIDADES,
+                                       context=filtertools.context))
+
+
     for videoitem in itemlist:
         videoitem.infoLabels = item.infoLabels
         videoitem.channel = item.channel
@@ -278,7 +290,12 @@ def findvideos(item):
             Item(channel=item.channel, title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]', url=item.url,
                  action="add_pelicula_to_library", extra="findvideos", contentTitle=item.contentTitle))
 
-    ### Requerido para AutoPlay ###
+    # Requerido para FilterTools
+
+    if len(itemlist) > 0 and filtertools.context:
+        itemlist = filtertools.get_links(itemlist, item.channel)
+
+    # Requerido para AutoPlay
 
     if config.get_setting("autoplay", item.channel) and autoplay.context:
         autoplay.start(itemlist, item)

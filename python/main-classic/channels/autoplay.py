@@ -190,8 +190,8 @@ def start(itemlist, item):
         for indice in autoplay_list:
             if not xbmc.Player().isPlaying() and not played:
                 videoitem = indice[1]
-                lang = ""
-                if hasattr(item, 'language'):
+                lang = " "
+                if hasattr(item, 'language') and item.language != "":
                     lang = " '%s' " % item.language
 
                 platformtools.dialog_notification("AutoPlay iniciado en:",
@@ -212,7 +212,7 @@ def start(itemlist, item):
                 try:
                     xbmc.Player().getTotalTime()
                     played = True
-
+                    break
                 except:  # TODO evitar el informe de que el conector fallo o el video no se encuentra
                     logger.debug(str(len(autoplay_list)))
     else:

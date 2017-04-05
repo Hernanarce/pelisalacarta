@@ -449,6 +449,8 @@ def findvideos(item):
                                    fulltitle=item.ContentSeriename, quality='default', context=autoplay.context,
                                    list_idiomas=list_idiomas)
 
+        # Requerido para FilterTools
+
         itemlist = filtertools.get_link(itemlist, new_item)
 
     for videoitem in itemlist:

@@ -96,9 +96,10 @@
 		<lvalues>gamovideo</lvalues>
 		<lvalues>powvideo</lvalues>
 		<lvalues>streamplay</lvalues>
-		<lvalues>streaminto</lvalues>
+		<lvalues>streamin</lvalues>
 		<lvalues>streame</lvalues>
 		<lvalues>flashx</lvalues>
+		<lvalues>nowvideo</lvalues>
 	</settings>
 	
 	<settings>
@@ -113,9 +114,10 @@
 		<lvalues>gamovideo</lvalues>
 		<lvalues>powvideo</lvalues>
 		<lvalues>streamplay</lvalues>
-		<lvalues>streaminto</lvalues>
+		<lvalues>streamin</lvalues>
 		<lvalues>streame</lvalues>
 		<lvalues>flashx</lvalues>
+		<lvalues>nowvideo</lvalues>
 	</settings>
 	
 	<settings>
@@ -130,9 +132,10 @@
 		<lvalues>gamovideo</lvalues>
 		<lvalues>powvideo</lvalues>
 		<lvalues>streamplay</lvalues>
-		<lvalues>streaminto</lvalues>
+		<lvalues>streamin</lvalues>
 		<lvalues>streame</lvalues>
 		<lvalues>flashx</lvalues>
+		<lvalues>nowvideo</lvalues>
 	</settings>
 
 	<settings>
@@ -166,6 +169,7 @@
 		<lvalues>default</lvalues>
 		<lvalues>default</lvalues>
 	</settings>
+	
 	<settings>
 		<id>quality_3</id>
 		<type>list</type>
