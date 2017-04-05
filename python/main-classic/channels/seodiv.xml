@@ -84,6 +84,7 @@
 		<lvalues>openload</lvalues>
         <lvalues>okru</lvalues>
         <lvalues>myvideo</lvalues>
+        <lvalues>sendvid</lvalues>
 	</settings>
 	
 	<settings>
@@ -97,6 +98,7 @@
 		<lvalues>openload</lvalues>
         <lvalues>okru</lvalues>
         <lvalues>myvideo</lvalues>
+        <lvalues>sendvid</lvalues>
 	</settings>
 	
 	<settings>
@@ -110,6 +112,7 @@
 		<lvalues>openload</lvalues>
         <lvalues>okru</lvalues>
         <lvalues>myvideo</lvalues>
+        <lvalues>sendvid</lvalues>
 	</settings>
 
 	<settings>
