@@ -335,9 +335,10 @@ def episodiosxtemp(item):
         infoLabels = item.infoLabels
         infoLabels['episode'] = contentEpisodeNumber
         itemlist.append(Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                             thumbnail=item.thumbnail, plot=plot, extra1=item.extra1, idioma='',
+                             thumbnail=thumbnail, plot=plot, extra1=item.extra1, idioma='',
                              contentSerieName=item.contentSerieName, contentSeasonNumber=item.contentSeasonNumber,
-                             infoLabels=infoLabels))
+                             infoLabels=infoLabels, context=filtertools.context,
+                                list_idiomas=list_idiomas))
 
     #if len(itemlist) > 0 and filtertools.context:
     #        itemlist = filtertools.get_links(itemlist, item.channel)
@@ -437,6 +438,8 @@ def findvideos(item):
     patron = 'href="([^"]+)".*?domain=.*?>([^<]+).*?gold">([^<]+)<'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
+    import time
+    start_time = time.time()
     for scrapedurl, scrapedserver, scrapedidioma in matches:
         url = scrapedurl
         idioma = audio[scrapedidioma]
