@@ -19,6 +19,9 @@ from channels import filtertools
 IDIOMAS = {'latino': 'Latino'}
 list_languages = IDIOMAS.values()
 
+CALIDADES = {'1080':'1080p', '720':'720p', '480':'480p', '360':'360p'}
+list_calidades = CALIDADES.values()
+
 host = 'http://doomtv.net/'
 headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
            ['Referer', host]]
@@ -286,8 +289,8 @@ def get_url(item):
                 itemlist.append(
                     Item(channel=item.channel, action='play', title=title, url=url, thumbnail=item.thumbnail,
                          plot=item.plot, fanart=item.fanart, contentTitle=item.contentTitle, language=IDIOMAS['latino'],
-                         server='directo', quality=calidad, list_languages
-                 = list_languages))
+                         server='directo', quality=CALIDADES[calidad], list_languages
+                 = list_languages, list_calidades = list_calidades, context = autoplay.context))
                 duplicado.append(url)
 
         return itemlist
@@ -311,128 +314,5 @@ def findvideos(item):
 
     if config.get_setting("autoplay", item.channel) and autoplay.context:
         autoplay.start(itemlist, item)
-
-    return itemlist
-
-
-### Requerido para AutoPlay ###
-
-def configuracion(item):
-    ret = platformtools.show_channel_settings()
-    platformtools.itemlist_refresh()
-    return ret
-
-
-def autoplay(itemlist, item):
-    logger.info()
-
-    duplicados = []
-    autoplay_list = []
-    favorite_servers = []
-    favorite_quality = []
-    servidores = []
-    lang = []
-
-    info_dialog = platformtools.dialog_notification('AutoPlay Activo', '', sound=False)
-
-    ### Verifica el estado de la configuracion automatica ###
-
-    auto_config = config.get_setting("auto_config", item.channel)
-
-    if auto_config:
-        favorite_priority = 2  ### Si esta activa la auto-configuracion la prioridad se fija en calidad ###
-
-    else:
-
-        favorite_priority = config.get_setting("priority",
-                                               item.channel)  ### Ordena los enlaces por la prioridad
-        # Servidor/Calidad la lista de favoritos ###
-
-    ### Obtiene las listas servidores, calidades e idiomas disponibles esde el xml del canal ###
-
-    settings_list, actual_settings = channeltools.get_channel_controls_settings(item.channel)
-
-    for setting in settings_list:
-        for id_setting, name_setting in setting.items():
-
-            if name_setting == 'server_1':
-                server_list = setting['lvalues']
-
-            elif name_setting == 'lang':
-                lang_list = setting['lvalues']
-
-            elif name_setting == 'quality_1':
-                quality_list = setting['lvalues']
-
-
-
-            ### Se obtienen desde el archivo de configuracion los servidores y calidades favoritos ###
-
-    for num in range(1, 4):
-        favorite_servers.append(server_list[config.get_setting("server_" + str(num), item.channel)])
-        favorite_quality.append(quality_list[config.get_setting("quality_" + str(num), item.channel)])
-
-    lang = lang_list[(config.get_setting("lang", item.channel))]  # Se obtiene el idioma favorito ###
-
-    ### Se crea la lista de enlaces que cumplen los requisitos de los favoritos y no esten repetidos ###
-
-
-    for item in itemlist:
-        ### Se crea la lista para configuracion automatica
-        if auto_config:
-            for quality in quality_list:
-                if item.quality == quality and item.lang == lang and item.server in server_list:
-                    autoplay_list.append(
-                            [server_list.index(item.server), item, quality_list.index(quality), item.quality,
-                             item.server])
-
-
-        else:
-            ### Se crea la lista de enlaces que cumplen los requisitos de los favoritos ###
-
-            for favorite in favorite_servers:
-                if item.server == favorite and item.lang == lang and item.quality in favorite_quality and item.url \
-                        not in duplicados:
-                    autoplay_list.append(
-                            [favorite_servers.index(favorite), item, favorite_quality.index(item.quality), item.quality,
-                             item.server])
-                    duplicados.append(item.url)
-
-    if favorite_priority == 2:
-        autoplay_list.sort(key=lambda priority: priority[2])  ### Se ordena la lista solo por calidad ###
-
-    elif favorite_priority == 1:
-        autoplay_list.sort(key=lambda priority: priority[0])  ### Se ordena la lista solo por servidor ###
-
-    elif favorite_priority == 0:
-        autoplay_list.sort(key=lambda priority: priority[2])
-        ordered_list = sorted(autoplay_list,
-                              key=lambda priority: priority[0])  ### Se ordena la lista por servidor y calidad
-        autoplay_list = ordered_list
-
-        # logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
-
-    ### Si hay elementos en la lista de autoplay se intenta reproducir cada elemento, hasta encontrar uno funcional o
-    #  fallen todos  ###
-
-    if autoplay_list:
-        played = False
-
-        for indice in autoplay_list:
-            if not xbmc.Player().isPlaying() and not played:
-                info_dialog = platformtools.dialog_notification('AutoPlay iniciado en:',
-                                                                indice[1].server.upper() + ' ' + lang + ' ' + str(
-                                                                        indice[3]).upper(), sound=False)
-                platformtools.play_video(indice[1])
-                try:
-                    total_time = xbmc.Player().getTotalTime()
-                    played = True
-
-                except:  ### TODO evitar el informe de que el conector fallo o el video no se encuentra ###
-                    logger.debug(str(len(autoplay_list)))
-    else:
-        info_dialog = platformtools.dialog_notification('AutoPlay No Fue Posible', 'No Hubo Coincidencias')
-
-    ### devuelve la lista de enlaces para la eleccion manual ###
 
     return itemlist

@@ -149,7 +149,8 @@ def episodiosxtemp(item):
             title = scrapedtipo + ' ' + scrapedtitle
             itemlist.append(
                 Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                     thumbnail=item.thumbnail, plot=plot, language=item.language, list_idiomas=list_idiomas))
+                     thumbnail=item.thumbnail, plot=plot, language=item.language, list_idiomas=list_idiomas,
+                     context = autoplay.context))
 
     return itemlist
 

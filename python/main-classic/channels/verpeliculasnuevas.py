@@ -272,7 +272,7 @@ def findvideos(item):
         itemlist.append(
             Item(channel=item.channel, action='play', idioma=idioma, calidad=calidad, url=url, language=scrapedidioma,
                  quality=scrapedcalidad.lower(), list_idiomas=list_idiomas, list_calidad=CALIDADES,
-                                       context=filtertools.context))
+                                       context=autoplay.context))
 
 
     for videoitem in itemlist:

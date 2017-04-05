@@ -352,7 +352,7 @@ def findvideos(item):
 
                                          quality=quality,
                                          server='directo', list_idiomas=list_idiomas, list_calidad=CALIDADES,
-                                       context=filtertools.context))
+                                       context=autoplay.context))
                     duplicados.append(url)
 
     url = scrapedurl
