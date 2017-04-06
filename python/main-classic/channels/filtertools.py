@@ -241,6 +241,24 @@ def get_links(list_item, channel, global_filter_lang_id="filter_languages"):
     _filter = Filter(list_item[0], global_filter_lang_id).result
     logger.debug("filter: '{0}' datos: '{1}'".format(list_item[0].show, _filter))
 
+        for control in list_controls:
+            if control["id"] == "filter_languages":
+
+                try:
+                    language = control["lvalues"][global_filter_language]
+                    # logger.debug("language %s" % language)
+                except:
+                    logger.error("No se ha encontrado el valor asociado al codigo 'filter_languages': %s" %
+                                 global_filter_language)
+                    break
+
+                dict_filter = dict()
+                dict_filter[TAG_ACTIVE] = True
+                dict_filter[TAG_LANGUAGE] = language
+                dict_filter[TAG_QUALITY_NOT_ALLOWED] = []
+                _filter = Filter(dict_filter=dict_filter)
+                break
+
     if _filter and _filter.active:
 
         for item in list_item:

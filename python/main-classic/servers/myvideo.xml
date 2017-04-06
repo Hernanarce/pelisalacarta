@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<server>
+	<active>true</active>
+	<changes>Versión incial</changes>
+	<date>24/03/2017</date>
+	<free>true</free>
+	<id>myvideo</id>
+	<name>myvideo</name>
+	<premium></premium>
+	<thumbnail></thumbnail>
+	<update_url></update_url>
+	<version>1</version>
+</server>

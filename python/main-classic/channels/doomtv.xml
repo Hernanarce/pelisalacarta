@@ -14,19 +14,6 @@
 	<update_url>https://raw.githubusercontent.com/tvalacarta/pelisalacarta/master/python/main-classic/channels/</update_url>
 	<version>3</version>
 
-	<changes>
-		<change>
-			<date>15/03/2017</date>
-			<autor>SeiTaN</autor>
-			<description>limpieza código</description>
-		</change>
-		<change>
-			<date>01/02/2017</date>
-			<autor>Hernan_Ar_c</autor>
-			<description>Release.</description>
-		</change>
-	</changes>
-
 	<categories>
 		<category>latino</category>
 		<category>movie</category>
@@ -40,6 +27,147 @@
 		<enabled>false</enabled>
 		<visible>false</visible>
 	</settings>
+
+	<settings>
+		<id>filter_languages</id>
+		<type>list</type>
+		<label>Mostrar enlaces en idioma...</label>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>No filtrar</lvalues>
+		<lvalues>Latino</lvalues>
+	</settings>
+
+	<settings>
+		<id>autoplay</id>
+		<label>AutoPlay (activar/desactivar la auto-reproducción)</label>
+		<color>0xffffff99</color>
+		<type>bool</type>
+		<default>true</default>
+		<enabled>true</enabled>
+ 		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>autoplay_settings</id>
+		<type>bool</type>
+		<label>   Configuracion Personalizada (Define tus Preferencias):</label>
+		<color>0xff66ffcc</color>
+		<default>false</default>
+		<enabled>eq(-1,true)</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>priority</id>
+		<type>list</type>
+		<label>      - Prioridad (Indica el orden para Auto-Reproducir)</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-2,true)+eq(-1,true)</enabled>
+		<visible>true</visible>
+		<lvalues>Servidor y Calidad</lvalues>
+		<lvalues>Servidor</lvalues>
+		<lvalues>Calidad</lvalues>
+	</settings>
+
+	<settings>
+		<id>label4</id>
+		<type>label</type>
+		<label></label>
+		<enabled>false</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>server_1</id>
+		<type>list</type>
+		<label>      - Servidor Favorito 1</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-4,true)+eq(-3,true)</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+        <lvalues>directo</lvalues>
+	</settings>
+
+	<settings>
+		<id>server_2</id>
+		<type>list</type>
+		<label>      - Servidor Favorito 2</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-5,true)+eq(-4,true)</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+        <lvalues>directo</lvalues>
+		
+	</settings>
+
+	<settings>
+		<id>server_3</id>
+		<type>list</type>
+		<label>      - Servidor Favorito 3</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-6,true)+eq(-5,true)</enabled>
+		<visible>true</visible>
+		<lvalues>directo</lvalues>
+        <lvalues>directo</lvalues>
+	</settings>
+
+	<settings>
+		<id>label5</id>
+		<type>label</type>
+		<label></label>
+		<default>None</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+
+	<settings>
+		<id>quality_1</id>
+		<type>list</type>
+		<label>      - Calidad Favorita 1</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-8,true)+eq(-7,true)</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+	</settings>
+
+	<settings>
+		<id>quality_2</id>
+		<type>list</type>
+		<label>      - Calidad Favorita 2</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-9,true)+eq(-8,true)</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+	</settings>
+
+	<settings>
+		<id>quality_3</id>
+		<type>list</type>
+		<label>      - Calidad Favorita 3</label>
+		<color>0xffffff99</color>
+		<default>0</default>
+		<enabled>eq(-10,true)+eq(-9,true)</enabled>
+		<visible>true</visible>
+		<lvalues>1080p</lvalues>
+		<lvalues>720p</lvalues>
+		<lvalues>480p</lvalues>
+		<lvalues>360p</lvalues>
+	</settings>
+
 	<settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>
@@ -48,6 +176,7 @@
 		<enabled>true</enabled>
 		<visible>true</visible>
 	</settings>
+	
 	<settings>
 		<id>include_in_newest_infantiles</id>
 		<type>bool</type>
