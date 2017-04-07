@@ -146,7 +146,7 @@ def episodiosxtemp(item):
                 itemlist.append(
                     Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
                          thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality,
-                         contentSerieName = item.contentSerieName, idioma = idioma))
+                         contentSerieName = item.contentSerieName))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Pelicula':
             title = scrapedtipo + ' ' + scrapedtitle
@@ -161,7 +161,8 @@ def episodiosxtemp(item):
 def findvideos(item):
     logger.info()
     itemlist = []
-    data = httptools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
+    logger.debug(data)
     video_items = servertools.find_video_items(item)
 
     for videoitem in video_items:
