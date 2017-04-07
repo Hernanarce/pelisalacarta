@@ -24,7 +24,7 @@ thumbtodos = 'https://s29.postimg.org/4p8j2pkdj/todos.png'
 patrones = ['<<meta property="og:image" content="([^"]+)" \/>" \/>', '\/><\/a>([^*]+)<p><\/p>.*']
 
 IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub':'Subtitulado', 'en': 'Original', 'vosi': 'VOSI'}
-list_idiomas = IDIOMAS.values()
+list_languages = IDIOMAS.values()
 
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
@@ -102,7 +102,7 @@ def todas(item):
         itemlist.append(
             Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=title, infoLabels={'year': year},
-                 show=title, list_idiomas=list_idiomas,
+                 show=title, list_languages=list_languages,
                  context=filtertools.context))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -337,7 +337,7 @@ def episodiosxtemp(item):
                              thumbnail=thumbnail, plot=plot, extra1=item.extra1, idioma='',
                              contentSerieName=item.contentSerieName, contentSeasonNumber=item.contentSeasonNumber,
                              infoLabels=infoLabels, context=filtertools.context,
-                                list_idiomas=list_idiomas))
+                             list_languages=list_languages))
 
     #if len(itemlist) > 0 and filtertools.context:
     #        itemlist = filtertools.get_links(itemlist, item.channel)
@@ -447,9 +447,9 @@ def findvideos(item):
             item.contentEpisodeNumber) + ' ' + idioma + ' (' + server + ')'
 
         new_item = item.clone(title=title, url=url, action="play", language=IDIOMAS[scrapedidioma],
-                                   server=server,
-                                   fulltitle=item.ContentSeriename, quality='default', context=autoplay.context,
-                                   list_idiomas=list_idiomas)
+                              server=server,
+                              fulltitle=item.ContentSeriename, quality='default', context=autoplay.context,
+                              list_languages=list_languages)
 
         # Requerido para FilterTools
 

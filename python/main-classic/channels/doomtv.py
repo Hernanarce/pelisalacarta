@@ -21,7 +21,7 @@ IDIOMAS = {'latino': 'Latino'}
 list_languages = IDIOMAS.values()
 
 CALIDADES = {'1080':'1080p', '720':'720p', '480':'480p', '360':'360p'}
-list_calidades = CALIDADES.values()
+list_quality = CALIDADES.values()
 
 host = 'http://doomtv.net/'
 headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
@@ -291,7 +291,7 @@ def get_url(item):
                     Item(channel=item.channel, action='play', title=title, url=url, thumbnail=item.thumbnail,
                          plot=item.plot, fanart=item.fanart, contentTitle=item.contentTitle, language=IDIOMAS['latino'],
                          server='directo', quality=CALIDADES[calidad], list_languages
-                 = list_languages, list_calidades = list_calidades, context = autoplay.context))
+                 = list_languages, list_quality = list_quality, context = autoplay.context))
                 duplicado.append(url)
 
         return itemlist

@@ -29,10 +29,10 @@ patrones = ['<img src="([^"]+)" alt=".*?" class="picture-movie">',
 
 
 IDIOMA = {'latino':'Latino'}
-list_idiomas = IDIOMA.values()
+list_languages = IDIOMA.values()
 
 CALIDADES = {'1080p':'1080p', '720p':'720p', '480p':'480p', '360p':'360p', '240p':'240p'}
-list_calidad = CALIDADES.values()
+list_quality = CALIDADES.values()
 
 
 def mainlist(item):
@@ -354,7 +354,7 @@ def findvideos(item):
                                          fanart=fanart, show= title, extra='directo', language=language,
 
                                          quality=quality,
-                                         server='directo', list_idiomas=list_idiomas, list_calidad=CALIDADES,
+                                         server='directo', list_languages=list_languages, list_quality=CALIDADES,
                                        context=autoplay.context))
                     duplicados.append(url)
 

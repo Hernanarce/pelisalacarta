@@ -308,7 +308,7 @@ def save_library_tvshow(item, episodelist):
 
     # FILTERTOOLS
     # si el canal tiene filtro de idiomas, añadimos el canal y el show
-    if episodelist and "list_idiomas" in episodelist[0]:
+    if episodelist and "list_languages" in episodelist[0]:
         # si ya hemos añadido un canal previamente con filtro, añadimos o actualizamos el canal y show
         if "library_filter_show" in item_tvshow:
             item_tvshow.library_filter_show[item.channel] = item.show

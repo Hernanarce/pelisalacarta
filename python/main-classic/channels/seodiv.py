@@ -18,7 +18,7 @@ from channels import autoplay
 from channels import filtertools
 
 IDIOMAS = {'latino':'Latino'}
-list_idiomas = IDIOMAS.values()
+list_languages = IDIOMAS.values()
 
 host = 'http://www.seodiv.com'
 
@@ -151,7 +151,7 @@ def episodiosxtemp(item):
             title = scrapedtipo + ' ' + scrapedtitle
             itemlist.append(
                 Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                     thumbnail=item.thumbnail, plot=plot, language=item.language, list_idiomas=list_idiomas,
+                     thumbnail=item.thumbnail, plot=plot, language=item.language, list_languages=list_languages,
                      context = autoplay.context))
 
     return itemlist

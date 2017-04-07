@@ -19,7 +19,7 @@ from channels import filtertools
 host = 'http://verpeliculasnuevas.com'
 
 IDIOMA = {'latino':'Latino', 'Castellano':'Español', 'sub':'Subtitulado'}
-list_idiomas = IDIOMA.values()
+list_languages = IDIOMA.values()
 
 taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]', 'castellano': '[COLOR yellow]ESPAÑOL[/COLOR]',
           'sub': '[COLOR red]ORIGINAL SUBTITULADO[/COLOR]', 'castellanolatinosub': '[COLOR orange]MULTI[/COLOR]',
@@ -271,7 +271,7 @@ def findvideos(item):
         url = scrapedurl
         itemlist.append(
             Item(channel=item.channel, action='play', idioma=idioma, calidad=calidad, url=url, language=scrapedidioma,
-                 quality=scrapedcalidad.lower(), list_idiomas=list_idiomas, list_calidad=CALIDADES,
+                 quality=scrapedcalidad.lower(), list_languages=list_languages, list_calidad=CALIDADES,
                                        context=autoplay.context))
 
 
