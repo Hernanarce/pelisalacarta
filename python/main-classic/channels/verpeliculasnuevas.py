@@ -199,9 +199,6 @@ def lista(item):
 
         title = scrapedtitle + ' | ' + scrapedcalidad + ' | ' + scrapedidioma + ' | '
         fanart = ''
-
-        # plot= scrapertools.find_single_match(dataplot, '<span class="clms">Sinopsis:<\/span>([^<]+)<div
-        # class="info_movie">')
         plot = ''
 
         itemlist.append(

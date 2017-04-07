@@ -404,13 +404,11 @@ def busqueda(item):
     itemlist = fail_tmdb(itemlist)
 
     # Paginacion
-    patron = "<a rel='nofollow' class=previouspostslink' href='([^']+)'>Siguiente &rsaquo;</a>"
     next_page_url = scrapertools.find_single_match(data,
                                                    "<a rel='nofollow' class=previouspostslink' href='(["
                                                    "^']+)'>Siguiente &rsaquo;</a>")
     if next_page_url != "":
         item.url = next_page_url
-        import inspect
         itemlist.append(Item(channel=item.channel, action="busqueda", title=">> Página siguiente", url=next_page_url,
                              thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
     return itemlist

@@ -205,8 +205,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    if len(itemlist) > 0 and filtertools.context:
-        itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item.channel)
 
     # Requerido para AutoPlay
 
