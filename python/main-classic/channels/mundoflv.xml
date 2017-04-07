@@ -49,9 +49,11 @@
 		<enabled>true</enabled>
 		<visible>true</visible>
 		<lvalues>No filtrar</lvalues>
-		<lvalues>VOSE</lvalues>
 		<lvalues>Latino</lvalues>
 		<lvalues>Español</lvalues>
+		<lvalues>VOS</lvalues>
+		<lvalues>VOSE</lvalues>
+		<lvalues>VO</lvalues>
 	</settings>
 
 	<settings>

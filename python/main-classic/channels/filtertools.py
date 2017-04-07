@@ -413,6 +413,8 @@ def config_item(item):
         }
         list_controls.append(active_control)
 
+    logger.debug('lang_selected: '+lang_selected)
+    logger.debug('list_language: ' + str(item.list_language))
     language_option = {
         "id": "language",
         "type": "list",

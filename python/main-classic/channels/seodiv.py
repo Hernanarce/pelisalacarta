@@ -127,10 +127,7 @@ def episodiosxtemp(item):
                                             '^<]+)</span></p>')
     for scrapedurl, scrapedtipo, scrapedtitle in matches:
         url = host + scrapedurl
-        title = ''
-        thumbnail = item.thumbnail
         plot = item.plot
-        fanart = ''
 
         if 'temporada' in item.title and item.title in scrapedurl and scrapedtipo == 'Capitulo' and item.temp != '':
             title = item.contentSerieName + ' ' + item.temp + 'x' + scrapedtitle + ' (' + idioma + ')'

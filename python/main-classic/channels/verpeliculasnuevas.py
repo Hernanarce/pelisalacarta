@@ -8,6 +8,7 @@ import os, sys
 
 from core import config
 from core import httptools
+from core.item import Item
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -18,8 +19,8 @@ from channels import filtertools
 
 host = 'http://verpeliculasnuevas.com'
 
-IDIOMA = {'latino':'Latino', 'Castellano':'Español', 'sub':'Subtitulado'}
-list_languages = IDIOMA.values()
+IDIOMAS = {'latino':'Latino', 'castellano':'Español', 'sub':'VOS'}
+list_language = IDIOMAS.values()
 
 taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]', 'castellano': '[COLOR yellow]ESPAÑOL[/COLOR]',
           'sub': '[COLOR red]ORIGINAL SUBTITULADO[/COLOR]', 'castellanolatinosub': '[COLOR orange]MULTI[/COLOR]',
@@ -30,8 +31,7 @@ thumbaudio = {'latino': 'http://flags.fmcdn.net/data/flags/normal/mx.png',
               'sub': 'https://s32.postimg.org/nzstk8z11/sub.png'}
 
 
-CALIDADES = {'hq':'HQ', 'hd':'HD', 'hd-1080':'HD-1080', 'dvd':'DVD', 'cam':'CAM' }
-list_calidad = CALIDADES.values()
+list_quality = ['HQ', 'HD', 'HD-1080', 'DVD', 'CAM']
 
 
 tcalidad = {'hq': '[COLOR limegreen]HQ[/COLOR]', 'hd': '[COLOR limegreen]HD[/COLOR]',
@@ -207,7 +207,8 @@ def lista(item):
         itemlist.append(
             Item(channel=item.channel, action='findvideos', title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentTitle=scrapedtitle, extra=item.extra, infoLabels={'year': year},
-                 context=autoplay.context))
+                 show = scrapedtitle,
+                 context=filtertools.context, list_language=list_language))
 
     # #Paginacion
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -270,9 +271,17 @@ def findvideos(item):
         calidad = tcalidad[scrapedcalidad.lower()]
         url = scrapedurl
         itemlist.append(
-            Item(channel=item.channel, action='play', idioma=idioma, calidad=calidad, url=url, language=scrapedidioma,
-                 quality=scrapedcalidad.lower(), list_languages=list_languages, list_calidad=CALIDADES,
-                                       context=autoplay.context))
+            Item(channel = item.channel,
+                 action =' play',
+                 idioma = idioma,
+                 calidad = calidad,
+                 url = url,
+                 language = IDIOMAS[scrapedidioma],
+                 quality = scrapedcalidad.lower(),
+                 list_language = list_language,
+                 list_quality = list_quality,
+                 context = filtertools.context
+                 ))
 
 
     for videoitem in itemlist:
@@ -285,15 +294,15 @@ def findvideos(item):
         videoitem.title = item.contentTitle + ' | ' + videoitem.calidad + ' | ' + videoitem.idioma + ' (' + \
                           videoitem.server + ')'
 
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item.channel)
+
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
             Item(channel=item.channel, title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]', url=item.url,
                  action="add_pelicula_to_library", extra="findvideos", contentTitle=item.contentTitle))
 
-    # Requerido para FilterTools
-
-    if len(itemlist) > 0 and filtertools.context:
-        itemlist = filtertools.get_links(itemlist, item.channel)
 
     # Requerido para AutoPlay
 

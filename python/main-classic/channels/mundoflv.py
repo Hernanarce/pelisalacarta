@@ -25,8 +25,8 @@ thumbsub = 'https://s32.postimg.org/nzstk8z11/sub.png'
 thumbtodos = 'https://s29.postimg.org/4p8j2pkdj/todos.png'
 patrones = ['<<meta property="og:image" content="([^"]+)" \/>" \/>', '\/><\/a>([^*]+)<p><\/p>.*']
 
-IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub':'Subtitulado', 'en': 'Original', 'vosi': 'VOSI'}
-list_languages = IDIOMAS.values()
+IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub':'VOS', 'vosi': 'VOSE', 'en': 'VO'}
+list_language = IDIOMAS.values()
 
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
@@ -98,23 +98,20 @@ def todas(item):
         thumbnail = scrapedthumbnail
         year = scrapedyear
         plot = ''
-        fanart = ''
 
         fanart = 'https://s32.postimg.org/h1ewz9hhx/mundoflv.png'
         itemlist.append(
             Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
                  fanart=fanart, contentSerieName=title, infoLabels={'year': year},
-                 show=title, list_languages=list_languages,
+                 show=title, list_language=list_language,
                  context=filtertools.context))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
     # Paginacion
-    patron = '<link rel="next" href="([^"]+)" />'
     next_page_url = scrapertools.find_single_match(data, '<link rel="next" href="([^"]+)" />')
 
     if next_page_url != "":
-        import inspect
         itemlist.append(Item(channel=item.channel, action="todas", title=">> Página siguiente", url=next_page_url,
                              thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
 
@@ -331,18 +328,14 @@ def episodiosxtemp(item):
         title = item.contentSerieName + ' ' + item.contentSeasonNumber + 'x' + contentEpisodeNumber
         thumbnail = item.thumbnail
         plot = ''
-        fanart = ''
-        idioma = ''
         infoLabels = item.infoLabels
         infoLabels['episode'] = contentEpisodeNumber
         itemlist.append(Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
                              thumbnail=thumbnail, plot=plot, extra1=item.extra1, idioma='',
                              contentSerieName=item.contentSerieName, contentSeasonNumber=item.contentSeasonNumber,
-                             infoLabels=infoLabels, context=filtertools.context,
-                             list_languages=list_languages))
-
-    #if len(itemlist) > 0 and filtertools.context:
-    #        itemlist = filtertools.get_links(itemlist, item.channel)
+                             infoLabels=infoLabels, show=item.contentSerieName,
+                             context=filtertools.context,
+                             list_language=list_language))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     return itemlist
@@ -448,10 +441,16 @@ def findvideos(item):
         title = item.contentSerieName + ' ' + str(item.contentSeasonNumber) + 'x' + str(
             item.contentEpisodeNumber) + ' ' + idioma + ' (' + server + ')'
 
-        new_item = item.clone(title=title, url=url, action="play", language=IDIOMAS[scrapedidioma],
+        new_item = item.clone(title=title,
+                              url=url,
+                              action="play",
+                              language=IDIOMAS[scrapedidioma],
                               server=server,
-                              fulltitle=item.ContentSeriename, quality='default', context=autoplay.context,
-                              list_languages=list_languages)
+                              fulltitle=item.ContentSeriename,
+                              quality='default',
+                              context=filtertools.context,
+                              list_language=list_language
+                              )
 
         # Requerido para FilterTools
 
@@ -462,7 +461,7 @@ def findvideos(item):
         videoitem.infoLabels = item.infoLabels
         videoitem.thumbnail = servertools.guess_server_thumbnail(videoitem.server)
 
-    if itemlist ==[]:
+    if len(itemlist)== 0:
         itemlist.append(Item(channel=item.channel, title='No hay enlaces compatibles con filtro'))
 
     # Requerido para AutoPlay

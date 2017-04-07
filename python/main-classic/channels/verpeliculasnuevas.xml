@@ -51,7 +51,7 @@
 		<lvalues>No filtrar</lvalues>
 		<lvalues>Latino</lvalues>
 		<lvalues>Español</lvalues>
-		<lvalues>Subtitulado</lvalues>
+		<lvalues>VOS</lvalues>
 	</settings>
 
 	<settings>
@@ -80,7 +80,7 @@
 		<label>      - Prioridad (Indica el orden para Auto-Reproducir)</label>
 		<color>0xffffff99</color>
 		<default>0</default>
-		<enabled>true</enabled>
+		<enabled>eq(-2,true)+eq(-1,true)</enabled>
 		<visible>true</visible>
 		<lvalues>Servidor y Calidad</lvalues>
 		<lvalues>Servidor</lvalues>
@@ -91,7 +91,6 @@
 		<id>label4</id>
 		<type>label</type>
 		<label></label>
-		<default>None</default>
 		<enabled>false</enabled>
 		<visible>true</visible>
 	</settings>
@@ -163,7 +162,6 @@
 		<id>label5</id>
 		<type>label</type>
 		<label></label>
-		<default>None</default>
 		<enabled>true</enabled>
 		<visible>true</visible>
 	</settings>
