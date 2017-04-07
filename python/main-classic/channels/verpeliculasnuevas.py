@@ -205,10 +205,20 @@ def lista(item):
         plot = ''
 
         itemlist.append(
-            Item(channel=item.channel, action='findvideos', title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentTitle=scrapedtitle, extra=item.extra, infoLabels={'year': year},
+            Item(channel=item.channel,
+                 action='findvideos',
+                 title=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 fanart=fanart,
+                 contentTitle=scrapedtitle,
+                 extra=item.extra,
+                 infoLabels={'year': year},
                  show = scrapedtitle,
-                 context=filtertools.context, list_language=list_language))
+                 context=filtertools.context,
+                 list_language=list_language
+                 ))
 
     # #Paginacion
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -272,11 +282,11 @@ def findvideos(item):
         url = scrapedurl
         itemlist.append(
             Item(channel = item.channel,
-                 action =' play',
+                 action ='play',
                  idioma = idioma,
                  calidad = calidad,
                  url = url,
-                 language = IDIOMAS[scrapedidioma],
+                 language = IDIOMAS[scrapedidioma.lower()],
                  quality = scrapedcalidad.lower(),
                  list_language = list_language,
                  list_quality = list_quality,

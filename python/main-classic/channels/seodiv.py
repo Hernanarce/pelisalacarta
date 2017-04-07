@@ -38,21 +38,23 @@ def todas(item):
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
-    data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>', "", data)
+    data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>|\s{2,}', "", data)
     logger.debug(data)
-
-    patron = '<\/div><img src=(.*?) style=box.*?title-topic>(.*?)<\/div>.*?topic>(.*?)<\/div>.*?<a href=(.*?) style'
+    #return
+    patron = '<div class=shortf><div><div class=shortf-img><a href=(.*?)><img src=(.*?) alt=.*?quality>(' \
+             '.*?)<.*?series transition>(.*?) <\/span>'
 
     matches = re.compile(patron, re.DOTALL).findall(data)
-    for scrapedthumbnail, scrapedtitle, scrapedplot, scrapedurl in matches:
+    for scrapedurl, scrapedthumbnail, scrapedcalidad, scrapedtitle in matches:
         url = host + scrapedurl
+        calidad = scrapedcalidad
         title = scrapedtitle.decode('utf-8')
         thumbnail = scrapedthumbnail
         fanart = 'https://s32.postimg.org/gh8lhbkb9/seodiv.png'
-        plot = scrapedplot
+
         itemlist.append(
             Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, fanart=fanart,
-                 plot=plot, contentSerieName=title, extra='', language=item.language, quality='default'))
+                 contentSerieName=title, extra='', language=item.language, quality='default'))
 
     return itemlist
 
@@ -60,8 +62,8 @@ def todas(item):
 def temporadas(item):
     logger.info()
     itemlist = []
-    templist = []
     data = httptools.downloadpage(item.url).data
+    logger.debug(data)
     url_base = item.url
     patron = '<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href=.*? aria-expanded="false" ' \
              'aria-controls=.*?>([^<]+)<\/a>'
@@ -122,34 +124,36 @@ def episodiosxtemp(item):
     patron = '<li><a href="([^"]+)">.*?(Capitulo|Pelicula).*?([\d]+)'
 
     matches = re.compile(patron, re.DOTALL).findall(data)
-    idioma = scrapertools.find_single_match(data,
-                                            ' <p><span class="ah-lead-tit">Idioma:</span>&nbsp;<span id="l-vipusk">(['
-                                            '^<]+)</span></p>')
+
+
+
     for scrapedurl, scrapedtipo, scrapedtitle in matches:
         url = host + scrapedurl
         plot = item.plot
 
         if 'temporada' in item.title and item.title in scrapedurl and scrapedtipo == 'Capitulo' and item.temp != '':
-            title = item.contentSerieName + ' ' + item.temp + 'x' + scrapedtitle + ' (' + idioma + ')'
+            title = item.contentSerieName + ' ' + item.temp + 'x' + scrapedtitle
             itemlist.append(
                 Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                     thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality))
+                     thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality,
+                     contentSerieName = item.contentSerieName, idioma = idioma))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Capitulo' and item.temp\
                 == '':
             if item.temp == '': temp = '1'
-            title = item.contentSerieName + ' ' + temp + 'x' + scrapedtitle + ' (' + idioma + ')'
+            title = item.contentSerieName + ' ' + temp + 'x' + scrapedtitle
             if '#' not in scrapedurl:
                 itemlist.append(
                     Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                         thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality))
+                         thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality,
+                         contentSerieName = item.contentSerieName, idioma = idioma))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Pelicula':
             title = scrapedtipo + ' ' + scrapedtitle
             itemlist.append(
                 Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
                      thumbnail=item.thumbnail, plot=plot, language=item.language, list_languages=list_languages,
-                     context = autoplay.context))
+                     context = autoplay.context, contentSerieName = item.contentSerieName))
 
     return itemlist
 
@@ -157,11 +161,14 @@ def episodiosxtemp(item):
 def findvideos(item):
     logger.info()
     itemlist = []
+    data = httptools.downloadpage(item.url)
     video_items = servertools.find_video_items(item)
 
     for videoitem in video_items:
         videoitem.thumbnail = servertools.guess_server_thumbnail(videoitem.server)
-        videoitem.language = 'latino'
+        videoitem.language = scrapertools.find_single_match(data,'<span class="f-info-title">Idioma:<\/span>\s*<span '
+                                                                 'class="f-info-text">(.*?)<\/span>')
+        videoitem.title = item.contentSerieName+' ('+videoitem.server+') ('+videoitem.language+')'
         videoitem.quality = 'default'
         videoitem.context = autoplay.context
         itemlist.append(videoitem)

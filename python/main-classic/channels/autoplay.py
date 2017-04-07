@@ -190,7 +190,7 @@ def start(itemlist, item):
         for indice in autoplay_list:
             if not xbmc.Player().isPlaying() and not played:
                 videoitem = indice[1]
-                logger.debug(item.language)
+                logger.debug('item.language: '+item.language)
                 return
                 lang = " "
                 if hasattr(item, 'language') and item.language != "":
