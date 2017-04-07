@@ -177,7 +177,7 @@ def start(itemlist, item):
                               key=lambda priority: priority[0])
         autoplay_list = ordered_list
 
-        # logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
+        #logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
 
     # Si hay elementos en la lista de autoplay se intenta reproducir cada elemento, hasta encontrar uno funcional
     # o fallen todos
@@ -203,11 +203,9 @@ def start(itemlist, item):
                 # Si el canal tiene metodo play propio lo utiliza
                 channel = __import__('channels.%s' % item.channel, None, None, ["channels.%s" % item.channel])
                 if hasattr(channel, 'play'):
-                    logger.debug('usando play interno')
                     resolved_item = getattr(channel, 'play')(videoitem)
                     videoitem = resolved_item[0]
                 # si no directamente reproduce
-                logger.debug('usando play externo')
                 platformtools.play_video(videoitem)
 
                 try:

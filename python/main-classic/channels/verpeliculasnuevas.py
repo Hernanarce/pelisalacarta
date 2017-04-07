@@ -22,26 +22,40 @@ host = 'http://verpeliculasnuevas.com'
 IDIOMAS = {'latino':'Latino', 'castellano':'Español', 'sub':'VOS'}
 list_language = IDIOMAS.values()
 
-taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]', 'castellano': '[COLOR yellow]ESPAÑOL[/COLOR]',
-          'sub': '[COLOR red]ORIGINAL SUBTITULADO[/COLOR]', 'castellanolatinosub': '[COLOR orange]MULTI[/COLOR]',
-          'castellanolatino': '[COLOR orange]MULTI[/COLOR]'}
+taudio = {'latino': '[COLOR limegreen]LATINO[/COLOR]',
+          'castellano': '[COLOR yellow]ESPAÑOL[/COLOR]',
+          'sub': '[COLOR red]ORIGINAL SUBTITULADO[/COLOR]',
+          'castellanolatinosub': '[COLOR orange]MULTI[/COLOR]',
+          'castellanolatino': '[COLOR orange]MULTI[/COLOR]'
+          }
 
 thumbaudio = {'latino': 'http://flags.fmcdn.net/data/flags/normal/mx.png',
               'castellano': 'http://flags.fmcdn.net/data/flags/normal/es.png',
-              'sub': 'https://s32.postimg.org/nzstk8z11/sub.png'}
+              'sub': 'https://s32.postimg.org/nzstk8z11/sub.png'
+              }
 
 
-list_quality = ['HQ', 'HD', 'HD-1080', 'DVD', 'CAM']
+list_quality = ['HQ',
+                'HD',
+                'HD-1080',
+                'DVD',
+                'CAM'
+                ]
 
 
-tcalidad = {'hq': '[COLOR limegreen]HQ[/COLOR]', 'hd': '[COLOR limegreen]HD[/COLOR]',
-            'hd-1080': '[COLOR limegreen]HD-1080[/COLOR]', 'dvd': '[COLOR limegreen]DVD[/COLOR]',
-            'cam': '[COLOR red]CAM[/COLOR]', }
+tcalidad = {'hq': '[COLOR limegreen]HQ[/COLOR]',
+            'hd': '[COLOR limegreen]HD[/COLOR]',
+            'hd-1080': '[COLOR limegreen]HD-1080[/COLOR]',
+            'dvd': '[COLOR limegreen]DVD[/COLOR]',
+            'cam': '[COLOR red]CAM[/COLOR]'
+            }
 
 thumbcalidad = {'hd-1080': 'https://s24.postimg.org/vto15vajp/hd1080.png',
-                'dvd': 'https://s31.postimg.org/6sksfqarf/dvd.png', 'cam': 'https://s29.postimg.org/c7em44e9j/cam.png',
+                'dvd': 'https://s31.postimg.org/6sksfqarf/dvd.png',
+                'cam': 'https://s29.postimg.org/c7em44e9j/cam.png',
                 'hq': 'https://s27.postimg.org/bs0jlpdsz/image.png',
-                'hd': 'https://s30.postimg.org/6vxtqu9sx/image.png'}
+                'hd': 'https://s30.postimg.org/6vxtqu9sx/image.png'
+                }
 
 thumbletras = {'0-9': 'https://s32.postimg.org/drojt686d/image.png', '1': 'https://s32.postimg.org/drojt686d/image.png',
                'a': 'https://s32.postimg.org/llp5ekfz9/image.png', 'b': 'https://s32.postimg.org/y1qgm1yp1/image.png',
@@ -73,13 +87,10 @@ tgenero = {"comedia": "https://s32.postimg.org/q7g2qs90l/comedia.png",
            "fantastico": "https://s32.postimg.org/b6xwbui6d/fantastico.png",
            "deporte": "https://s31.postimg.org/pdc8etc0r/deporte.png",
            "infantil": "https://s32.postimg.org/i53zwwgsl/infantil.png",
-           "animacion": "https://s32.postimg.org/rbo1kypj9/animacion.png"}
+           "animacion": "https://s32.postimg.org/rbo1kypj9/animacion.png"
+           }
 
 patrones = ['', '<span class="clms">Sinopsis:<\/span>([^<]+)<div class="info_movie">']
-
-
-### Requerido para AutoPlay ###
-
 
 
 def mainlist(item):
@@ -87,33 +98,60 @@ def mainlist(item):
 
     itemlist = []
 
-    itemlist.append(item.clone(title="Todas", action="lista", thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
-                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png', extra='peliculas/', url=host))
+    itemlist.append(item.clone(title="Todas",
+                               action="lista",
+                               thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               extra='peliculas/',
+                               url=host
+                               ))
 
-    itemlist.append(itemlist[-1].clone(title="Generos", action="menuseccion",
+    itemlist.append(itemlist[-1].clone(title="Generos",
+                                       action="menuseccion",
                                        thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
-                                       fanart='https://s31.postimg.org/szbr0gmkb/generos.png', url=host,
-                                       extra='/genero'))
+                                       fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
+                                       url=host,
+                                       extra='/genero'
+                                       ))
 
-    itemlist.append(itemlist[-1].clone(title="Alfabetico", action="menuseccion",
+    itemlist.append(itemlist[-1].clone(title="Alfabetico",
+                                       action="menuseccion",
                                        thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
-                                       fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png', url=host, extra='/tag'))
+                                       fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png',
+                                       url=host, extra='/tag'
+                                       ))
 
     itemlist.append(
-        itemlist[-1].clone(title="Audio", action="menuseccion", thumbnail='https://s24.postimg.org/qmvqz4uxx/audio.png',
-                           fanart='https://s24.postimg.org/qmvqz4uxx/audio.png', url=host, extra='/audio'))
+        itemlist[-1].clone(title="Audio",
+                           action="menuseccion",
+                           thumbnail='https://s24.postimg.org/qmvqz4uxx/audio.png',
+                           fanart='https://s24.postimg.org/qmvqz4uxx/audio.png',
+                           url=host,
+                           extra='/audio'
+                           ))
 
-    itemlist.append(itemlist[-1].clone(title="Calidad", action="menuseccion",
+    itemlist.append(itemlist[-1].clone(title="Calidad",
+                                       action="menuseccion",
                                        thumbnail='https://s23.postimg.org/ui42030wb/calidad.png',
-                                       fanart='https://s23.postimg.org/ui42030wb/calidad.png', extra='/calidad'))
+                                       fanart='https://s23.postimg.org/ui42030wb/calidad.png',
+                                       extra='/calidad'
+                                       ))
 
     itemlist.append(
-        itemlist[-1].clone(title="Año", action="menuseccion", thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
-                           fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png', url=host, extra='/fecha-estreno'))
+        itemlist[-1].clone(title="Año",
+                           action="menuseccion",
+                           thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                           fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                           url=host,
+                           extra='/fecha-estreno'
+                           ))
 
-    itemlist.append(itemlist[-1].clone(title="Buscar", action="search", url=host + '?s=',
+    itemlist.append(itemlist[-1].clone(title="Buscar",
+                                       action="search",
+                                       url=host + '?s=',
                                        thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                                       fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
+                                       fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                                       ))
 
     if autoplay.context:
         autoplay.show_option(item.channel, itemlist)
@@ -163,7 +201,12 @@ def menuseccion(item):
             else:
                 thumbnail = ''
 
-        itemlist.append(Item(channel=item.channel, action='lista', title=title, url=url, thumbnail=thumbnail))
+        itemlist.append(Item(channel=item.channel,
+                             action='lista',
+                             title=title,
+                             url=url,
+                             thumbnail=thumbnail
+                             ))
 
     return itemlist
 
@@ -226,8 +269,13 @@ def lista(item):
                                                    "class=previouspostslink' href='([^']+)'>Siguiente &rsaquo;<\/a>")
         import inspect
         if next_page != '':
-            itemlist.append(Item(channel=item.channel, action="lista", title='Siguiente >>>', url=next_page,
-                                 thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png', extra=item.extra))
+            itemlist.append(Item(channel=item.channel,
+                                 action="lista",
+                                 title='Siguiente >>>',
+                                 url=next_page,
+                                 thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
+                                 extra=item.extra
+                                 ))
 
     return itemlist
 
@@ -265,7 +313,7 @@ def findvideos(item):
 
     patron = 'class="servidor" alt=""> ([^<]+)<\/span><span style="width: 40px;">([^<]+)<\/span><a class="verLink" ' \
              'rel="nofollow" href="([^"]+)" target="_blank"> <img title="Ver online gratis"'
-    matches = matches = re.compile(patron, re.DOTALL).findall(data)
+    matches = re.compile(patron, re.DOTALL).findall(data)
     for scrapedidioma, scrapedcalidad, scrapedurl in matches:
 
         scrapedidioma = scrapertools.decodeHtmlentities(scrapedidioma)
@@ -307,8 +355,13 @@ def findvideos(item):
 
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
-            Item(channel=item.channel, title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]', url=item.url,
-                 action="add_pelicula_to_library", extra="findvideos", contentTitle=item.contentTitle))
+            Item(channel=item.channel,
+                 title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]',
+                 url=item.url,
+                 action="add_pelicula_to_library",
+                 extra="findvideos",
+                 contentTitle=item.contentTitle
+                 ))
 
 
     # Requerido para AutoPlay

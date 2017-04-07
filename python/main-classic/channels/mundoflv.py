@@ -36,10 +36,6 @@ headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/2
            ['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info()
 
@@ -455,9 +451,8 @@ def findvideos(item):
         itemlist = filtertools.get_link(itemlist, new_item)
 
     for videoitem in itemlist:
-
         videoitem.infoLabels = item.infoLabels
-        videoitem.thumbnail = servertools.guess_server_thumbnail(videoitem.server)
+        videoitem.thumbnail = "http://media.tvalacarta.info/servers/server_%s.png" % videoitem.server
 
     if len(itemlist)== 0:
         itemlist.append(Item(channel=item.channel, title='No hay enlaces compatibles con filtro'))
@@ -484,5 +479,7 @@ def play(item):
         videoitem.infoLabels = item.infoLabels
         videoitem.title = item.title
         videoitem.thumbnail = videoitem.infoLabels['thumbnail']
+
+
 
     return itemlist
