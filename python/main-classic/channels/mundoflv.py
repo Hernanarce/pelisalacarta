@@ -13,6 +13,7 @@ from core import scrapertools
 from core import servertools
 from core import httptools
 from core.item import Item
+from core import tmdb
 from channels import autoplay
 from channels import filtertools
 
