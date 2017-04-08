@@ -56,7 +56,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         for t in text_encode:
             text_decode += aadecode(t)
 
-        var_r = scrapertools.find_single_match(text_decode, "window.p\s*=\s*['\"]([^'\"]+)['\"]")
+        var_r = scrapertools.find_single_match(text_decode, "window\.[A-z]+\s*=\s*['\"]([^'\"]+)['\"]")
         var_encodes = scrapertools.find_multiple_matches(data, 'id="%s[^"]*">([^<]+)<' % var_r)
         numeros = scrapertools.find_multiple_matches(data, '=\s*(0x[\da-f]{4,});')
 
@@ -64,15 +64,15 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         for encode in var_encodes:
             text_decode = ""
             try:
-                rango1 = encode[:48]
+                rango1 = encode[:56]
                 decode1 = []
                 for i in range(0, len(rango1), 8):
                     decode1.append(int(rango1[i:i+8], 16))
-                rango1 = encode[48:]
+                rango1 = encode[56:]
                 j = 0
                 i = 0
                 while i < len(rango1):
-                    index1 = 128
+                    index1 = 64
                     value1 = 0
                     value2 = 0
                     value3 = 0
@@ -81,21 +81,22 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
                             index1 = 143
                         value3 = int(rango1[i:i+2], 16)
                         i += 2
-                        data = value3 & 127
+                        data = value3 & 63
                         value2 += data << value1
-                        value1 += 7
+                        value1 += 6
                         if value3 < index1:
                             break
 
-                    value4 = value2 ^ decode1[j % 6]
+                    value4 = value2 ^ decode1[j % 7]
                     for n in numeros:
-                        value4 ^= int(n, 16)
-
-                    value5 = index1 + 127 
+                        if not n.isdigit():
+                            n = int(n, 16)
+                        value4 ^= int(n)
+                    value5 = index1 * 2 + 127 
                     for h in range(4):
                         valorfinal = (value4 >> 8 * h) & (value5)
                         valorfinal = chr(valorfinal)
-                        if valorfinal != "#":
+                        if valorfinal != "%":
                             text_decode += valorfinal
                     j += 1
             except:
