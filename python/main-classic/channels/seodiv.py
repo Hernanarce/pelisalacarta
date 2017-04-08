@@ -28,9 +28,15 @@ def mainlist(item):
 
     itemlist = []
 
-    itemlist.append(Item(channel=item.channel, title="Todos", action="todas", url=host,
-                         thumbnail='https://s32.postimg.org/544rx8n51/series.png',
-                         fanart='https://s32.postimg.org/544rx8n51/series.png', language='latino'))
+    itemlist.append(
+            Item(channel=item.channel,
+                 title="Todos",
+                 action="todas",
+                 url=host,
+                 thumbnail='https://s32.postimg.org/544rx8n51/series.png',
+                 fanart='https://s32.postimg.org/544rx8n51/series.png',
+                 language='latino'
+                 ))
     return itemlist
 
 
@@ -51,9 +57,17 @@ def todas(item):
         thumbnail = scrapedthumbnail
         fanart = 'https://s32.postimg.org/gh8lhbkb9/seodiv.png'
 
-        itemlist.append(Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail,
-                             fanart=fanart, contentSerieName=title, extra='', language=item.language,
-                             quality='default'))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="temporadas",
+                     title=title, url=url,
+                     thumbnail=thumbnail,
+                     fanart=fanart,
+                     contentSerieName=title,
+                     extra='',
+                     language=item.language,
+                     quality='default'
+                     ))
 
     return itemlist
 
@@ -80,22 +94,45 @@ def temporadas(item):
             plot = item.plot
             fanart = scrapertools.find_single_match(data, '<img src="([^"]+)"/>.*?</a>')
             itemlist.append(
-                    Item(channel=item.channel, action="episodiosxtemp", title=title, fulltitle=item.title, url=url,
-                         thumbnail=thumbnail, plot=plot, fanart=fanart, temp=str(temp),
-                         contentSerieName=item.contentSerieName, language=item.language, quality=item.quality))
+                    Item(channel=item.channel,
+                         action="episodiosxtemp",
+                         title=title,
+                         fulltitle=item.title,
+                         url=url,
+                         thumbnail=thumbnail,
+                         plot=plot, fanart=fanart,
+                         temp=str(temp),
+                         contentSerieName=item.contentSerieName,
+                         language=item.language,
+                         quality=item.quality
+                         ))
             temp = temp + 1
 
         if config.get_library_support() and len(itemlist) > 0:
-            itemlist.append(Item(channel=item.channel, title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]',
-                                 url=item.url, action="add_serie_to_library", extra="episodios",
-                                 contentSerieName=item.contentSerieName, extra1=item.extra1, temp=str(temp)))
+            itemlist.append(
+                    Item(channel=item.channel,
+                         title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]',
+                         url=item.url,
+                         action="add_serie_to_library",
+                         extra="episodios",
+                         contentSerieName=item.contentSerieName,
+                         extra1=item.extra1,
+                         temp=str(temp)
+                         ))
         return itemlist
     else:
         itemlist = episodiosxtemp(item)
         if config.get_library_support() and len(itemlist) > 0:
-            itemlist.append(Item(channel=item.channel, title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]',
-                                 url=item.url, action="add_serie_to_library", extra="episodios",
-                                 contentSerieName=item.contentSerieName, extra1=item.extra1, temp=str(temp)))
+            itemlist.append(
+                    Item(channel=item.channel,
+                         title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]',
+                         url=item.url,
+                         action="add_serie_to_library",
+                         extra="episodios",
+                         contentSerieName=item.contentSerieName,
+                         extra1=item.extra1,
+                         temp=str(temp)
+                         ))
         return itemlist
 
 
@@ -131,9 +168,18 @@ def episodiosxtemp(item):
         if 'temporada' in item.title and item.title in scrapedurl and scrapedtipo == 'Capitulo' and item.temp != '':
             title = item.contentSerieName + ' ' + item.temp + 'x' + scrapedtitle
             itemlist.append(
-                    Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                         thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality,
-                         contentSerieName=item.contentSerieName, idioma=idioma))
+                    Item(channel=item.channel,
+                         action="findvideos",
+                         title=title,
+                         fulltitle=item.fulltitle,
+                         url=url,
+                         thumbnail=item.thumbnail,
+                         plot=plot,
+                         language=item.language,
+                         quality=item.quality,
+                         contentSerieName=item.contentSerieName,
+                         idioma=idioma
+                         ))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Capitulo' and item.temp\
                 == '':
@@ -141,16 +187,33 @@ def episodiosxtemp(item):
             title = item.contentSerieName + ' ' + temp + 'x' + scrapedtitle
             if '#' not in scrapedurl:
                 itemlist.append(
-                        Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                             thumbnail=item.thumbnail, plot=plot, language=item.language, quality=item.quality,
-                             contentSerieName=item.contentSerieName))
+                    Item(channel=item.channel,
+                         action="findvideos",
+                         title=title,
+                         fulltitle=item.fulltitle,
+                         url=url,
+                         thumbnail=item.thumbnail,
+                         plot=plot,
+                         language=item.language,
+                         quality=item.quality,
+                         contentSerieName=item.contentSerieName
+                         ))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Pelicula':
             title = scrapedtipo + ' ' + scrapedtitle
             itemlist.append(
-                    Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                         thumbnail=item.thumbnail, plot=plot, language=item.language, list_languages=list_languages,
-                         context=autoplay.context, contentSerieName=item.contentSerieName))
+                    Item(channel=item.channel,
+                         action="findvideos",
+                         title=title,
+                         fulltitle=item.fulltitle,
+                         url=url,
+                         thumbnail=item.thumbnail,
+                         plot=plot,
+                         language=item.language,
+                         list_languages=list_languages,
+                         context=autoplay.context,
+                         contentSerieName=item.contentSerieName
+                         ))
 
     return itemlist
 

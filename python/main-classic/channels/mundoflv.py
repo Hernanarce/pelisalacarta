@@ -25,12 +25,18 @@ thumbsub = 'https://s32.postimg.org/nzstk8z11/sub.png'
 thumbtodos = 'https://s29.postimg.org/4p8j2pkdj/todos.png'
 patrones = ['<<meta property="og:image" content="([^"]+)" \/>" \/>', '\/><\/a>([^*]+)<p><\/p>.*']
 
-IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub':'VOS', 'vosi': 'VOSE', 'en': 'VO'}
+IDIOMAS = {'la': 'Latino',
+           'es': 'Español',
+           'sub':'VOS',
+           'vosi': 'VOSE',
+           'en': 'VO'
+           }
 list_language = IDIOMAS.values()
 
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
-         'vosi': '[COLOR red]ORIGINAL SUBTITULADO INGLES[/COLOR]'}
+         'vosi': '[COLOR red]ORIGINAL SUBTITULADO INGLES[/COLOR]'
+         }
 
 headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
            ['Referer', host]]
@@ -41,27 +47,33 @@ def mainlist(item):
 
     itemlist = []
 
-    itemlist.append(Item(channel=item.channel, title="Series", action="todas", url=host,
+    itemlist.append(
+            Item(channel=item.channel, title="Series", action="todas", url=host,
                          thumbnail='https://s32.postimg.org/544rx8n51/series.png',
                          fanart='https://s32.postimg.org/544rx8n51/series.png'))
 
-    itemlist.append(Item(channel=item.channel, title="Alfabetico", action="letras", url=host,
+    itemlist.append(
+            Item(channel=item.channel, title="Alfabetico", action="letras", url=host,
                          thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
                          fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png'))
 
-    itemlist.append(Item(channel=item.channel, title="Mas vistas", action="masvistas", url=host,
+    itemlist.append(
+            Item(channel=item.channel, title="Mas vistas", action="masvistas", url=host,
                          thumbnail='https://s32.postimg.org/466gt3ipx/vistas.png',
                          fanart='https://s32.postimg.org/466gt3ipx/vistas.png'))
 
-    itemlist.append(Item(channel=item.channel, title="Recomendadas", action="recomendadas", url=host,
+    itemlist.append(
+            Item(channel=item.channel, title="Recomendadas", action="recomendadas", url=host,
                          thumbnail='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
                          fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png'))
 
-    itemlist.append(Item(channel=item.channel, title="Ultimas Agregadas", action="ultimas", url=host,
+    itemlist.append(
+            Item(channel=item.channel, title="Ultimas Agregadas", action="ultimas", url=host,
                          thumbnail='https://s31.postimg.org/3ua9kwg23/ultimas.png',
                          fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png'))
 
-    itemlist.append(Item(channel=item.channel, title="Buscar", action="search", url='http://mundoflv.com/?s=',
+    itemlist.append(
+            Item(channel=item.channel, title="Buscar", action="search", url='http://mundoflv.com/?s=',
                          thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
                          fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
 
@@ -76,10 +88,6 @@ def todas(item):
     itemlist = []
     data = httptools.downloadpage(item.url).data
     data = re.sub(r"\n|\r|\t|\s{2}|&nbsp;", "", data)
-
-    '''<a href="http://mundoflv.com/jessica-jones/" title="Jessica Jones (2015)">
-<div class="img">
-<img src="http://mundoflv.com/wp-content/uploads/2015/11/jessica-203x300.jpg" alt="Jessica Jones ()" />'''
 
     patron = 'class="item"><a href="(.*?)" title="(.*?)(?:\|.*?|\(.*?|- )(\d{4})(?:\)|-)".*?'
     patron += '<div class="img">.*?'
@@ -97,10 +105,19 @@ def todas(item):
 
         fanart = 'https://s32.postimg.org/h1ewz9hhx/mundoflv.png'
         itemlist.append(
-            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentSerieName=title, infoLabels={'year': year},
-                 show=title, list_language=list_language,
-                 context=filtertools.context))
+            Item(channel=item.channel,
+                 action="temporadas",
+                 title=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 fanart=fanart,
+                 contentSerieName=title,
+                 infoLabels={'year': year},
+                 show=title,
+                 list_language=list_language,
+                 context=filtertools.context
+                 ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
@@ -108,8 +125,12 @@ def todas(item):
     next_page_url = scrapertools.find_single_match(data, '<link rel="next" href="([^"]+)" />')
 
     if next_page_url != "":
-        itemlist.append(Item(channel=item.channel, action="todas", title=">> Página siguiente", url=next_page_url,
-                             thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
+        itemlist.append(Item(channel=item.channel,
+                             action="todas",
+                             title=">> Página siguiente",
+                             url=next_page_url,
+                             thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+                             ))
 
     return itemlist
 
@@ -161,8 +182,16 @@ def letras(item):
             thumbnail = ''
         plot = ""
         fanart = item.fanart
-        itemlist.append(Item(channel=item.channel, action="todas", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                             fanart=fanart, contentSerieName=title))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="todas",
+                     title=title,
+                     url=url,
+                     thumbnail=thumbnail,
+                     plot=plot,
+                     fanart=fanart,
+                     contentSerieName=title
+                     ))
 
     return itemlist
 
@@ -200,8 +229,16 @@ def masvistas(item):
         thumbnail = ''
         plot = 'nada'
         itemlist.append(
-            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentSerieName=contentSerieName, infoLabels={'year': year}))
+            Item(channel=item.channel,
+                 action="temporadas",
+                 title=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 fanart=fanart,
+                 contentSerieName=contentSerieName,
+                 infoLabels={'year': year}
+                 ))
 
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -224,11 +261,18 @@ def recomendadas(item):
         realplot = scrapertools.find_single_match(data, '\/><\/a>([^*]+)<p><\/p>.*')
         plot = scrapertools.remove_htmltags(realplot)
         title = scrapedtitle.replace('online', '')
-        title = title = scrapertools.decodeHtmlentities(title)
+        title = scrapertools.decodeHtmlentities(title)
         fanart = item.fanart
         itemlist.append(
-            Item(channel=item.channel, action="temporadas", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentSerieName=title))
+            Item(channel=item.channel,
+                 action="temporadas",
+                 title=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 fanart=fanart,
+                 contentSerieName=title
+                 ))
 
     return itemlist
 
@@ -253,8 +297,15 @@ def ultimas(item):
         title = scrapertools.decodeHtmlentities(title)
         fanart = item.fanart
         itemlist.append(
-            Item(channel=item.channel, action="idioma", title=title, url=url, thumbnail=thumbnail, plot=plot,
-                 fanart=fanart, contentSerieName=title))
+            Item(channel=item.channel,
+                 action="idioma",
+                 title=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 fanart=fanart,
+                 contentSerieName=title
+                 ))
 
 
     return itemlist
@@ -284,17 +335,32 @@ def temporadas(item):
         realplot = scrapertools.find_single_match(data, '\/><\/a>([^*]+)<p><\/p>.*')
         plot = ''
         fanart = ''
-        itemlist.append(Item(channel=item.channel, action="episodiosxtemp", title=title, fulltitle=item.title, url=url,
-                             thumbnail=thumbnail, plot=plot, fanart=fanart, extra1=item.extra1,
-                             contentSerieName=item.contentSerieName, contentSeasonNumber=contentSeasonNumber,
-                             infoLabels={'season': contentSeasonNumber}))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="episodiosxtemp",
+                     title=title,
+                     fulltitle=item.title,
+                     url=url,
+                     thumbnail=thumbnail,
+                     plot=plot,
+                     fanart=fanart,
+                     extra1=item.extra1,
+                     contentSerieName=item.contentSerieName,
+                     contentSeasonNumber=contentSeasonNumber,
+                     infoLabels={'season': contentSeasonNumber}
+                     ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     if config.get_library_support() and len(itemlist) > 0:
         itemlist.append(
-            Item(channel=item.channel, title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]', url=item.url,
-                 action="add_serie_to_library", extra="episodios", contentSerieName=item.contentSerieName,
-                 extra1=item.extra1))
+            Item(channel=item.channel,
+                 title='[COLOR yellow]Añadir esta serie a la biblioteca[/COLOR]',
+                 url=item.url,
+                 action="add_serie_to_library",
+                 extra="episodios",
+                 contentSerieName=item.contentSerieName,
+                 extra1=item.extra1
+                 ))
 
     return itemlist
 
@@ -326,12 +392,23 @@ def episodiosxtemp(item):
         plot = ''
         infoLabels = item.infoLabels
         infoLabels['episode'] = contentEpisodeNumber
-        itemlist.append(Item(channel=item.channel, action="findvideos", title=title, fulltitle=item.fulltitle, url=url,
-                             thumbnail=thumbnail, plot=plot, extra1=item.extra1, idioma='',
-                             contentSerieName=item.contentSerieName, contentSeasonNumber=item.contentSeasonNumber,
-                             infoLabels=infoLabels, show=item.contentSerieName,
-                             context=filtertools.context,
-                             list_language=list_language))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="findvideos",
+                     title=title,
+                     fulltitle=item.fulltitle,
+                     url=url,
+                     thumbnail=thumbnail,
+                     plot=plot,
+                     extra1=item.extra1,
+                     idioma='',
+                     contentSerieName=item.contentSerieName,
+                     contentSeasonNumber=item.contentSeasonNumber,
+                     infoLabels=infoLabels,
+                     show=item.contentSerieName,
+                     context=filtertools.context,
+                     list_language=list_language
+                     ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     return itemlist
@@ -343,34 +420,89 @@ def idioma(item):
     itemlist = []
     thumbvid = item.thumbnail
     itemlist.append(
-        Item(channel=item.channel, title="Latino", action="temporadas", url=item.url, thumbnail=thumbmx, fanart='',
-             extra1='la', fulltitle=item.title, thumbvid=thumbvid, contentSerieName=item.contentSerieName,
-             infoLabels=item.infoLabels, language='la'))
+        Item(channel=item.channel,
+             title="Latino",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumbmx,
+             fanart='',
+             extra1='la',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             infoLabels=item.infoLabels,
+             language='la'
+             ))
 
     itemlist.append(
-        Item(channel=item.channel, title="Español", action="temporadas", url=item.url, thumbnail=thumbes, fanart='',
-             extra1='es', fulltitle=item.title, thumbvid=thumbvid, contentSerieName=item.contentSerieName,
-             language='es'))
+        Item(channel=item.channel,
+             title="Español",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumbes,
+             fanart='',
+             extra1='es',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             language='es'
+             ))
 
     itemlist.append(
-        Item(channel=item.channel, title="Subtitulado", action="temporadas", url=item.url, thumbnail=thumbsub,
-             fanart='', extra1='sub', fulltitle=item.title, thumbvid=thumbvid,
-             contentSerieName=item.contentSerieName, language='sub'))
+        Item(channel=item.channel,
+             title="Subtitulado",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumbsub,
+             fanart='',
+             extra1='sub',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             language='sub'
+             ))
 
     itemlist.append(
-        Item(channel=item.channel, title="Original", action="temporadas", url=item.url, thumbnail=thumben, fanart='',
-             extra1='en', fulltitle=item.title, thumbvid=thumbvid, contentSerieName=item.contentSerieName,
-             language='en'))
+        Item(channel=item.channel,
+             title="Original",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumben,
+             fanart='',
+             extra1='en',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             language='en'
+             ))
 
     itemlist.append(
-        Item(channel=item.channel, title="Original Subtitulado en Ingles", action="temporadas", url=item.url,
-             thumbnail=thumben, fanart='', extra1='vosi', fulltitle=item.title, thumbvid=thumbvid,
-             contentSerieName=item.contentSerieName, language='vosi'))
+        Item(channel=item.channel,
+             title="Original Subtitulado en Ingles",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumben,
+             fanart='',
+             extra1='vosi',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             language='vosi'
+             ))
 
     itemlist.append(
-        Item(channel=item.channel, title="Todo", action="temporadas", url=item.url, thumbnail=thumbtodos, fanart='',
-             extra1='all', fulltitle=item.title, thumbvid=thumbvid, contentSerieName=item.contentSerieName,
-             language='all'))
+        Item(channel=item.channel,
+             title="Todo",
+             action="temporadas",
+             url=item.url,
+             thumbnail=thumbtodos,
+             fanart='',
+             extra1='all',
+             fulltitle=item.title,
+             thumbvid=thumbvid,
+             contentSerieName=item.contentSerieName,
+             language='all'
+             ))
 
     return itemlist
 
@@ -392,8 +524,16 @@ def busqueda(item):
         plot = ''
         year = scrapedyear
         itemlist.append(
-            Item(channel=item.channel, action="idioma", title=title, fulltitle=title, url=url, thumbnail=thumbnail,
-                 plot=plot, contentSerieName=title, infoLabels={'year': year}))
+            Item(channel=item.channel,
+                 action="idioma",
+                 title=title,
+                 fulltitle=title,
+                 url=url,
+                 thumbnail=thumbnail,
+                 plot=plot,
+                 contentSerieName=title,
+                 infoLabels={'year': year}
+                 ))
 
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -405,8 +545,13 @@ def busqueda(item):
                                                    "^']+)'>Siguiente &rsaquo;</a>")
     if next_page_url != "":
         item.url = next_page_url
-        itemlist.append(Item(channel=item.channel, action="busqueda", title=">> Página siguiente", url=next_page_url,
-                             thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="busqueda",
+                     title=">> Página siguiente",
+                     url=next_page_url,
+                     thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+                     ))
     return itemlist
 
 
@@ -427,7 +572,6 @@ def findvideos(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     import time
-    start_time = time.time()
     for scrapedurl, scrapedserver, scrapedidioma in matches:
         url = scrapedurl
         idioma = audio[scrapedidioma]
@@ -455,7 +599,9 @@ def findvideos(item):
         videoitem.thumbnail = "http://media.tvalacarta.info/servers/server_%s.png" % videoitem.server
 
     if len(itemlist)== 0:
-        itemlist.append(Item(channel=item.channel, title='No hay enlaces compatibles con filtro'))
+        itemlist.append(
+                Item(channel=item.channel,
+                     title='No hay enlaces compatibles con filtro'))
 
     # Requerido para AutoPlay
 
@@ -479,7 +625,5 @@ def play(item):
         videoitem.infoLabels = item.infoLabels
         videoitem.title = item.title
         videoitem.thumbnail = videoitem.infoLabels['thumbnail']
-
-
 
     return itemlist

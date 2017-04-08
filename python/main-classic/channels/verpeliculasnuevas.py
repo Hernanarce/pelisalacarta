@@ -98,60 +98,65 @@ def mainlist(item):
 
     itemlist = []
 
-    itemlist.append(item.clone(title="Todas",
-                               action="lista",
-                               thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
-                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
-                               extra='peliculas/',
-                               url=host
+    itemlist.append(
+            item.clone(title="Todas",
+                       action="lista",
+                       thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
+                       fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
+                       extra='peliculas/',
+                       url=host
+                       ))
+
+    itemlist.append(
+            itemlist[-1].clone(title="Generos",
+                               action="menuseccion",
+                               thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               url=host,
+                               extra='/genero'
                                ))
 
-    itemlist.append(itemlist[-1].clone(title="Generos",
-                                       action="menuseccion",
-                                       thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
-                                       fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
-                                       url=host,
-                                       extra='/genero'
-                                       ))
-
-    itemlist.append(itemlist[-1].clone(title="Alfabetico",
-                                       action="menuseccion",
-                                       thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
-                                       fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png',
-                                       url=host, extra='/tag'
-                                       ))
+    itemlist.append(
+            itemlist[-1].clone(title="Alfabetico",
+                               action="menuseccion",
+                               thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
+                               fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png',
+                               url=host, extra='/tag'
+                               ))
 
     itemlist.append(
-        itemlist[-1].clone(title="Audio",
-                           action="menuseccion",
-                           thumbnail='https://s24.postimg.org/qmvqz4uxx/audio.png',
-                           fanart='https://s24.postimg.org/qmvqz4uxx/audio.png',
-                           url=host,
-                           extra='/audio'
-                           ))
-
-    itemlist.append(itemlist[-1].clone(title="Calidad",
-                                       action="menuseccion",
-                                       thumbnail='https://s23.postimg.org/ui42030wb/calidad.png',
-                                       fanart='https://s23.postimg.org/ui42030wb/calidad.png',
-                                       extra='/calidad'
-                                       ))
+            itemlist[-1].clone(title="Audio",
+                               action="menuseccion",
+                               thumbnail='https://s24.postimg.org/qmvqz4uxx/audio.png',
+                               fanart='https://s24.postimg.org/qmvqz4uxx/audio.png',
+                               url=host,
+                               extra='/audio'
+                               ))
 
     itemlist.append(
-        itemlist[-1].clone(title="Año",
-                           action="menuseccion",
-                           thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
-                           fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
-                           url=host,
-                           extra='/fecha-estreno'
-                           ))
+            itemlist[-1].clone(title="Calidad",
+                               action="menuseccion",
+                               thumbnail='https://s23.postimg.org/ui42030wb/calidad.png',
+                               fanart='https://s23.postimg.org/ui42030wb/calidad.png',
+                               extra='/calidad'
+                               ))
 
-    itemlist.append(itemlist[-1].clone(title="Buscar",
-                                       action="search",
-                                       url=host + '?s=',
-                                       thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                                       fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
-                                       ))
+    itemlist.append(
+            itemlist[-1].clone(title="Año",
+                               action="menuseccion",
+                               thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                               fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                               url=host,
+                               extra='/fecha-estreno'
+                               ))
+
+    itemlist.append(
+            itemlist[-1].clone(title="Buscar",
+                               action="search",
+                               url=host + '?s=',
+                               thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
+                               fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                               ))
 
     if autoplay.context:
         autoplay.show_option(item.channel, itemlist)
@@ -201,12 +206,13 @@ def menuseccion(item):
             else:
                 thumbnail = ''
 
-        itemlist.append(Item(channel=item.channel,
-                             action='lista',
-                             title=title,
-                             url=url,
-                             thumbnail=thumbnail
-                             ))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action='lista',
+                     title=title,
+                     url=url,
+                     thumbnail=thumbnail
+                     ))
 
     return itemlist
 
@@ -269,13 +275,14 @@ def lista(item):
                                                    "class=previouspostslink' href='([^']+)'>Siguiente &rsaquo;<\/a>")
         import inspect
         if next_page != '':
-            itemlist.append(Item(channel=item.channel,
-                                 action="lista",
-                                 title='Siguiente >>>',
-                                 url=next_page,
-                                 thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
-                                 extra=item.extra
-                                 ))
+            itemlist.append(
+                    Item(channel=item.channel,
+                         action="lista",
+                         title='Siguiente >>>',
+                         url=next_page,
+                         thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
+                         extra=item.extra
+                         ))
 
     return itemlist
 

@@ -18,7 +18,7 @@ from channels import autoplay
 from channels import filtertools
 
 IDIOMAS = {'latino': 'Latino'}
-list_languages = IDIOMAS.values()
+list_language = IDIOMAS.values()
 
 CALIDADES = {'1080':'1080p', '720':'720p', '480':'480p', '360':'360p'}
 list_quality = CALIDADES.values()
@@ -60,28 +60,56 @@ def mainlist(item):
 
     itemlist = []
 
-    itemlist.append(item.clone(title="Todas", action="lista", thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
-                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png', url=host))
+    itemlist.append(
+            item.clone(title="Todas",
+                       action="lista",
+                       thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
+                       fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
+                       url=host
+                       ))
 
     itemlist.append(
-        item.clone(title="Generos", action="seccion", thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
-                   fanart='https://s31.postimg.org/szbr0gmkb/generos.png', url=host, extra='generos'))
+            item.clone(title="Generos",
+                       action="seccion",
+                       thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
+                       fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
+                       url=host,
+                       extra='generos'
+                       ))
 
     itemlist.append(
-        item.clone(title="Mas vistas", action="seccion", thumbnail='https://s32.postimg.org/466gt3ipx/vistas.png',
-                   fanart='https://s32.postimg.org/466gt3ipx/vistas.png', url=host, extra='masvistas'))
+            item.clone(title="Mas vistas",
+                       action="seccion",
+                       thumbnail='https://s32.postimg.org/466gt3ipx/vistas.png',
+                       fanart='https://s32.postimg.org/466gt3ipx/vistas.png',
+                       url=host,
+                       extra='masvistas'
+                       ))
 
     itemlist.append(
-        item.clone(title="Recomendadas", action="lista", thumbnail='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
-                   fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png', url=host, extra='recomendadas'))
+            item.clone(title="Recomendadas",
+                       action="lista",
+                       thumbnail='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
+                       fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
+                       url=host,
+                       extra='recomendadas'
+                       ))
 
     itemlist.append(
-        item.clone(title="Por año", action="seccion", thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
-                   fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png', url=host, extra='poraño'))
+            item.clone(title="Por año",
+                       action="seccion",
+                       thumbnail='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                       fanart='https://s31.postimg.org/iyl5fvzqz/pora_o.png',
+                       url=host, extra='poraño'
+                       ))
 
-    itemlist.append(item.clone(title="Buscar", action="search", url='http://doomtv.net/?s=',
-                               thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                               fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
+    itemlist.append(
+            item.clone(title="Buscar",
+                       action="search",
+                       url='http://doomtv.net/?s=',
+                       thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
+                       fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                       ))
 
     if autoplay.context:
         autoplay.show_option(item.channel, itemlist)
@@ -142,15 +170,29 @@ def lista(item):
 
         if 'serie' not in url:
             itemlist.append(
-                Item(channel=item.channel, action='findvideos', title=title, url=url, thumbnail=thumbnail, plot=plot,
-                     fanart=fanart, contentTitle=title, infoLabels={'year': year}))
+                Item(channel=item.channel,
+                     action='findvideos',
+                     title=title,
+                     url=url,
+                     thumbnail=thumbnail,
+                     plot=plot,
+                     fanart=fanart,
+                     contentTitle=title,
+                     infoLabels={'year': year}
+                     ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     # Paginacion
     if next_page_url != '':
-        itemlist.append(Item(channel=item.channel, action="lista", title='Siguiente >>>', url=next_page_url,
-                             thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png', extra=item.extra,
-                             next_page=next_page))
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="lista",
+                     title='Siguiente >>>',
+                     url=next_page_url,
+                     thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
+                     extra=item.extra,
+                     next_page=next_page
+                     ))
     return itemlist
 
 
@@ -200,8 +242,16 @@ def seccion(item):
 
         if url not in duplicado:
             itemlist.append(
-                Item(channel=item.channel, action=accion, title=title, url=url, thumbnail=thumbnail, plot=plot,
-                     fanart=fanart, contentTitle=contentTitle, infoLabels={'year': year}))
+                Item(channel=item.channel,
+                     action=accion,
+                     title=title,
+                     url=url,
+                     thumbnail=thumbnail,
+                     plot=plot,
+                     fanart=fanart,
+                     contentTitle=contentTitle,
+                     infoLabels={'year': year}
+                     ))
             duplicado.append(url)
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     return itemlist
@@ -288,10 +338,21 @@ def get_url(item):
             title = item.contentTitle + ' (' + calidad + ')'
             if url not in duplicado:
                 itemlist.append(
-                    Item(channel=item.channel, action='play', title=title, url=url, thumbnail=item.thumbnail,
-                         plot=item.plot, fanart=item.fanart, contentTitle=item.contentTitle, language=IDIOMAS['latino'],
-                         server='directo', quality=CALIDADES[calidad], list_languages
-                 = list_languages, list_quality = list_quality, context = autoplay.context))
+                    Item(channel=item.channel,
+                         action='play',
+                         title=title,
+                         url=url,
+                         thumbnail=item.thumbnail,
+                         plot=item.plot,
+                         fanart=item.fanart,
+                         contentTitle=item.contentTitle,
+                         language=IDIOMAS['latino'],
+                         server='directo',
+                         quality=CALIDADES[calidad],
+                         list_language= list_language,
+                         list_quality = list_quality,
+                         context = autoplay.context
+                         ))
                 duplicado.append(url)
 
         return itemlist
@@ -303,8 +364,13 @@ def findvideos(item):
     itemlist = get_url(item)
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
-            Item(channel=item.channel, title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]', url=item.url,
-                 action="add_pelicula_to_library", extra="findvideos", contentTitle=item.contentTitle))
+            Item(channel=item.channel,
+                 title='[COLOR yellow]Añadir esta pelicula a la biblioteca[/COLOR]',
+                 url=item.url,
+                 action="add_pelicula_to_library",
+                 extra="findvideos",
+                 contentTitle=item.contentTitle
+                 ))
 
     # Requerido para FilterTools
 
