@@ -248,7 +248,6 @@ def findvideos(item):
                              language=IDIOMAS[scrapedid],
                              quality='default',
                              server=server,
-                             list_idiomas = list_language,
                              context = autoplay.context
                              ))
     if item.extra1 != 'capitulos':
@@ -269,7 +268,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 

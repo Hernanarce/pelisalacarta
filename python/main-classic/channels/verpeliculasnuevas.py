@@ -262,7 +262,6 @@ def lista(item):
                  extra=item.extra,
                  infoLabels={'year': year},
                  show = scrapedtitle,
-                 context=filtertools.context,
                  list_language=list_language
                  ))
 
@@ -340,9 +339,6 @@ def findvideos(item):
                  url = url,
                  language = IDIOMAS[scrapedidioma.lower()],
                  quality = scrapedcalidad.lower(),
-                 list_language = list_language,
-                 list_quality = list_quality,
-                 context = filtertools.context
                  ))
 
 
@@ -358,7 +354,8 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
+    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
 
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(

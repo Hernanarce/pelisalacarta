@@ -3,15 +3,12 @@
 # Canal (seodiv) por Hernan_Ar_c
 # ------------------------------------------------------------
 
-<<<<<<< Temporary merge branch 1
 import urlparse, urllib2, urllib, re
 import os, sys
 
 from core import logger
-=======
 import re
 
->>>>>>> Temporary merge branch 2
 from core import config
 from core import httptools
 from core import logger
@@ -24,7 +21,7 @@ from channels import autoplay
 from channels import filtertools
 
 IDIOMAS = {'latino': 'Latino'}
-list_languages = IDIOMAS.values()
+list_language = IDIOMAS.values()
 
 host = 'http://www.seodiv.com'
 
@@ -43,6 +40,9 @@ def mainlist(item):
                  fanart='https://s32.postimg.org/544rx8n51/series.png',
                  language='latino'
                  ))
+
+    if autoplay.context:
+        autoplay.show_option(item.channel, itemlist)
     return itemlist
 
 
@@ -154,12 +154,10 @@ def episodios(item):
 
 
 def episodiosxtemp(item):
-<<<<<<< Temporary merge branch 1
     logger.debug("pelisalacarta.channels.seodiv episodiosxtemp")
-=======
+
     
     logger.info()
->>>>>>> Temporary merge branch 2
     itemlist = []
     data = httptools.downloadpage(item.url).data
     tempo = item.title
@@ -221,7 +219,6 @@ def episodiosxtemp(item):
                          thumbnail=item.thumbnail,
                          plot=plot,
                          language=item.language,
-                         list_languages=list_languages,
                          context=autoplay.context,
                          contentSerieName=item.contentSerieName
                          ))
@@ -247,8 +244,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    if len(itemlist) > 0 and filtertools.context:
-        itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
@@ -257,8 +253,3 @@ def findvideos(item):
 
     return itemlist
 
-import urlparse, urllib2, urllib, re
-import os, sys
-
-from core import logger
-    logger.debug("pelisalacarta.channels.seodiv episodiosxtemp")

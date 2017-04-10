@@ -472,8 +472,6 @@ def findvideos(item):
                                          language=language,
                                          quality=quality,
                                          server='directo',
-                                         list_languages=list_language,
-                                         list_quality=list_quality,
                                          context=autoplay.context
                                          ))
                     duplicados.append(url)
@@ -522,7 +520,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
 
     # Requerido para AutoPlay
 
