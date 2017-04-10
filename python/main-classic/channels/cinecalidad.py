@@ -3,19 +3,19 @@
 # Canal (cinecalidad) por Hernan_Ar_c
 # ------------------------------------------------------------
 
-import urlparse, urllib2, urllib, re
-import os, sys
+import re
+import sys
+import urlparse
 
-from core import logger
-from core import config
-from core import scrapertools
-from core.item import Item
-from core import servertools
-from core import httptools
-from core import tmdb
-from core import jsontools
 from channels import autoplay
 from channels import filtertools
+from core import config
+from core import httptools
+from core import logger
+from core import scrapertools
+from core import servertools
+from core import tmdb
+from core.item import Item
 
 IDIOMAS = {'latino': 'Latino', 'castellano': 'Español', 'portugues': 'Portugues'}
 list_language = IDIOMAS.values()
@@ -296,7 +296,6 @@ def findvideos(item):
                              language=IDIOMAS[item.language],
                              quality='default',
                              server=server,
-                             list_language = list_language,
                              context = autoplay.context
                              ))
             duplicados.append(title)
@@ -312,7 +311,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
