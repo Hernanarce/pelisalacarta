@@ -534,7 +534,7 @@ def get_setting(name):
 
     if dev == "true":
         return True
-    elif dev == "false"
+    elif dev == "false":
         return False
     else:
         try:

@@ -106,7 +106,7 @@ class MenuWindow(xbmcgui.WindowXML):
             ntitle=item.title
             nplot=item.plot
 
-        if item.hasContentDetails=="true":
+        if item.hasContentDetails==True:
 
             if item.contentThumbnail and item.contentThumbnail!="":
                 nthumbnail = item.contentThumbnail

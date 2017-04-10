@@ -3,13 +3,19 @@
 # Canal (seodiv) por Hernan_Ar_c
 # ------------------------------------------------------------
 
+<<<<<<< Temporary merge branch 1
 import urlparse, urllib2, urllib, re
 import os, sys
 
 from core import logger
+=======
+import re
+
+>>>>>>> Temporary merge branch 2
 from core import config
 from core import httptools
 from core import logger
+from core import servertools
 from core import scrapertools
 from core.item import Item
 from core import servertools
@@ -148,7 +154,12 @@ def episodios(item):
 
 
 def episodiosxtemp(item):
+<<<<<<< Temporary merge branch 1
     logger.debug("pelisalacarta.channels.seodiv episodiosxtemp")
+=======
+    
+    logger.info()
+>>>>>>> Temporary merge branch 2
     itemlist = []
     data = httptools.downloadpage(item.url).data
     tempo = item.title
@@ -245,3 +256,9 @@ def findvideos(item):
         autoplay.start(itemlist, item)
 
     return itemlist
+
+import urlparse, urllib2, urllib, re
+import os, sys
+
+from core import logger
+    logger.debug("pelisalacarta.channels.seodiv episodiosxtemp")

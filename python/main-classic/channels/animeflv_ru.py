@@ -170,7 +170,7 @@ def listado(item):
 
     data = httptools.downloadpage(item.url).data
     data = re.sub(r"\n|\r|\t|\s{2}|-\s", "", data)
-    logger.debug("datito %s" % data)
+    # logger.debug("datito %s" % data)
 
     url_pagination = scrapertools.find_single_match(data, '<li class="current">.*?</li>[\s]<li><a href="([^"]+)">')
 
