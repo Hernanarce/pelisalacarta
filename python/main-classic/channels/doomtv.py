@@ -349,8 +349,6 @@ def get_url(item):
                          language=IDIOMAS['latino'],
                          server='directo',
                          quality=CALIDADES[calidad],
-                         list_language= list_language,
-                         list_quality = list_quality,
                          context = autoplay.context
                          ))
                 duplicado.append(url)
@@ -374,8 +372,7 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    if len(itemlist) > 0 and filtertools.context:
-        itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
 
     # Requerido para AutoPlay
 

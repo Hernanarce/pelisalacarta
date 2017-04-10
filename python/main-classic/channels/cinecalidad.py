@@ -19,6 +19,7 @@ from channels import filtertools
 
 IDIOMAS = {'latino': 'Latino', 'castellano': 'Español', 'portugues': 'Portugues'}
 list_language = IDIOMAS.values()
+list_quality = ['default']
 
 host = 'http://www.cinecalidad.to'
 thumbmx = 'http://flags.fmcdn.net/data/flags/normal/mx.png'
@@ -294,9 +295,8 @@ def findvideos(item):
                              plot=plot,
                              extra=item.thumbnail,
                              language=IDIOMAS[item.language],
-                             quality='default',
+                             quality = 'default',
                              server=server,
-                             list_language = list_language,
                              context = autoplay.context
                              ))
             duplicados.append(title)
@@ -307,12 +307,12 @@ def findvideos(item):
                  url=item.url,
                  action="add_pelicula_to_library",
                  extra="findvideos",
-                 contentTitle=item.contentTitle
+                 contentTitle=item.contentTitle,
                  ))
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
 
     # Requerido para AutoPlay
 

@@ -33,6 +33,8 @@ IDIOMAS = {'la': 'Latino',
            }
 list_language = IDIOMAS.values()
 
+CALIDADES =[]
+
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
          'vosi': '[COLOR red]ORIGINAL SUBTITULADO INGLES[/COLOR]'
@@ -115,7 +117,6 @@ def todas(item):
                  contentSerieName=title,
                  infoLabels={'year': year},
                  show=title,
-                 list_language=list_language,
                  context=filtertools.context
                  ))
 
@@ -407,7 +408,6 @@ def episodiosxtemp(item):
                      infoLabels=infoLabels,
                      show=item.contentSerieName,
                      context=filtertools.context,
-                     list_language=list_language
                      ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -586,13 +586,11 @@ def findvideos(item):
                               server=server,
                               fulltitle=item.ContentSeriename,
                               quality='default',
-                              context=filtertools.context,
-                              list_language=list_language
                               )
 
         # Requerido para FilterTools
 
-        itemlist = filtertools.get_link(itemlist, new_item)
+        itemlist = filtertools.get_link(itemlist, new_item, list_language, CALIDADES)
 
     for videoitem in itemlist:
         videoitem.infoLabels = item.infoLabels
