@@ -31,14 +31,6 @@ def context():
 context = context()
 
 
-def autoplay_config(item):
-    logger.info()
-
-    logger.debug(item.from_channel)
-    return platformtools.show_channel_settings(channelpath=filetools.join(config.get_runtime_path(), "channels",
-                                                                          item.from_channel))
-
-
 def show_option(channel, itemlist):
     logger.info()
     plot_autoplay = 'AutoPlay permite auto reproducir los enlaces directamente, basándose en la configuracion de tus ' \
@@ -63,6 +55,9 @@ def start(itemlist, item):
     favorite_servers = []
     favorite_quality = []
 
+    # Obtiene el nodo Autoplay desde el json del canal
+    autoplay_node = filetools.get_node_from_data_json(item.channel, 'AUTOPLAY')
+
     # Guarda la accion del usuario
     user_config_setting = config.get_setting("default_action")
     # Habilita la accion reproducir en calidad alta si el servidor devuelve más de una calidad p.e. gdrive
@@ -73,10 +68,13 @@ def start(itemlist, item):
 
     # Obtenemos si tenemos configuración personalizada
     autoplay_settings = config.get_setting("autoplay_settings", item.channel)
+    autoplay_settings = autoplay_node.get('custom', False)
+    logger.debug ('autoplay_settings: '+str(autoplay_settings))
 
     if autoplay_settings:
         # Ordena los enlaces por la prioridad Servidor/Calidad la lista de favoritos 
-        favorite_priority = config.get_setting("priority", item.channel)
+        #favorite_priority = config.get_setting("priority", item.channel)
+        favorite_priority = autoplay_node.get('settings', {}).get("priority", 0)
     else:
         # Si no está activa la personalización, la prioridad se fija en calidad
         favorite_priority = 2
@@ -87,35 +85,40 @@ def start(itemlist, item):
     server_found = False
     quality_found = False
 
-    server_list = []
-    quality_list = []
-    for setting in settings_list:
-        for id_setting, name_setting in setting.items():
+    server_list = autoplay_node.get('servers', [])
+    quality_list = autoplay_node.get('quality', [])
 
-            if name_setting == 'server_1':
-                # se obtiene los distintos servidores
-                # TODO esto hay que revisarlo con la actualización de servertools
-                server_list = setting['lvalues']
-                server_found = True
-
-            elif name_setting == 'quality_1':
-                # se obtiene las distintas calidades
-                # TODO esto hay que revisarlo ya que si el canal devuelve calidades se debe hacer en filtertools
-                quality_list = setting['lvalues']
-                quality_found = True
-
-                if server_found and quality_found:
-                    break
-
-        if server_found and quality_found:
-            break
+    # for setting in settings_list:
+    #     for id_setting, name_setting in setting.items():
+    #
+    #         if name_setting == 'server_1':
+    #             # se obtiene los distintos servidores
+    #             # TODO esto hay que revisarlo con la actualización de servertools
+    #             server_list = setting['lvalues']
+    #             server_found = True
+    #
+    #         elif name_setting == 'quality_1':
+    #             # se obtiene las distintas calidades
+    #             # TODO esto hay que revisarlo ya que si el canal devuelve calidades se debe hacer en filtertools
+    #             quality_list = setting['lvalues']
+    #             quality_found = True
+    #
+    #             if server_found and quality_found:
+    #                 break
+    #
+    #     if server_found and quality_found:
+    #         break
 
     # Se guardan los textos de cada servidor y calidad en listas p.e. favorite_servers = ['openload', 'streamcloud']
     for num in range(1, 4):
-        logger.debug('server_list: %s ' % server_list[config.get_setting("server_%s" % num, item.channel)])
-        logger.debug('config_get_settings: %s ' % config.get_setting("server_%s" % num, item.channel))
-        favorite_servers.append(server_list[config.get_setting("server_%s" % num, item.channel)])
-        favorite_quality.append(quality_list[config.get_setting("quality_%s" % num, item.channel)])
+        logger.debug('server_list: %s ' % server_list[autoplay_node.get('settings', {}).get("server_%s" %num, 0)])
+        #logger.debug('config_get_settings: %s ' % config.get_setting("server_%s" % num, item.channel))
+
+        #favorite_servers.append(server_list[config.get_setting("server_%s" % num, item.channel)])
+        #favorite_quality.append(quality_list[config.get_setting("quality_%s" % num, item.channel)])
+
+        favorite_servers.append(server_list[autoplay_node.get('settings', {}).get("server_%s" %num, 0)])
+        favorite_quality.append(quality_list[autoplay_node.get('settings', {}).get("quality_%s" % num, 0)])
 
     logger.debug (str(favorite_servers))
 
@@ -177,8 +180,7 @@ def start(itemlist, item):
                               key=lambda priority: priority[0])
         autoplay_list = ordered_list
 
-        #logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
-
+    logger.debug('autoplay_list: '+str(autoplay_list)+' favorite priority: '+str(favorite_priority))
     # Si hay elementos en la lista de autoplay se intenta reproducir cada elemento, hasta encontrar uno funcional
     # o fallen todos
     if autoplay_list:
@@ -221,3 +223,156 @@ def start(itemlist, item):
     config.set_setting("default_action", user_config_setting)
     # logger.debug(str(config.get_setting("default_action")))
     return itemlist
+
+def add_settings(channel, itemlist):
+    logger.info()
+
+    channel_servers = []
+    channel_quality = []
+    priority_list = ['Servidor y Calidad', 'Servidor', 'Calidad']
+
+    autoplay_node = filetools.get_node_from_data_json(channel, 'AUTOPLAY')
+    logger.debug('autoplay_node: '+str(len(autoplay_node)))
+
+    if len(autoplay_node)== 0:
+
+        autoplay_dict={"active": True,
+                       "custom": False,
+                       "servers": channel_servers,
+                       "quality": channel_quality,
+                       "priority": priority_list,
+                       "settings": {
+                                    "priority": 0,
+                                    "server_1": 0,
+                                    "server_2": 0,
+                                    "server_3": 0,
+                                    "quality_1": 0,
+                                    "quality_2": 0,
+                                    "quality_3": 0
+                                    }
+                       }
+
+        fname, json_data = filetools.update_json_data(autoplay_dict,channel,'AUTOPLAY')
+        result = filetools.write(fname, json_data)
+
+    for item in itemlist:
+         channel_servers = check_value(channel, item.server, 'servers')
+         channel_quality = check_value(channel, item.quality, 'quality')
+
+    return
+
+def check_value(channel, value ,value_type):
+    logger.info()
+    autoplay_node = filetools.get_node_from_data_json(channel, 'AUTOPLAY')
+    value_list = autoplay_node.get(value_type, [])
+    logger.debug('servers: '+str(value_list))
+
+    if len(value_list) == 0 or (value!='' and value not in value_list):
+        value_list.append(value)
+        fname, json_data = filetools.update_json_data(autoplay_node, channel, 'AUTOPLAY')
+        result = filetools.write(fname, json_data)
+
+    return value_list
+
+
+def autoplay_config(item):
+    logger.info()
+
+    # Obtenemos los datos de json
+    autoplay_node = filetools.get_node_from_data_json(item.from_channel, 'AUTOPLAY')
+
+    allow_option = True
+    active = autoplay_node.get('active', False)
+    list_controls = []
+
+    active_settings = {
+                      "id":"active",
+                      "label":"AutoPlay (activar/desactivar la auto-reproduccion)",
+                      "color":"0xffffff99",
+                      "type":"bool",
+                      "default":active,
+                      "enabled":allow_option,
+                      "visible":allow_option
+                     }
+    list_controls.append(active_settings)
+
+    custom_status = autoplay_node.get('custom', False)
+    custom_settings = {
+                        "id": "custom",
+                        "label": "   Configuracion Personalizada (Define tus Preferencias)",
+                        "color": "0xff66ffcc",
+                        "type": "bool",
+                        "default": custom_status,
+                        "enabled": True,
+                        "visible": True,
+                      }
+    list_controls.append(custom_settings)
+
+    priority_list = autoplay_node.get("priority", [])
+    status_priority = autoplay_node.get("settings", {}).get("priority",0)
+    set_priority = {
+                "id": "priority",
+                "label": "      - Prioridad (Indica el orden para Auto-Reproducir)",
+                "color": "0xffffff99",
+                "type": "list",
+                "default":status_priority ,
+                "enabled": True,
+                "visible": True,
+                "lvalues": priority_list
+                }
+    list_controls.append(set_priority)
+
+    server_list = autoplay_node.get("servers", [])
+    for num in range(1,4):
+        status_server = autoplay_node.get("settings", {}).get("server_%s"%num,0)
+        set_servers= {
+                      "id": "server_%s"%num,
+                      "label": "      - Servidor Favorito %s"%num,
+                      "color": "0xfffcab14",
+                      "type": "list",
+                      "default": status_server,
+                      "enabled": True,
+                      "visible": True,
+                      "lvalues": server_list
+                     }
+        list_controls.append(set_servers)
+
+    quality_list = autoplay_node.get("quality", [])
+    for num in range(1, 4):
+        status_quality = autoplay_node.get("settings", {}).get("quality_%s" % num, 0)
+        set_quality = {
+                       "id": "quality_%s" % num,
+                       "label": "      - Calidad Favorita %s" % num,
+                       "color": "0xfff442d9",
+                       "type": "list",
+                       "default": status_quality,
+                       "enabled": True,
+                       "visible": True,
+                       "lvalues": quality_list
+                      }
+        list_controls.append(set_quality)
+
+
+    logger.debug(str(list_controls))
+    platformtools.show_channel_settings(list_controls=list_controls, callback='save', item=item,
+                                        caption='AutoPlay')
+
+    def save(item, dict_data_saved):
+        logger.info()
+        logger.debug('dict_data_saved: '+str(dict_data_saved))
+        
+        autoplay_node = filetools.get_node_from_data_json(item.from_channel, 'AUTOPLAY')
+        fname, json_data = filetools.update_json_data(autoplay_node, item.from_channel, 'AUTOPLAY')
+        result = filetools.write(fname, json_data)
+
+
+
+
+
+
+
+
+
+
+
+

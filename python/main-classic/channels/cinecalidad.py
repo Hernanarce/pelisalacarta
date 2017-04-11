@@ -309,14 +309,15 @@ def findvideos(item):
                  contentTitle=item.contentTitle
                  ))
 
+    autoplay.add_settings(item.channel, itemlist)
     # Requerido para FilterTools
 
     itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
-        autoplay.start(itemlist, item)
+    #if config.get_setting("autoplay", item.channel) and autoplay.context:
+    autoplay.start(itemlist, item)
 
     return itemlist
 
