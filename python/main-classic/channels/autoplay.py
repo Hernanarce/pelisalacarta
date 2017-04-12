@@ -224,9 +224,11 @@ def start(itemlist, item):
     # logger.debug(str(config.get_setting("default_action")))
     return itemlist
 
-def add_settings(channel, itemlist):
+def add_settings(itemlist, item, list_language):
     logger.info()
 
+    channel = item.channel
+    list_language.insert(0,'No filtrar')
     channel_servers = []
     channel_quality = []
     priority_list = ['Servidor y Calidad', 'Servidor', 'Calidad']
@@ -237,6 +239,7 @@ def add_settings(channel, itemlist):
     if len(autoplay_node)== 0:
 
         autoplay_dict={"active": True,
+                       "language": list_language,
                        "custom": False,
                        "servers": channel_servers,
                        "quality": channel_quality,
@@ -296,14 +299,37 @@ def autoplay_config(item):
                      }
     list_controls.append(active_settings)
 
+    channel_language = autoplay_node.get('language', [])
+    set_language = {"id": "language",
+                    "label": "Idioma para AutoPlay (Obligatorio)",
+                    "color": "0xffffff99",
+                    "type": "list",
+                    "default": 0,
+                    "enabled": "eq(-1,true)",
+                    "visible": True,
+                    "lvalues": channel_language
+                    }
+    list_controls.append(set_language)
+
+    separador = {
+                       "id": "label",
+                       "label":
+                           "        "
+                           "_________________________________________________________________________________________",
+                       "type": "label",
+                       "enabled": True,
+                       "visible": True
+                       }
+    list_controls.append(separador)
+
     custom_status = autoplay_node.get('custom', False)
     custom_settings = {
                         "id": "custom",
-                        "label": "   Configuracion Personalizada (Define tus Preferencias)",
+                        "label": "   Personalizar Preferidos (Opcional)",
                         "color": "0xff66ffcc",
                         "type": "bool",
                         "default": custom_status,
-                        "enabled": True,
+                        "enabled": "eq(-3,true)",
                         "visible": True,
                       }
     list_controls.append(custom_settings)
@@ -316,7 +342,7 @@ def autoplay_config(item):
                 "color": "0xffffff99",
                 "type": "list",
                 "default":status_priority ,
-                "enabled": True,
+                "enabled": "eq(-4,true)+eq(-1,true)",
                 "visible": True,
                 "lvalues": priority_list
                 }
@@ -324,14 +350,16 @@ def autoplay_config(item):
 
     server_list = autoplay_node.get("servers", [])
     for num in range(1,4):
+        pos1 = num+4
+        pos2 = num+1
         status_server = autoplay_node.get("settings", {}).get("server_%s"%num,0)
         set_servers= {
                       "id": "server_%s"%num,
-                      "label": "      - Servidor Favorito %s"%num,
+                      "label": u"      \u2665 Servidor Favorito %s"%num,
                       "color": "0xfffcab14",
                       "type": "list",
                       "default": status_server,
-                      "enabled": True,
+                      "enabled": "eq(-%s,true)+eq(-%s,true)"%(pos1,pos2),
                       "visible": True,
                       "lvalues": server_list
                      }
@@ -339,14 +367,16 @@ def autoplay_config(item):
 
     quality_list = autoplay_node.get("quality", [])
     for num in range(1, 4):
+        pos1 = num + 7
+        pos2 = num + 4
         status_quality = autoplay_node.get("settings", {}).get("quality_%s" % num, 0)
         set_quality = {
                        "id": "quality_%s" % num,
-                       "label": "      - Calidad Favorita %s" % num,
+                       "label": u"      \u2665 Calidad Favorita %s" % num,
                        "color": "0xfff442d9",
                        "type": "list",
                        "default": status_quality,
-                       "enabled": True,
+                       "enabled":  "eq(-%s,true)+eq(-%s,true)"%(pos1,pos2),
                        "visible": True,
                        "lvalues": quality_list
                       }
