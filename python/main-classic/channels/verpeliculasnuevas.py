@@ -262,7 +262,6 @@ def lista(item):
                  extra=item.extra,
                  infoLabels={'year': year},
                  show = scrapedtitle,
-                 context=filtertools.context,
                  list_language=list_language
                  ))
 
@@ -283,6 +282,7 @@ def lista(item):
                          thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
                          extra=item.extra
                          ))
+
 
     return itemlist
 
@@ -342,7 +342,6 @@ def findvideos(item):
                  quality = scrapedcalidad.lower(),
                  list_language = list_language,
                  list_quality = list_quality,
-                 context = filtertools.context
                  ))
 
 
@@ -356,9 +355,10 @@ def findvideos(item):
         videoitem.title = item.contentTitle + ' | ' + videoitem.calidad + ' | ' + videoitem.idioma + ' (' + \
                           videoitem.server + ')'
 
+    autoplay.add_settings(itemlist, item, list_language)
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
@@ -373,7 +373,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist
