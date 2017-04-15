@@ -372,7 +372,8 @@ def autoplay_config(item):
     list_controls.append(set_language)
 
     separador = {"id": "label",
-                 "label": "_________________________________________________________________________________________",
+                 "label": "         "
+                          "_________________________________________________________________________________________",
                  "type": "label",
                  "enabled": True,
                  "visible": True
