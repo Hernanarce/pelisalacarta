@@ -97,6 +97,7 @@ def extractSeriesFromData(item, data):
             name = unicode(name, "iso-8859-1", errors="replace").encode("utf-8")
 
         logger.debug("Show found: {name} -> {url} ({img})".format(name = name, url = url, img = img))
+        item.show = name
         itemlist.append(item.clone(title=name, url=urlparse.urljoin(HOST, url),
                                    action="episodios" if not episodePattern.search(url) else "findvideos", show=name, thumbnail=img,
                                    context=filtertools.context(item, list_idiomas, CALIDADES)))
@@ -230,8 +231,14 @@ def parseVideos(item, typeStr, data):
         for vMatch in vPattIter:
             vFields = vMatch.groupdict()
             quality = vFields.get("quality")
+
+            # FIX para veces que añaden el idioma en los comentarios
+            quality = re.sub(r"sub-inglés-?", "", quality, flags=re.IGNORECASE)
             if not quality:
                 quality = "SD"
+            # FIX para los guiones en la calidad y no tener que añadir otra opción en la lista de calidades
+            if quality.startswith("MicroHD"):
+                quality = re.sub(r"microhd", "Micro-HD-", quality, flags=re.IGNORECASE)
 
             title = "{0} en {1} [{2}] [{3}] ({4}: {5})"\
                 .format(typeStr, vFields.get("server"), IDIOMAS.get(vFields.get("language"), "OVOS"), quality,
