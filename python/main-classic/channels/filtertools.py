@@ -117,6 +117,7 @@ def context(item, list_language=None, list_quality=None, exist=False):
     Para xbmc/kodi y mediaserver ya que pueden mostrar el menú contextual, se añade un menu para configuración
     la opción de filtro, sólo si es para series.
     Dependiendo del lugar y si existe filtro se añadirán más opciones a mostrar.
+    El contexto -solo se muestra para series-.
 
     @param item: elemento para obtener la información y ver que contexto añadir
     @type item: item
@@ -130,7 +131,9 @@ def context(item, list_language=None, list_quality=None, exist=False):
     @rtype: list
     """
     _context = []
-    if config.is_xbmc() or config.get_platform() == "mediaserver" and item.show != "":
+    # TODO hay que mirar si el contexto ya tiene valores para no eliminar las anteriores opciones
+
+    if access() and item.show != "":
         dict_data = {"title": "FILTRO: Configurar", "action": "config_item", "channel": "filtertools"}
         if list_language:
             dict_data["list_language"] = list_language
@@ -240,6 +243,7 @@ def get_link(list_item, item, list_language, list_quality=None, global_filter_la
         list_item, quality_count, language_count = \
             check_conditions(filter_global, list_item, item, list_language, list_quality)
     else:
+        item.context = context(item)
         list_item.append(item)
 
     return list_item
