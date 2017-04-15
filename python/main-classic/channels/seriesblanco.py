@@ -16,19 +16,27 @@ from core import servertools
 from core import httptools
 from core.item import Item
 
+# Requerido para AutoPlay
+from channels import autoplay
 from channels import filtertools
 
 
 channel_xml = channeltools.get_channel_parameters("seriesblanco")
 HOST = "http://seriesblanco.com/"
 IDIOMAS = {'es': 'Español', 'en': 'Inglés', 'la': 'Latino', 'vo': 'VO', 'vos': 'VOS', 'vosi': 'VOSI', 'otro': 'OVOS'}
-list_idiomas = IDIOMAS.values()
 CALIDADES = ['SD', 'HDiTunes', 'Micro-HD-720p', 'Micro-HD-1080p', '1080p', '720p']
+
+list_idiomas = IDIOMAS.values()
+list_servers =['youwatch','powvideo', 'openload', 'streamplay', 'streaminto', 'flashx', 'gamovideo', 'nowvideo',
+               'rockfile']
 
 CAPITULOS_DE_ESTRENO_STR = "Capítulos de Estreno"
 
 def mainlist(item):
     logger.info()
+
+    # Requerido para AutoPlay
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, CALIDADES)
 
     thumb_series    = get_thumb("squares", "thumb_canales_series.png")
     thumb_series_az = get_thumb("squares", "thumb_canales_series_az.png")
@@ -54,6 +62,10 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, title="Buscar...", action="search", url=HOST, thumbnail=thumb_buscar))
 
     itemlist = filtertools.show_option(itemlist, item.channel, list_idiomas, CALIDADES)
+
+    # Requerido para AutoPlay
+    if autoplay.context:
+        autoplay.show_option(item.channel, itemlist)
 
     return itemlist
 
@@ -226,7 +238,7 @@ def parseVideos(item, typeStr, data):
                         vFields.get("uploader"), vFields.get("date"))
             itemlist.append(item.clone(title=title, fulltitle=item.title, url=urlparse.urljoin(HOST, vFields.get("link")),
                                        action="play", language=IDIOMAS.get(vFields.get("language"), "OVOS"),
-                                       quality=quality))
+                                       quality=quality, server= vFields.get("server")))
 
         if len(itemlist) > 0:
             return itemlist
@@ -262,6 +274,10 @@ def findvideos(item):
         list_links.extend(parseVideos(item, "Descargar", online[1]))
 
     list_links = filtertools.get_links(list_links, item, list_idiomas, CALIDADES)
+
+    # Requerido para AutoPlay
+    if autoplay.context:
+        autoplay.start(list_links, item)
 
     return list_links
 

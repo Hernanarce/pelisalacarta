@@ -301,6 +301,7 @@ class HTTPHeaderDict(dict):
             yield val[0], ', '.join(val[1:])
 
     def items(self):
+        # type: () -> object
         return list(self.iteritems())
 
     @classmethod

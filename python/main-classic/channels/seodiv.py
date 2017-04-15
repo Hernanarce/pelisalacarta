@@ -22,6 +22,13 @@ from channels import filtertools
 
 IDIOMAS = {'latino': 'Latino'}
 list_language = IDIOMAS.values()
+list_servers =['openload',
+               'okru',
+               'myvideo',
+               'sendvid'
+               ]
+list_quality = ['default']
+
 
 host = 'http://www.seodiv.com'
 
@@ -29,6 +36,7 @@ host = 'http://www.seodiv.com'
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -40,7 +48,6 @@ def mainlist(item):
                  fanart='https://s32.postimg.org/544rx8n51/series.png',
                  language='latino'
                  ))
-
     if autoplay.context:
         autoplay.show_option(item.channel, itemlist)
     return itemlist
@@ -51,7 +58,6 @@ def todas(item):
     itemlist = []
     data = httptools.downloadpage(item.url).data
     data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>|\s{2,}', "", data)
-    logger.debug(data)
     patron = '<div class=shortf><div><div class=shortf-img><a href=(.*?)><img src=(.*?) alt=.*?quality>(' \
              '.*?)<.*?series transition>(.*?) <\/span>'
 
@@ -82,7 +88,6 @@ def temporadas(item):
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
-    logger.debug(data)
     url_base = item.url
     patron = '<a class="collapsed" data-toggle="collapse" data-parent="#accordion" href=.*? aria-expanded="false" ' \
              'aria-controls=.*?>([^<]+)<\/a>'
@@ -147,16 +152,14 @@ def episodios(item):
     itemlist = []
     templist = temporadas(item)
     for tempitem in templist:
-        logger.debug(tempitem)
         itemlist += episodiosxtemp(tempitem)
 
     return itemlist
 
 
 def episodiosxtemp(item):
-    logger.debug("pelisalacarta.channels.seodiv episodiosxtemp")
+    logger.info()
 
-    
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
@@ -203,7 +206,6 @@ def episodiosxtemp(item):
                          url=url,
                          thumbnail=item.thumbnail,
                          plot=plot,
-                         language=item.language,
                          quality=item.quality,
                          contentSerieName=item.contentSerieName
                          ))
@@ -219,7 +221,6 @@ def episodiosxtemp(item):
                          thumbnail=item.thumbnail,
                          plot=plot,
                          language=item.language,
-                         context=autoplay.context,
                          contentSerieName=item.contentSerieName
                          ))
 
@@ -230,7 +231,6 @@ def findvideos(item):
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
-    logger.debug(data)
     video_items = servertools.find_video_items(item)
 
     for videoitem in video_items:
@@ -244,7 +244,8 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item, list_language)
+    if len(itemlist) > 0 and filtertools.context:
+        itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
@@ -252,4 +253,3 @@ def findvideos(item):
         autoplay.start(itemlist, item)
 
     return itemlist
-

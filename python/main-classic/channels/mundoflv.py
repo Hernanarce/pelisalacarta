@@ -32,6 +32,17 @@ IDIOMAS = {'la': 'Latino',
            'en': 'VO'
            }
 list_language = IDIOMAS.values()
+list_quality = []
+list_servers = [
+                'openload',
+                'gamovideo',
+                'powvideo',
+                'streamplay',
+                'streamin',
+                'streame',
+                'flashx',
+                'nowvideo'
+               ]
 
 list_quality =['default']
 
@@ -47,6 +58,7 @@ headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/2
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -116,7 +128,8 @@ def todas(item):
                  fanart=fanart,
                  contentSerieName=title,
                  infoLabels={'year': year},
-                 show=title, context=filtertools.context(item, list_language, list_quality)
+                 show=title,
+                 list_language=list_language,
                  ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -406,6 +419,7 @@ def episodiosxtemp(item):
                      contentSeasonNumber=item.contentSeasonNumber,
                      infoLabels=infoLabels,
                      show=item.contentSerieName,
+                     list_language=list_language
                      ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -584,7 +598,7 @@ def findvideos(item):
                               server=server,
                               quality ='default',
                               fulltitle=item.ContentSeriename,
-                              context = autoplay.context
+                              quality='default',
                               )
 
         # Requerido para FilterTools
@@ -602,7 +616,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist

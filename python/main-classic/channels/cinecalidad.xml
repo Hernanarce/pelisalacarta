@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <channel>
    <id>cinecalidad</id>
    <name>CineCalidad</name>
@@ -7,7 +6,7 @@
    <adult>false</adult>
    <language>es</language>
 
-   <fanart></fanart>
+   <fanart/>
    <thumbnail>https://s31.postimg.org/puxmvsi7v/cinecalidad.png</thumbnail>
    <bannermenu>https://s32.postimg.org/kihkdpx1x/banner_cinecalidad.png</bannermenu>
 
@@ -18,7 +17,7 @@
 		<change>
 			<date>15/03/2017</date>
 			<autor>SeiTaN</autor>
-			<description>limpieza código</description>
+			<description>limpieza c&#243;digo</description>
 		</change>
 		<change>
 			<date>18/06/2016</date>
@@ -53,152 +52,7 @@
       <lvalues>Español</lvalues>
       <lvalues>Portuges</lvalues>
    </settings>
-
-   <settings>
-      <id>autoplay</id>
-      <label>AutoPlay (activar/desactivar la auto-reproducción)</label>
-      <color>0xffffff99</color>
-      <type>bool</type>
-      <default>true</default>
-      <enabled>true</enabled>
-      <visible>true</visible>
-   </settings>
-   
-   <settings>
-      <id>autoplay_settings</id>
-      <type>bool</type>
-      <label>   Configuracion Personalizada (Define tus Preferencias):</label>
-      <color>0xff66ffcc</color>
-      <default>false</default>
-      <enabled>eq(-1,true)</enabled>
-      <visible>true</visible>
-   </settings>
-
-   <settings>
-      <id>priority</id>
-      <type>list</type>
-      <label>      - Prioridad (Indica el orden para Auto-Reproducir)</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-2,true)+eq(-1,true)</enabled>
-      <visible>true</visible>
-      <lvalues>Servidor y Calidad</lvalues>
-      <lvalues>Servidor</lvalues>
-      <lvalues>Calidad</lvalues>
-   </settings>
-
-   <settings>
-      <id>label4</id>
-      <type>label</type>
-      <label></label>
-      <enabled>false</enabled>
-      <visible>true</visible>
-   </settings>
-
-  <settings>
-      <id>server_1</id>
-      <type>list</type>
-      <label>      - Servidor Favorito 1</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-4,true)+eq(-3,true)</enabled>
-      <visible>true</visible>
-      <lvalues>yourupload</lvalues>
-      <lvalues>thevideos</lvalues>
-      <lvalues>filescdn</lvalues>
-      <lvalues>uptobox</lvalues>
-      <lvalues>okru</lvalues>
-      <lvalues>nowvideo</lvalues>
-      <lvalues>userscloud</lvalues>
-      <lvalues>pcloud</lvalues>
-      <lvalues>usersfiles</lvalues>
-      <lvalues>vidbull</lvalues>
-   </settings>
-   
-   <settings>
-      <id>server_2</id>
-      <type>list</type>
-      <label>      - Servidor Favorito 2</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-5,true)+eq(-4,true)</enabled>
-      <visible>true</visible>
-      <lvalues>yourupload</lvalues>
-      <lvalues>thevideos</lvalues>
-      <lvalues>filescdn</lvalues>
-      <lvalues>uptobox</lvalues>
-      <lvalues>okru</lvalues>
-      <lvalues>nowvideo</lvalues>
-      <lvalues>userscloud</lvalues>
-      <lvalues>pcloud</lvalues>
-      <lvalues>usersfiles</lvalues>
-      <lvalues>vidbull</lvalues>
-   </settings>
-   
-   <settings>
-      <id>server_3</id>
-      <type>list</type>
-      <label>      - Servidor Favorito 3</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-6,true)+eq(-5,true)</enabled>
-      <visible>true</visible>
-      <lvalues>yourupload</lvalues>
-      <lvalues>thevideos</lvalues>
-      <lvalues>filescdn</lvalues>
-      <lvalues>uptobox</lvalues>
-      <lvalues>okru</lvalues>
-      <lvalues>nowvideo</lvalues>
-      <lvalues>userscloud</lvalues>
-      <lvalues>pcloud</lvalues>
-      <lvalues>usersfiles</lvalues>
-      <lvalues>vidbull</lvalues>
-   </settings>
-
-   <settings>
-      <id>label5</id>
-      <type>label</type>
-      <label></label>
-      <enabled>true</enabled>
-      <visible>true</visible>
-   </settings>
-
-   <settings>
-      <id>quality_1</id>
-      <type>list</type>
-      <label>      - Calidad Favorita 1</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-8,true)+eq(-7,true)</enabled>
-      <visible>true</visible>
-       <lvalues>default</lvalues>
-      <lvalues>default</lvalues>
-   </settings>
-
-   <settings>
-      <id>quality_2</id>
-      <type>list</type>
-      <label>      - Calidad Favorita 2</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-9,true)+eq(-8,true)</enabled>
-      <visible>true</visible>
-       <lvalues>default</lvalues>
-      <lvalues>default</lvalues>
-   </settings>
-
-   <settings>
-      <id>quality_3</id>
-      <type>list</type>
-      <label>      - Calidad Favorita 3</label>
-      <color>0xffffff99</color>
-      <default>0</default>
-      <enabled>eq(-10,true)+eq(-9,true)</enabled>
-      <visible>true</visible>
-      <lvalues>default</lvalues>
-      <lvalues>default</lvalues>
-   </settings>
-
+  
    <settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>
@@ -215,4 +69,5 @@
 		<enabled>true</enabled>
 		<visible>true</visible>
 	</settings>
-</channel>
+   
+   </channel>

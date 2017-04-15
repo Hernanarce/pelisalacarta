@@ -22,6 +22,7 @@ list_language = IDIOMAS.values()
 
 CALIDADES = {'1080':'1080p', '720':'720p', '480':'480p', '360':'360p'}
 list_quality = CALIDADES.values()
+list_servers =['directo']
 
 host = 'http://doomtv.net/'
 headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
@@ -58,6 +59,7 @@ tgenero = {"Comedia": "https://s32.postimg.org/q7g2qs90l/comedia.png",
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -233,8 +235,8 @@ def seccion(item):
         elif item.extra == 'generos':
             title = re.sub(r'<\/a> <i>\d+', '', scrapedtitle)
             cantidad = re.findall(r'.*?<\/a> <i>(\d+)', scrapedtitle)
-            logger.debug('scrapedtitle: ' + scrapedtitle)
-            logger.debug('cantidad: ' + str(cantidad))
+            #logger.debug('scrapedtitle: ' + scrapedtitle)
+            #logger.debug('cantidad: ' + str(cantidad))
             th_title = title
             title = title + ' (' + cantidad[0] + ')'
             thumbnail = tgenero[th_title]
@@ -367,16 +369,16 @@ def findvideos(item):
                  url=item.url,
                  action="add_pelicula_to_library",
                  extra="findvideos",
-                 contentTitle=item.contentTitle
+                 contentTitle=item.contentTitle,
                  ))
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item, list_language, list_quality)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist

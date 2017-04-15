@@ -19,7 +19,21 @@ from core.item import Item
 
 IDIOMAS = {'latino': 'Latino', 'castellano': 'Español', 'portugues': 'Portugues'}
 list_language = IDIOMAS.values()
-list_quality = ['default']
+logger.debug('lista_language: %s'%list_language)
+
+list_quality =[]
+list_servers =[
+               'yourupload',
+               'thevideos',
+               'filescdn',
+               'uptobox',
+               'okru',
+               'nowvideo',
+               'userscloud',
+               'pcloud',
+               'usersfiles',
+               'vidbull'
+               ]
 
 host = 'http://www.cinecalidad.to'
 thumbmx = 'http://flags.fmcdn.net/data/flags/normal/mx.png'
@@ -30,6 +44,8 @@ thumbbr = 'http://flags.fmcdn.net/data/flags/normal/br.png'
 def mainlist(item):
     idioma2 = "destacadas"
     logger.info()
+
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -297,7 +313,6 @@ def findvideos(item):
                              language=IDIOMAS[item.language],
                              quality = 'default',
                              server=server,
-                             context = autoplay.context
                              ))
             duplicados.append(title)
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
@@ -316,7 +331,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist
@@ -376,7 +391,6 @@ def busqueda(item):
         year = re.sub(r'.*?\((\d{4})\)', '', title)
         title = year
         fulltitle = title
-        logger.debug(plot)
 
         new_item = item.clone(action="findvideos",
                               title=title,
