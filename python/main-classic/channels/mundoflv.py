@@ -32,6 +32,17 @@ IDIOMAS = {'la': 'Latino',
            'en': 'VO'
            }
 list_language = IDIOMAS.values()
+list_quality = []
+list_servers = [
+                'openload',
+                'gamovideo',
+                'powvideo',
+                'streamplay',
+                'streamin',
+                'streame',
+                'flashx',
+                'nowvideo'
+               ]
 
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
@@ -45,6 +56,7 @@ headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/2
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -116,7 +128,6 @@ def todas(item):
                  infoLabels={'year': year},
                  show=title,
                  list_language=list_language,
-                 context=filtertools.context
                  ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -406,7 +417,6 @@ def episodiosxtemp(item):
                      contentSeasonNumber=item.contentSeasonNumber,
                      infoLabels=infoLabels,
                      show=item.contentSerieName,
-                     context=filtertools.context,
                      list_language=list_language
                      ))
 
@@ -586,13 +596,11 @@ def findvideos(item):
                               server=server,
                               fulltitle=item.ContentSeriename,
                               quality='default',
-                              context=filtertools.context,
-                              list_language=list_language
                               )
 
         # Requerido para FilterTools
 
-        itemlist = filtertools.get_link(itemlist, new_item)
+        itemlist = filtertools.get_link(itemlist, new_item, list_language)
 
     for videoitem in itemlist:
         videoitem.infoLabels = item.infoLabels
@@ -605,7 +613,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist

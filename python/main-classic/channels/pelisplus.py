@@ -37,11 +37,19 @@ list_quality = ['1080p',
                 '360p',
                 '240p'
                 ]
+list_servers = [
+                'directo',
+                'openload',
+                'thevideos'
+                ]
+
+
 
 
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel,list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -472,9 +480,6 @@ def findvideos(item):
                                          language=language,
                                          quality=quality,
                                          server='directo',
-                                         list_languages=list_language,
-                                         list_quality=list_quality,
-                                         context=autoplay.context
                                          ))
                     duplicados.append(url)
 
@@ -522,11 +527,11 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist

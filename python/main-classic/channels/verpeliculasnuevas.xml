@@ -54,16 +54,6 @@
 		<lvalues>VOS</lvalues>
 	</settings>
 
-	<settings>
-		<id>autoplay</id>
-		<label>AutoPlay (activar/desactivar la auto-reproduccion)</label>
-		<color>0xffffff99</color>
-		<type>bool</type>
-		<default>true</default>
-		<enabled>true</enabled>
- 		<visible>true</visible>
-	</settings>
-
 <settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>

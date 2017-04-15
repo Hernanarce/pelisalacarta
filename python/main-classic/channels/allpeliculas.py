@@ -45,7 +45,7 @@ def mainlist(item):
     logger.info()
 
     # Requerido para AutoPlay
-    autoplay.prepare_autoplay_settings(item.channel, list_language, list_servers, list_quality)
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
 
     itemlist = []
     item.text_color = color1
@@ -303,7 +303,16 @@ def findvideos(item):
             idioma = IDIOMAS.get(idiomas_videos.get(language))
             titulo = server.capitalize()+"  ["+idioma+"] ["+calidad_videos.get(calidad)+"]"
             itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma,
-                                       language=idioma, server=server, quality =calidad_videos.get(calidad)))
+                                       language=idioma, server=server, quality=calidad_videos.get(calidad)
+                                       ))
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    if autoplay.context:
+        autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?id_lang=' \
@@ -328,6 +337,7 @@ def findvideos(item):
                 itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma, server=server,
                                            language=idioma, quality = calidad_videos.get(calidad)))
 
+
     itemlist.sort(key=lambda item: (item.extra, item.server))
     if itemlist:
         if not "trailer" in item.infoLabels:
@@ -343,14 +353,6 @@ def findvideos(item):
                                      infoLabels={'title': item.fulltitle}, fulltitle=item.fulltitle,
                                      extra="library"))
 
-    # Requerido para FilterTools
-
-    itemlist = filtertools.get_links(itemlist, item, list_language)
-
-    # Requerido para AutoPlay
-
-    if autoplay.context:
-        autoplay.start(itemlist, item)
 
     return itemlist
 
@@ -431,7 +433,6 @@ def findvideostv(item):
     idiomas_videos, calidad_videos = dict_videos()
     logger.debug('idiomas_videos:'+str(idiomas_videos.values()))
     logger.debug('calidad_videos:' + str(calidad_videos.values()))
-    return
 
     data = httptools.downloadpage(item.url).data
     data = data.replace("\n", "").replace("\t", "")
@@ -460,7 +461,17 @@ def findvideostv(item):
             idioma = IDIOMAS.get(idiomas_videos.get(language))
             titulo = server.capitalize()+" ["+idioma+"] ("+calidad_videos.get(quality)+")"
 
-            itemlist.append(item.clone(action="play", title=titulo, url=url, contentType="episode", server=server))
+            itemlist.append(item.clone(action="play", title=titulo, url=url, contentType="episode", server=server,
+                                       quality=calidad_videos.get(quality)))
+
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    if autoplay.context:
+        autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?episode="%s' \

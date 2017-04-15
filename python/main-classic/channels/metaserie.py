@@ -18,10 +18,21 @@ from channels import filtertools
 
 IDIOMAS = {'la': 'Latino', 'es': 'Español', 'sub': 'VOS'}
 list_language = IDIOMAS.values()
+list_quality =[]
+list_servers =[
+               'openload',
+               'gamovideo',
+               'powvideo',
+               'streamplay',
+               'streaminto',
+               'streame',
+               'flashx'
+              ]
 
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(item.clone(title="Series",
@@ -248,8 +259,6 @@ def findvideos(item):
                              language=IDIOMAS[scrapedid],
                              quality='default',
                              server=server,
-                             list_idiomas = list_language,
-                             context = autoplay.context
                              ))
     if item.extra1 != 'capitulos':
         if anterior != '':
@@ -269,11 +278,11 @@ def findvideos(item):
 
     # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item.channel)
+    itemlist = filtertools.get_links(itemlist, item, list_language)
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
+    if autoplay.context:
         autoplay.start(itemlist, item)
 
     return itemlist

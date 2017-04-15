@@ -41,6 +41,19 @@ list_quality = ['HQ',
                 'DVD',
                 'CAM'
                 ]
+list_servers = [
+                'openload',
+		        'powvideo',
+		        'streamplay',
+		        'streaminto',
+		        'netu',
+		        'vidabc',
+		        'thevideos',
+		        'yourupload',
+		        'thevideome',
+		        'directo',
+                'netutv'
+                ]
 
 
 tcalidad = {'hq': '[COLOR limegreen]HQ[/COLOR]',
@@ -96,6 +109,7 @@ patrones = ['', '<span class="clms">Sinopsis:<\/span>([^<]+)<div class="info_mov
 def mainlist(item):
     logger.info()
 
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -340,8 +354,6 @@ def findvideos(item):
                  url = url,
                  language = IDIOMAS[scrapedidioma.lower()],
                  quality = scrapedcalidad.lower(),
-                 list_language = list_language,
-                 list_quality = list_quality,
                  ))
 
 
@@ -355,10 +367,14 @@ def findvideos(item):
         videoitem.title = item.contentTitle + ' | ' + videoitem.calidad + ' | ' + videoitem.idioma + ' (' + \
                           videoitem.server + ')'
 
-    autoplay.add_settings(itemlist, item, list_language)
     # Requerido para FilterTools
 
     itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    if autoplay.context:
+        autoplay.start(itemlist, item)
 
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
@@ -369,12 +385,6 @@ def findvideos(item):
                  extra="findvideos",
                  contentTitle=item.contentTitle
                  ))
-
-
-    # Requerido para AutoPlay
-
-    if autoplay.context:
-        autoplay.start(itemlist, item)
 
     return itemlist
 
