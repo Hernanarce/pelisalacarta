@@ -223,7 +223,11 @@ def start(itemlist, item):
                         channel = __import__('channels.%s' % item.channel, None, None, ["channels.%s" % item.channel])
                         if hasattr(channel, 'play'):
                             resolved_item = getattr(channel, 'play')(videoitem)
-                            videoitem = resolved_item[0]
+                            if isinstance(resolved_item[0], list):
+                                videoitem.video_urls= resolved_item
+                            else:
+                                videoitem = resolved_item[0]
+
                         # si no directamente reproduce
                         logger.debug('videoitem: ' + str(videoitem))
                         platformtools.play_video(videoitem)
