@@ -74,8 +74,7 @@ def mainlist(item):
                    language='portugues'
                    ))
 
-    if autoplay.context:
-        autoplay.show_option(item.channel, itemlist)
+    autoplay.show_option(item.channel, itemlist)
 
     return itemlist
 

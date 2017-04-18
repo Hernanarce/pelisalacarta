@@ -61,8 +61,7 @@ def mainlist(item):
     itemlist.append(item.clone(action="configuracion", title="Configurar canal...", text_color="gold", folder=False))
 
     # Requerido para AutoPlay
-    if autoplay.context:
-        autoplay.show_option(item.channel, itemlist)
+    autoplay.show_option(item.channel, itemlist)
 
     return itemlist
 
