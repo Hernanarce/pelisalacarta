@@ -19,7 +19,7 @@ import os
 __channel__ = "autoplay"
 
 
-def context():
+def context ():
     '''
     Agrega la opcion Configurar AutoPlay al menu contextual
 
@@ -40,7 +40,7 @@ def context():
 context = context()
 
 
-def show_option(channel, itemlist):
+def show_option (channel, itemlist):
     '''
     Agrega la opcion Configurar AutoPlay en la lista recibida
 
@@ -58,7 +58,7 @@ def show_option(channel, itemlist):
     return itemlist
 
 
-def start(itemlist, item):
+def start (itemlist, item):
     '''
     Metodo principal desde donde se reproduce automaticamente los enlaces
     - En caso la opcion de personalizar activa utilizara las opciones definidas por el usuario.
@@ -139,6 +139,12 @@ def start(itemlist, item):
                                      "from_channel": item.channel
                                      }
                                     )
+                logger.debug('tiene: %s %s'%(hasattr(item, 'quality'),item.quality))
+                if item.quality == '':
+                    item.quality = 'default'
+                    setattr(item,'quality','default')
+                    logger.debug ('item hernan: %s'%item)
+                logger.debug('tiene: %s %s' % (hasattr(item, 'quality'), item.quality))
                 # Se crea la lista para configuracion personalizada
                 if autoplay_settings:
                     # si el servidor no se encuentra en la lista de favoritos o la url no es correcta, avanzamos en
@@ -223,7 +229,11 @@ def start(itemlist, item):
                         channel = __import__('channels.%s' % item.channel, None, None, ["channels.%s" % item.channel])
                         if hasattr(channel, 'play'):
                             resolved_item = getattr(channel, 'play')(videoitem)
-                            videoitem = resolved_item[0]
+                            if isinstance(resolved_item[0], list):
+                                videoitem.video_urls= resolved_item
+                            else:
+                                videoitem = resolved_item[0]
+
                         # si no directamente reproduce
                         logger.debug('videoitem: ' + str(videoitem))
                         platformtools.play_video(videoitem)
@@ -242,7 +252,7 @@ def start(itemlist, item):
         return itemlist
 
 
-def prepare_autoplay_settings(channel, list_servers, list_quality):
+def prepare_autoplay_settings (channel, list_servers, list_quality):
     '''
     Prepara el json para que el canal puede utilizar AutoPlay
 
@@ -305,7 +315,7 @@ def prepare_autoplay_settings(channel, list_servers, list_quality):
     return
 
 
-def check_value(channel, value, value_type):
+def check_value (channel, value, value_type):
     ''' comprueba la existencia de un valor en la lista de servidores o calidades
         si no eixtirera los agrerga a la lista en el json
 
@@ -328,7 +338,7 @@ def check_value(channel, value, value_type):
     return value_list
 
 
-def autoplay_config(item):
+def autoplay_config (item):
 
     logger.info()
 
@@ -372,7 +382,8 @@ def autoplay_config(item):
     list_controls.append(set_language)
 
     separador = {"id": "label",
-                 "label": "_________________________________________________________________________________________",
+                 "label": "         "
+                          "_________________________________________________________________________________________",
                  "type": "label",
                  "enabled": True,
                  "visible": True
@@ -438,7 +449,7 @@ def autoplay_config(item):
     platformtools.show_channel_settings(list_controls=list_controls, callback='save', item=item, caption='AutoPlay')
 
 
-def save(dict_data_saved, item):
+def save (dict_data_saved, item):
     '''
     Guarda los datos de la ventana de configuracion
 
@@ -471,7 +482,7 @@ def save(dict_data_saved, item):
 
 # Metodo auxiliar genera las listas de servidores y calidades an base al un itemlist y patron(calidad) recibido
 
-def make_server_list(itemlist):
+def make_server_list (itemlist):
     '''
 
     :param itemlist: list (lista de elementos que contenga el nombre del servidor)
@@ -491,7 +502,7 @@ def make_server_list(itemlist):
     logger.debug('server_list: ' + str(server_list))
 
 
-def get_languages(channel):
+def get_languages (channel):
     '''
     Obtiene los idiomas desde el xml del canal
 
@@ -507,3 +518,16 @@ def get_languages(channel):
             list_language = control["lvalues"]
 
     return list_language
+
+def check_status (channel):
+
+    logger.info()
+
+    fname = 'autoplay'
+    # Obtenemos el estado de AutoPlay desde el json
+    autoplay_node = filetools.get_node_from_data_json(fname, 'AUTOPLAY')
+    channel_node = autoplay_node.get(channel, {})
+    settings_node = channel_node.get('settings', {})
+    result = settings_node.get('active', False)
+    return result
+

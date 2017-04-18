@@ -378,7 +378,6 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     return itemlist

@@ -373,8 +373,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(

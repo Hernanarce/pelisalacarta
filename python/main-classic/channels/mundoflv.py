@@ -609,15 +609,9 @@ def findvideos(item):
         videoitem.infoLabels = item.infoLabels
         videoitem.thumbnail = "http://media.tvalacarta.info/servers/server_%s.png" % videoitem.server
 
-    if len(itemlist)== 0:
-        itemlist.append(
-                Item(channel=item.channel,
-                     title='No hay enlaces compatibles con filtro'))
-
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     return itemlist
 
