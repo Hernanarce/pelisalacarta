@@ -77,8 +77,7 @@ def mainlist(item):
                    extra='documentales/'
                        ))
 
-    if autoplay.context:
-        autoplay.show_option(item.channel, itemlist)
+    autoplay.show_option(item.channel, itemlist)
 
 
     return itemlist

@@ -172,8 +172,7 @@ def mainlist(item):
                                fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
                                ))
 
-    if autoplay.context:
-        autoplay.show_option(item.channel, itemlist)
+    autoplay.show_option(item.channel, itemlist)
 
     return itemlist
 

@@ -48,8 +48,7 @@ def mainlist(item):
                  fanart='https://s32.postimg.org/544rx8n51/series.png',
                  language='latino'
                  ))
-    if autoplay.context:
-        autoplay.show_option(item.channel, itemlist)
+    autoplay.show_option(item.channel, itemlist)
     return itemlist
 
 
