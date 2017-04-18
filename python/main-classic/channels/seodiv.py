@@ -206,7 +206,6 @@ def episodiosxtemp(item):
                          url=url,
                          thumbnail=item.thumbnail,
                          plot=plot,
-                         quality=item.quality,
                          contentSerieName=item.contentSerieName
                          ))
 
@@ -249,7 +248,6 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if config.get_setting("autoplay", item.channel) and autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     return itemlist

@@ -311,8 +311,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?id_lang=' \
@@ -470,8 +469,7 @@ def findvideostv(item):
 
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?episode="%s' \

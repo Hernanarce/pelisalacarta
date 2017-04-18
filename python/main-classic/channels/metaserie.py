@@ -257,7 +257,6 @@ def findvideos(item):
                              thumbnail=thumbnail,
                              extra=extra,
                              language=IDIOMAS[scrapedid],
-                             quality='default',
                              server=server,
                              ))
     if item.extra1 != 'capitulos':
@@ -282,8 +281,7 @@ def findvideos(item):
 
     # Requerido para AutoPlay
 
-    if autoplay.context:
-        autoplay.start(itemlist, item)
+    autoplay.start(itemlist, item)
 
     return itemlist
 
