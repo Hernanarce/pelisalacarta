@@ -194,6 +194,7 @@
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC"/>
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL16x9"/>
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/xml"/>
 
         <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/1080i">
             <fileset dir="main-classic/resources/skins/Default/720p">
@@ -216,6 +217,11 @@
         </copy>
 
         <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+     
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/xml">
             <fileset dir="main-classic/resources/skins/Default/720p">
             </fileset>
         </copy>
