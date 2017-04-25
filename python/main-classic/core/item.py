@@ -161,6 +161,8 @@ class Item(object):
         for k in kw:
             if k in ["contentTitle", "contentPlot", "contentSerieName", "show", "contentType", "contentEpisodeTitle",
                      "contentSeason", "contentEpisodeNumber", "contentThumbnail", "plot", "duration", "contentQuality"]:
+                     "contentSeason", "contentEpisodeNumber", "contentThumbnail", "plot", "duration", "contentQuality",
+                     "quality"]:
                 self.__setattr__(k, kw[k])
                 del kwargs[k]
 
@@ -191,6 +193,7 @@ class Item(object):
         # Al modificar cualquiera de estos atributos content...
         if name in ["contentTitle", "contentPlot", "plot", "contentSerieName", "contentType", "contentEpisodeTitle",
                     "contentSeason", "contentEpisodeNumber", "contentThumbnail", "show", "contentQuality"]:
+                    "contentSeason", "contentEpisodeNumber", "contentThumbnail", "show", "contentQuality", "quality"]:
             # ... marcamos hasContentDetails como "true"...
             self.__dict__["hasContentDetails"] = True
             # ...y actualizamos infoLables
@@ -211,6 +214,7 @@ class Item(object):
             elif name == "contentThumbnail":
                 self.__dict__["infoLabels"]["thumbnail"] = value
             elif name == "contentQuality":
+            elif name == "contentQuality" or name == "quality":
                 self.__dict__["infoLabels"]["quality"] = value
 
         elif name == "duration":
@@ -265,6 +269,7 @@ class Item(object):
         elif name in ["contentTitle", "contentPlot", "contentSerieName", "show", "contentType", "contentEpisodeTitle",
                       "contentSeason", "contentEpisodeNumber", "contentThumbnail", "plot", "duration",
                       "contentQuality"]:
+                      "contentQuality", "quality"]:
             if name == "contentTitle":
                 return self.__dict__["infoLabels"]["title"]
             elif name == "contentPlot" or name == "plot":
@@ -286,6 +291,7 @@ class Item(object):
             elif name == "contentThumbnail":
                 return self.__dict__["infoLabels"]["thumbnail"]
             elif name == "contentQuality":
+            elif name == "contentQuality" or name == "quality":
                 return self.__dict__["infoLabels"]["quality"]
             else:
                 return self.__dict__["infoLabels"][name]

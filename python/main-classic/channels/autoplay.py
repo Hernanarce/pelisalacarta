@@ -2,6 +2,7 @@
 # ------------------------------------------------------------
 # pelisalacarta
 # modulo para AutoPlay de pelisalacarta
+# modulo para AutoPlay de pelisalacarta por Hernan_ar_c
 # http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 # ------------------------------------------------------------
 
@@ -82,6 +83,8 @@ def start (itemlist, item):
 
         logger.debug('channel_node: %s' % channel_node)
         logger.debug('settings_node: %s' % settings_node)
+        #logger.debug('channel_node: %s' % channel_node)
+        #logger.debug('settings_node: %s' % settings_node)
 
         if settings_node['active']:
             url_list_valid = []
@@ -105,6 +108,7 @@ def start (itemlist, item):
             # Obtenemos si tenemos configuración personalizada
             autoplay_settings = settings_node.get('custom', False)
             # logger.debug ('autoplay_settings: '+str(autoplay_settings))
+            #logger.debug ('autoplay_settings: '+str(autoplay_settings))
 
             if autoplay_settings:
                 # Ordena los enlaces por la prioridad Servidor/Calidad la lista de favoritos
@@ -120,11 +124,14 @@ def start (itemlist, item):
 
             logger.debug('server_list: %s' % server_list)
             logger.debug('quality_list: %s' % quality_list)
+            #logger.debug('server_list: %s' % server_list)
+            #logger.debug('quality_list: %s' % quality_list)
 
             # Se guardan los textos de cada servidor y calidad en listas p.e. favorite_servers = ['openload',
             # 'streamcloud']
             for num in range(1, 4):
                 logger.debug('server_list: %s ' % server_list[settings_node.get("server_%s" % num, 0)])
+                #logger.debug('server_list: %s ' % server_list[settings_node.get("server_%s" % num, 0)])
                 # logger.debug('config_get_settings: %s ' % config.get_setting("server_%s" % num, item.channel))
 
                 favorite_servers.append(server_list[settings_node.get("server_%s" % num, 0)])
@@ -140,6 +147,7 @@ def start (itemlist, item):
                                      }
                                     )
                 logger.debug('tiene: %s %s'%(hasattr(item, 'quality'),item.quality))
+                # Si no tiene calidad definida le asigna calidad 'default'
                 if item.quality == '':
                     item.quality = 'default'
                     setattr(item,'quality','default')
@@ -203,6 +211,7 @@ def start (itemlist, item):
                 autoplay_list = ordered_list
 
             logger.debug('autoplay_list: ' + str(autoplay_list) + ' favorite priority: ' + str(favorite_priority))
+            #logger.debug('autoplay_list: ' + str(autoplay_list) + ' favorite priority: ' + str(favorite_priority))
 
             # Si hay elementos en la lista de autoplay se intenta reproducir cada elemento, hasta encontrar uno
             # funcional
@@ -210,6 +219,9 @@ def start (itemlist, item):
             if autoplay_list:
                 import xbmc
                 played = False
+                max_intentos = 5 # TODO: Este numero podria ser configurable
+                max_intentos_servers = {}
+
                 # Si se esta reproduciendo algo detiene la reproduccion
                 if xbmc.Player().isPlaying():
                     xbmc.Player().stop()
@@ -217,6 +229,15 @@ def start (itemlist, item):
                     if not xbmc.Player().isPlaying() and not played:
                         videoitem = indice[1]
                         logger.debug('item.language: ' + videoitem.language)
+
+                        if not videoitem.server in max_intentos_servers:
+                            max_intentos_servers[videoitem.server] = max_intentos
+
+                        # Si se han alcanzado el numero maximo de intentos de este servidor saltamos al siguiente
+                        if max_intentos_servers[videoitem.server] == 0:
+                            continue
+
+                        #logger.debug('item.language: ' + videoitem.language)
                         lang = " "
                         if hasattr(videoitem, 'language') and videoitem.language != "":
                             lang = " '%s' " % videoitem.language
@@ -236,6 +257,7 @@ def start (itemlist, item):
 
                         # si no directamente reproduce
                         logger.debug('videoitem: ' + str(videoitem))
+                        #logger.debug('videoitem: ' + str(videoitem))
                         platformtools.play_video(videoitem)
 
                         try:
@@ -244,6 +266,18 @@ def start (itemlist, item):
                             break
                         except:  # TODO evitar el informe de que el conector fallo o el video no se encuentra
                             logger.debug(str(len(autoplay_list)))
+
+                        # Si hemos llegado hasta aqui es por q no se ha podido reproducir
+                        max_intentos_servers[videoitem.server] -= 1
+
+                        # Si se han alcanzado el numero maximo de intentos de este servidor
+                        # preguntar si queremos seguir probando o lo ignoramos
+                        if max_intentos_servers[videoitem.server] == 0:
+                            text = "Parece que los enlaces de %s no estan funcionando." % videoitem.server.upper()
+                            if not platformtools.dialog_yesno("AutoPlay", text,
+                                                             "¿Desea ignorar todos los enlaces de este servidor?"):
+                                max_intentos_servers[videoitem.server] = max_intentos
+
             else:
                 platformtools.dialog_notification('AutoPlay No Fue Posible', 'No Hubo Coincidencias')
 
