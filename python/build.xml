@@ -26,11 +26,11 @@
 <project name="pelisalacarta" default="package">
     <description>pelisalacarta</description>
 
-    <property name="version" value="4.2.0-beta3"/>
-    <property name="versionboxee" value="10.28"/>
-    <property name="versiondate" value="18/Marzo/2017"/>
-    <property name="channels_version" value="20170323"/>
-    <property name="servers_version" value="20170323"/>
+    <property name="version" value="4.2.0-final"/>
+    <property name="versionboxee" value="10.29"/>
+    <property name="versiondate" value="30/Abril/2017"/>
+    <property name="channels_version" value="20170430"/>
+    <property name="servers_version" value="20170430"/>
 
     <property name="target_base_folder" value="../../target/python"/>
 
@@ -194,6 +194,7 @@
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/NTSC"/>
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL16x9"/>
         <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL"/>
+        <mkdir dir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/xml"/>
 
         <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/1080i">
             <fileset dir="main-classic/resources/skins/Default/720p">
@@ -216,6 +217,11 @@
         </copy>
 
         <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/PAL">
+            <fileset dir="main-classic/resources/skins/Default/720p">
+            </fileset>
+        </copy>
+     
+        <copy todir="${target_base_folder}/${target_platform_folder}/plugin.video.pelisalacarta/resources/skins/Default/xml">
             <fileset dir="main-classic/resources/skins/Default/720p">
             </fileset>
         </copy>

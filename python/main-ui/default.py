@@ -48,11 +48,14 @@ if config.get_setting("check_for_plugin_updates") == "true":
     from core import updater
   
     try:
-        version = updater.checkforupdates()
-        
-        if version:
+        new_published_version_tag , number_of_updates = updater.get_available_updates()
+        plugintools.log("new_published_version_tag="+repr(new_published_version_tag)+", number_of_updates="+repr(number_of_updates))
+
+        config.set_setting("plugin_updates_available",str(number_of_updates))
+
+        if new_published_version_tag!="":
             import xbmcgui
-            yes_pressed = xbmcgui.Dialog().yesno( "Versión "+version+" disponible" , "¿Quieres instalarla?" )
+            yes_pressed = xbmcgui.Dialog().yesno( "Versión "+new_published_version_tag+" disponible" , "¿Quieres instalarla?" )
       
             if yes_pressed:
                 item = Item(version=version)
