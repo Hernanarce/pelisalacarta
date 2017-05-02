@@ -598,7 +598,6 @@ def findvideos(item):
                               server=server,
                               quality ='default',
                               fulltitle=item.ContentSeriename,
-                              quality='default',
                               )
 
         # Requerido para FilterTools

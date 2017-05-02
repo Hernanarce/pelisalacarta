@@ -288,6 +288,7 @@ def findvideos(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
     recomendados = ["uptobox", "thevideos", "nowvideo", "pcloud", "directo"]
     for scrapedurl, scrapedtitle in matches:
+
         if dec(scrapedurl) in servidor:
             server = servidor[dec(scrapedurl)]
             title = "Ver " + item.contentTitle + " en " + servidor[dec(scrapedurl)].upper()
@@ -302,11 +303,14 @@ def findvideos(item):
                     new_title = title + ' (' + video['label'] + ')'
                     itemlist.append(
                             Item(channel=item.channel,
-                                 action="play", title=new_title,
+                                 action="play",
+                                 title=new_title,
                                  fulltitle=item.title,
                                  url=video['file'],
+                                 language=IDIOMAS[item.language],
                                  thumbnail=item.thumbnail,
                                  plot=item.plot,
+                                 quality = video['label'],
                                  server='directo'
                                  ))
                     duplicados.append(title)
@@ -328,11 +332,11 @@ def findvideos(item):
                              fulltitle=item.title,
                              url=url,
                              thumbnail=thumbnail,
-                             plot=plot,
+                             plot=item.plot,
                              extra=item.thumbnail,
                              language=IDIOMAS[item.language],
                              quality = 'default',
-                             server=server,
+                             server=server.lower,
                              ))
             duplicados.append(title)
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
@@ -360,8 +364,8 @@ def get_urls(item, link):
     logger.info()
     url = 'http://www.cinecalidad.to/ccstream/ccstream.php'
     headers = dict()
-    headers["Referer"] = 'http://www.cinecalidad.to/pelicula/bailarina-online-descarga/'
-    post = 'link=Ar-4ide9u-HdF8vzcqx0MvJtppJfP1TtvhFQmg=='
+    headers["Referer"] = item.url
+    post = 'link=%s'%link
 
     data = httptools.downloadpage(url, post= post ,headers = headers).data
     dict_data = jsontools.load_json(data)
