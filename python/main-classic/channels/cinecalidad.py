@@ -21,7 +21,7 @@ IDIOMAS = {'latino': 'Latino', 'castellano': 'Español', 'portugues': 'Portugues
 list_language = IDIOMAS.values()
 logger.debug('lista_language: %s'%list_language)
 
-list_quality =[]
+list_quality =['1080p','720p','480p', '360p','240p','default']
 list_servers =[
                'yourupload',
                'thevideos',
@@ -32,7 +32,9 @@ list_servers =[
                'userscloud',
                'pcloud',
                'usersfiles',
-               'vidbull'
+               'vidbull',
+               'openload',
+               'directo'
                ]
 
 host = 'http://www.cinecalidad.to'
@@ -272,7 +274,9 @@ def findvideos(item):
                 "http://www.nowvideo.sx/video/": "nowvideo",
                 "http://vidbull.com/": "vidbull",
                 "http://filescdn.com/": "filescdn",
-                "https://www.yourupload.com/watch/": "yourupload"
+                "https://www.yourupload.com/watch/": "yourupload",
+                "http://www.cinecalidad.to/protect/gdredirect.php?l=":"directo",
+                "https://openload.co/embed/":"openload"
                 }
 
     logger.info()
@@ -282,13 +286,30 @@ def findvideos(item):
 
     patron = 'dec\("([^"]+)"\)\+dec\("([^"]+)"\)'
     matches = re.compile(patron, re.DOTALL).findall(data)
-    recomendados = ["uptobox", "thevideos", "nowvideo", "pcloud"]
+    recomendados = ["uptobox", "thevideos", "nowvideo", "pcloud", "directo"]
     for scrapedurl, scrapedtitle in matches:
         if dec(scrapedurl) in servidor:
             server = servidor[dec(scrapedurl)]
             title = "Ver " + item.contentTitle + " en " + servidor[dec(scrapedurl)].upper()
             if 'yourupload' in dec(scrapedurl):
                 url = dec(scrapedurl).replace('watch', 'embed') + dec(scrapedtitle)
+            elif 'gdredirect' in dec(scrapedurl):
+                url = ''
+                url_list = []
+                url_list += get_urls(item, dec(scrapedtitle))
+
+                for video in url_list:
+                    new_title = title + ' (' + video['label'] + ')'
+                    itemlist.append(
+                            Item(channel=item.channel,
+                                 action="play", title=new_title,
+                                 fulltitle=item.title,
+                                 url=video['file'],
+                                 thumbnail=item.thumbnail,
+                                 plot=item.plot,
+                                 server='directo'
+                                 ))
+                    duplicados.append(title)
             else:
 
                 if 'youtube' in dec(scrapedurl):
@@ -299,7 +320,7 @@ def findvideos(item):
                 title = title + "[COLOR limegreen] [I] (Recomedado) [/I] [/COLOR]"
             thumbnail = servertools.guess_server_thumbnail(servidor[dec(scrapedurl)])
             plot = ""
-            if title not in duplicados:
+            if title not in duplicados and url != '':
                 itemlist.append(
                         Item(channel=item.channel,
                              action="play",
@@ -334,17 +355,35 @@ def findvideos(item):
 
     return itemlist
 
+def get_urls(item, link):
+    from core import jsontools
+    logger.info()
+    url = 'http://www.cinecalidad.to/ccstream/ccstream.php'
+    headers = dict()
+    headers["Referer"] = 'http://www.cinecalidad.to/pelicula/bailarina-online-descarga/'
+    post = 'link=Ar-4ide9u-HdF8vzcqx0MvJtppJfP1TtvhFQmg=='
+
+    data = httptools.downloadpage(url, post= post ,headers = headers).data
+    dict_data = jsontools.load_json(data)
+    logger.debug (dict_data['link'])
+    logger.debug(data)
+    return dict_data['link']
+
 
 def play(item):
     logger.info()
+    itemlist =[]
+    if 'redirector' not in item.url:
+        itemlist = servertools.find_video_items(data=item.url)
 
-    itemlist = servertools.find_video_items(data=item.url)
+        for videoitem in itemlist:
+            videoitem.title = item.fulltitle
+            videoitem.fulltitle = item.fulltitle
+            videoitem.thumbnail = item.extra
+            videochannel = item.channel
+    else:
+        itemlist.append(item)
 
-    for videoitem in itemlist:
-        videoitem.title = item.fulltitle
-        videoitem.fulltitle = item.fulltitle
-        videoitem.thumbnail = item.extra
-        videochannel = item.channel
     return itemlist
 
 
