@@ -3,17 +3,23 @@
 # Canal (pelisplus) por Hernan_Ar_c
 # ------------------------------------------------------------
 
-import re
-import sys
+import urlparse, urllib2, urllib, re
+import os, sys
 
-from core import config
+from core import logger
+from core import tmdb
+from core import scrapertools
 from core import httptools
 from core import logger
 from core import scrapertools
 from core import tmdb
 from core.item import Item
+from core import config
+from core import servertools
+from core import autoplay
+from channels import filtertools
 
-host ="http://www.pelisplus.tv/"
+host = "http://www.pelisplus.tv/"
 
 headers = [['User-Agent', 'Mozilla/50.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
            ['Referer', host]]
@@ -258,12 +264,19 @@ def lista(item):
                                                        '<span>Sinopsis:<\/span>.([^<]+)<span '
                                                        'class="text-detail-hide"><\/span>.<\/p>')
 
-#Paginacion
-    if item.title != 'Buscar' and actual !='':
-       if itemlist !=[]:
-           next_page = str(int(actual)+1)
-           next_page_url = host+item.extra+'pag-'+next_page
-           itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = next_page_url, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',extra=item.extra))
+            # Paginacion
+    if item.title != 'Buscar' and actual != '':
+        if itemlist != []:
+            next_page = str(int(actual) + 1)
+            next_page_url = host + item.extra + 'pag-' + next_page
+            itemlist.append(
+                    Item(channel=item.channel,
+                         action="lista",
+                         title='Siguiente >>>',
+                         url=next_page_url,
+                         thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
+                         extra=item.extra
+                         ))
     return itemlist
 
 
@@ -429,35 +442,43 @@ def generos(item):
 
 def findvideos(item):
     logger.info()
-    itemlist=[]
-    duplicados=[]
-    datas=httptools.downloadpage(item.url).data
-    patron ="<iframe.*?src='(.*?)' frameborder.*?"
-    matches = re.compile(patron,re.DOTALL).findall(datas)
-    
+    itemlist = []
+    duplicados = []
+    datas = httptools.downloadpage(item.url).data
+    patron = "<iframe.*?src='([^']+)' frameborder='0' allowfullscreen.*?"
+    matches = re.compile(patron, re.DOTALL).findall(datas)
+
     for scrapedurl in matches:
-       
-       
-       if 'elreyxhd' in scrapedurl or 'pelisplus.biz'in scrapedurl:
-            patronr = ''
+
+        if 'elreyxhd' or 'pelisplus.biz' in scrapedurl:
             data = httptools.downloadpage(scrapedurl, headers=headers).data
 
             quote = scrapertools.find_single_match(data, 'sources.*?file.*?http')
             if quote and "'" in quote:
                 patronr = "file:'([^']+)',label:'([^.*?]+)',type:.*?'.*?}"
             elif '"' in quote:
-               patronr ='{file:"(.*?)",label:"(.*?)"}'
-            if patronr != '':
-                matchesr = re.compile(patronr,re.DOTALL).findall(data)
+                patronr = '{file:"(.*?)",label:"(.*?)"}'
+            matchesr = re.compile(patronr, re.DOTALL).findall(data)
 
-                for scrapedurl, scrapedcalidad in matchesr:
-                   url = scrapedurl
-
-                   title = item.contentTitle+' ('+str(scrapedcalidad)+')'
-                   thumbnail = item.thumbnail
-                   fanart=item.fanart
-                   if url not in duplicados:
-                    itemlist.append( Item(channel=item.channel, action="play" , title=title , url=url, thumbnail=thumbnail,fanart =fanart, extra='directo'))
+            for scrapedurl, scrapedcalidad in matchesr:
+                url = scrapedurl
+                language = 'latino'
+                quality = scrapedcalidad.decode('cp1252').encode('utf8')
+                title = item.contentTitle + ' (' + str(scrapedcalidad) + ')'
+                thumbnail = item.thumbnail
+                fanart = item.fanart
+                if url not in duplicados:
+                    itemlist.append(item.clone(action="play",
+                                               title=title,
+                                               url=url,
+                                               thumbnail=thumbnail,
+                                               fanart=fanart,
+                                               show= title,
+                                               extra='directo',
+                                               language=language,
+                                               quality=quality,
+                                               server='directo',
+                                              ))
                     duplicados.append(url)
 
     url = scrapedurl
@@ -465,7 +486,7 @@ def findvideos(item):
     itemlist.extend(servertools.find_video_items(data=datas))
 
     for videoitem in itemlist:
-        videoitem.infoLabels = item.infoLabels
+        #videoitem.infoLabels = item.infoLabels
         videoitem.channel = item.channel
         if videoitem.quality == '' or videoitem.language == '':
             videoitem.quality = 'default'
@@ -491,6 +512,14 @@ def findvideos(item):
     if item.extra == 'findvideos' and 'youtube' in itemlist[-1]:
         itemlist.pop(1)
 
+        # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    autoplay.start(itemlist, item)
+
     if 'serie' not in item.url:
         if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
             itemlist.append(
@@ -501,14 +530,6 @@ def findvideos(item):
                      extra="findvideos",
                      contentTitle=item.contentTitle
                      ))
-
-    # Requerido para FilterTools
-
-    itemlist = filtertools.get_links(itemlist, item, list_language)
-
-    # Requerido para AutoPlay
-
-    autoplay.start(itemlist, item)
 
     return itemlist
 
@@ -539,3 +560,5 @@ def newest(categoria):
         return []
 
     return itemlist
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)

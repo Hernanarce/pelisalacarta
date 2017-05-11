@@ -3,16 +3,19 @@
 # Canal (mundoflv) por Hernan_Ar_c
 # ------------------------------------------------------------
 
-import re
-import urlparse
+import urlparse, urllib2, urllib, re
+import os, sys
 
 from core import config
 from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
-from core import tmdb
+from core import httptools
 from core.item import Item
+from core import tmdb
+from channels import autoplay
+from channels import filtertools
 
 host = "http://mundoflv.com"
 thumbmx = 'http://flags.fmcdn.net/data/flags/normal/mx.png'
@@ -41,6 +44,8 @@ list_servers = [
                 'nowvideo'
                ]
 
+list_quality =['default']
+
 audio = {'la': '[COLOR limegreen]LATINO[/COLOR]', 'es': '[COLOR yellow]ESPAÑOL[/COLOR]',
          'sub': '[COLOR orange]ORIGINAL SUBTITULADO[/COLOR]', 'en': '[COLOR red]Original[/COLOR]',
          'vosi': '[COLOR red]ORIGINAL SUBTITULADO INGLES[/COLOR]'
@@ -56,35 +61,53 @@ def mainlist(item):
     autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
     itemlist = []
 
-    itemlist.append(
-            Item(channel=item.channel, title="Series", action="todas", url=host,
+    itemlist.append(Item(channel=item.channel,
+                         title="Series",
+                         action="todas",
+                         url=host,
                          thumbnail='https://s32.postimg.org/544rx8n51/series.png',
-                         fanart='https://s32.postimg.org/544rx8n51/series.png'))
+                         fanart='https://s32.postimg.org/544rx8n51/series.png'
+                         ))
 
-    itemlist.append(
-            Item(channel=item.channel, title="Alfabetico", action="letras", url=host,
+    itemlist.append(Item(channel=item.channel,
+                         title="Alfabetico",
+                         action="letras",
+                         url=host,
                          thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
-                         fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png'))
+                         fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png'
+                         ))
 
-    itemlist.append(
-            Item(channel=item.channel, title="Mas vistas", action="masvistas", url=host,
+    itemlist.append(Item(channel=item.channel,
+                         title="Mas vistas",
+                         action="masvistas",
+                         url=host,
                          thumbnail='https://s32.postimg.org/466gt3ipx/vistas.png',
-                         fanart='https://s32.postimg.org/466gt3ipx/vistas.png'))
+                         fanart='https://s32.postimg.org/466gt3ipx/vistas.png'
+                         ))
 
-    itemlist.append(
-            Item(channel=item.channel, title="Recomendadas", action="recomendadas", url=host,
+    itemlist.append(Item(channel=item.channel,
+                         title="Recomendadas",
+                         action="recomendadas",
+                         url=host,
                          thumbnail='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
-                         fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png'))
+                         fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png'
+                         ))
 
-    itemlist.append(
-            Item(channel=item.channel, title="Ultimas Agregadas", action="ultimas", url=host,
+    itemlist.append(Item(channel=item.channel,
+                         title="Ultimas Agregadas",
+                         action="ultimas",
+                         url=host,
                          thumbnail='https://s31.postimg.org/3ua9kwg23/ultimas.png',
-                         fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png'))
+                         fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png'
+                         ))
 
-    itemlist.append(
-            Item(channel=item.channel, title="Buscar", action="search", url='http://mundoflv.com/?s=',
+    itemlist.append(Item(channel=item.channel,
+                         title="Buscar",
+                         action="search",
+                         url='http://mundoflv.com/?s=',
                          thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                         fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
+                         fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                         ))
 
     if autoplay.context:
         autoplay.show_option(item.channel, itemlist)
@@ -129,13 +152,8 @@ def todas(item):
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
-    #Paginacion
-    patron  = '<link rel="next" href="([^"]+)" />'
-    next_page_url = scrapertools.find_single_match(data,'<link rel="next" href="([^"]+)" />')
-    
-    if next_page_url!="":
-        itemlist.append(Item(channel = item.channel, action = "todas", title = ">> Página siguiente", url = next_page_url, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
-    
+    # Paginacion
+    next_page_url = scrapertools.find_single_match(data, '<link rel="next" href="([^"]+)" />')
 
     if next_page_url != "":
         itemlist.append(Item(channel=item.channel,
@@ -332,9 +350,11 @@ def temporadas(item):
     data = httptools.downloadpage(item.url).data
     realplot = ''
     patron = "<button class='classnamer' onclick='javascript: mostrarcapitulos.*?blank'>([^<]+)</button>"
-    
-    matches = re.compile(patron,re.DOTALL).findall(data)
+
+    matches = re.compile(patron, re.DOTALL).findall(data)
+
     serieid = scrapertools.find_single_match(data, 'data-nonce="(.*?)"')
+
     item.thumbnail = item.thumbvid
     infoLabels = item.infoLabels
     for scrapedtitle in matches:
@@ -549,12 +569,19 @@ def busqueda(item):
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     itemlist = fail_tmdb(itemlist)
 
-   #Paginacion
-    patron  = "<a rel='nofollow' class=previouspostslink' href='([^']+)'>Siguiente &rsaquo;</a>"
-    next_page_url = scrapertools.find_single_match(data,"<a rel='nofollow' class=previouspostslink' href='([^']+)'>Siguiente &rsaquo;</a>")
-    if next_page_url!="":
-        item.url=next_page_url
-        itemlist.append(Item(channel = item.channel,action = "busqueda",title = ">> Página siguiente", url = next_page_url, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
+    # Paginacion
+    next_page_url = scrapertools.find_single_match(data,
+                                                   "<a rel='nofollow' class=previouspostslink' href='(["
+                                                   "^']+)'>Siguiente &rsaquo;</a>")
+    if next_page_url != "":
+        item.url = next_page_url
+        itemlist.append(
+                Item(channel=item.channel,
+                     action="busqueda",
+                     title=">> Página siguiente",
+                     url=next_page_url,
+                     thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+                     ))
     return itemlist
 
 
@@ -578,11 +605,23 @@ def findvideos(item):
     for scrapedurl, scrapedserver, scrapedidioma in matches:
         url = scrapedurl
         idioma = audio[scrapedidioma]
-        title = item.contentSerieName+' '+str(item.contentSeasonNumber)+'x'+str(item.contentEpisodeNumber)+' '+idioma+' ('+scrapedserver.strip(' ')+')'
-        if scrapedidioma == item.extra1 or item.extra1 == 'all':
-           itemlist.append(item.clone(title=title, url=url, action="play", language=idioma,
-                                      server = scrapedserver.strip(), fulltitle = item.ContentSeriename))
-    
+        server = scrapedserver.strip(' ')
+        title = item.contentSerieName + ' ' + str(item.contentSeasonNumber) + 'x' + str(
+            item.contentEpisodeNumber) + ' ' + idioma + ' (' + server + ')'
+
+        new_item = item.clone(title=title,
+                              url=url,
+                              action="play",
+                              language=IDIOMAS[scrapedidioma],
+                              server=server,
+                              quality ='default',
+                              fulltitle=item.ContentSeriename,
+                              )
+
+        # Requerido para FilterTools
+
+        itemlist = filtertools.get_link(itemlist, new_item, list_language)
+
     for videoitem in itemlist:
         videoitem.infoLabels = item.infoLabels
         videoitem.thumbnail = "http://media.tvalacarta.info/servers/server_%s.png" % videoitem.server
@@ -597,12 +636,9 @@ def findvideos(item):
 def play(item):
     logger.info()
 
-    special_servers = ['streamplay', 'streame', 'idowatch']
-
     data = httptools.downloadpage(item.url).data
-
-    if item.server not in special_servers:
-       url = scrapertools.find_single_match(data, '<(?:IFRAME|iframe).*?(?:SRC|src)=*([^ ]+) (?!style|STYLE)')
+    if 'streamplay' not in item.server or 'streame' not in item.server:
+        url = scrapertools.find_single_match(data, '<(?:IFRAME|iframe).*?(?:SRC|src)=*([^ ]+) (?!style|STYLE)')
     else:
         url = scrapertools.find_single_match(data, '<meta http-equiv="refresh" content="0; url=([^"]+)">')
 

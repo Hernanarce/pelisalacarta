@@ -40,6 +40,19 @@
 		<enabled>false</enabled>
 		<visible>false</visible>
 	</settings>
+
+	<settings>
+		<id>filter_languages</id>
+		<type>list</type>
+		<label>Mostrar enlaces en idioma...</label>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>No filtrar</lvalues>
+		<lvalues>Latino</lvalues>
+		<lvalues>VOS</lvalues>
+	</settings>
+
 	<settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>

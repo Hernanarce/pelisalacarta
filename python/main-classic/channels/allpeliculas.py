@@ -12,6 +12,8 @@ from core import logger
 from core import scrapertools
 from core import servertools
 from core.item import Item
+from channels import autoplay
+from channels import filtertools
 
 
 __modo_grafico__ = config.get_setting('modo_grafico', "allpeliculas")
@@ -23,14 +25,28 @@ perfil = [['0xFFFFE6CC', '0xFFFFCE9C', '0xFF994D00'],
           ['0xFF58D3F7', '0xFF2E9AFE', '0xFF2E64FE']]
 color1, color2, color3 = perfil[__perfil__]
 
-IDIOMAS = {"Castellano": "CAST", "Latino": "LAT", "Subtitulado": "VOSE", "Ingles": "VO"}
+IDIOMAS = {"Castellano": "Español", "Latino": "Latino", "Subtitulado": "VOS", "Ingles": "VO"}
 SERVERS = {"26": "powvideo", "45": "okru", "75": "openload", "12": "netutv", "65": "thevideos",
            "67": "spruto", "71": "stormo", "73": "idowatch", "48": "okru", "55": "openload",
            "20": "nowvideo", "84": "fastplay", "96": "raptu", "94": "tusfiles"}
 
+list_servers = SERVERS.values()
+list_language = IDIOMAS.values()
+list_quality = ['BR Screener', 'DVD-Screener', 'HDRip', '720p HDCAM', 'HD 1080P', 'BRs 720p', '3D', 'HD Screener',
+                'BR-Screener Hq', '3D', 'BDRIP', 'HDrip', 'DVDRip', 'BDRip 720p', 'BRRip', 'TSRip', 'HDTV',
+                'BluRay 1080p', 'Cam 720p', 'BrRip 1080p', 'BluRay Screener', 'TS XviD 720p', 'MicroHD 1080p',
+                'HD Real 720', 'DVD', 'CAMRip', 'Ts-Screener', 'FLV', 'HD480p', 'SD (360p)', 'NTSC DVDR',
+                'HDTVScreener', 'BRRip 720p', 'R6', 'WEBRip 720p', 'Full HD (1080P)', 'Web screener', 'BluRay 720p',
+                'TS Xvid', 'HD Cam', 'BDRip 1080p', 'Dual 1080p', 'WepRip 1080p', 'DVD9 Full', 'Ts-Screener Hq']
+
+
 
 def mainlist(item):
     logger.info()
+
+    # Requerido para AutoPlay
+    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
+
     itemlist = []
     item.text_color = color1
 
@@ -43,6 +59,9 @@ def mainlist(item):
     itemlist.append(item.clone(title="", action=""))
     itemlist.append(item.clone(title="Buscar...", action="search"))
     itemlist.append(item.clone(action="configuracion", title="Configurar canal...", text_color="gold", folder=False))
+
+    # Requerido para AutoPlay
+    autoplay.show_option(item.channel, itemlist)
 
     return itemlist
 
@@ -186,6 +205,7 @@ def lista(item):
             itemlist.append(item.clone(action="temporadas", title=titulo, fulltitle=title, url=url, thumbnail=thumbnail,
                                        context=["buscar_trailer"], contentTitle=title, show=title, contentType="tvshow"))
 
+
     try:
         from core import tmdb
         # Obtenemos los datos basicos de todas las peliculas mediante multihilos
@@ -281,7 +301,16 @@ def findvideos(item):
                 server = "directo"
             idioma = IDIOMAS.get(idiomas_videos.get(language))
             titulo = server.capitalize()+"  ["+idioma+"] ["+calidad_videos.get(calidad)+"]"
-            itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma, server=server))
+            itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma,
+                                       language=idioma, server=server, quality=calidad_videos.get(calidad)
+                                       ))
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?id_lang=' \
@@ -303,7 +332,9 @@ def findvideos(item):
             if mostrar_server:
                 idioma = IDIOMAS.get(idiomas_videos.get(language))
                 titulo = "["+server.capitalize()+"]  ["+idioma+"] ["+calidad_videos.get(calidad)+"]"
-                itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma, server=server))
+                itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma, server=server,
+                                           language=idioma, quality = calidad_videos.get(calidad)))
+
 
     itemlist.sort(key=lambda item: (item.extra, item.server))
     if itemlist:
@@ -319,6 +350,7 @@ def findvideos(item):
                                      action="add_pelicula_to_library", url=item.url, text_color="green",
                                      infoLabels={'title': item.fulltitle}, fulltitle=item.fulltitle,
                                      extra="library"))
+
 
     return itemlist
 
@@ -397,6 +429,8 @@ def findvideostv(item):
 
     #Rellena diccionarios idioma y calidad
     idiomas_videos, calidad_videos = dict_videos()
+    logger.debug('idiomas_videos:'+str(idiomas_videos.values()))
+    logger.debug('calidad_videos:' + str(calidad_videos.values()))
 
     data = httptools.downloadpage(item.url).data
     data = data.replace("\n", "").replace("\t", "")
@@ -425,7 +459,16 @@ def findvideostv(item):
             idioma = IDIOMAS.get(idiomas_videos.get(language))
             titulo = server.capitalize()+" ["+idioma+"] ("+calidad_videos.get(quality)+")"
 
-            itemlist.append(item.clone(action="play", title=titulo, url=url, contentType="episode", server=server))
+            itemlist.append(item.clone(action="play", title=titulo, url=url, contentType="episode", server=server,
+                                       quality=calidad_videos.get(quality)))
+
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    autoplay.start(itemlist, item)
 
     #Enlace Descarga
     patron = '<span class="movie-downloadlink-list" id_movies_types="([^"]+)" id_movies_servers="([^"]+)".*?episode="%s' \

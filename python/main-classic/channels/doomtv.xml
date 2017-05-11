@@ -14,19 +14,6 @@
 	<update_url>https://raw.githubusercontent.com/tvalacarta/pelisalacarta/master/python/main-classic/channels/</update_url>
 	<version>3</version>
 
-	<changes>
-		<change>
-			<date>15/03/2017</date>
-			<autor>SeiTaN</autor>
-			<description>limpieza código</description>
-		</change>
-		<change>
-			<date>01/02/2017</date>
-			<autor>Hernan_Ar_c</autor>
-			<description>Release.</description>
-		</change>
-	</changes>
-
 	<categories>
 		<category>latino</category>
 		<category>movie</category>
@@ -40,6 +27,18 @@
 		<enabled>false</enabled>
 		<visible>false</visible>
 	</settings>
+
+	<settings>
+		<id>filter_languages</id>
+		<type>list</type>
+		<label>Mostrar enlaces en idioma...</label>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>No filtrar</lvalues>
+		<lvalues>Latino</lvalues>
+	</settings>
+
 	<settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>
@@ -48,6 +47,7 @@
 		<enabled>true</enabled>
 		<visible>true</visible>
 	</settings>
+	
 	<settings>
 		<id>include_in_newest_infantiles</id>
 		<type>bool</type>
