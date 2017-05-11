@@ -246,6 +246,9 @@ function get_response(data) {
             if (!data.items[x].color || data.items[x].color == "auto") {
                 data.items[x].color = "#FFFFFF";
             };
+			if (!data.items[x].enabled && data.items[x].enable) {
+                data.items[x].enabled = data.items[x].enable;
+            };
 
             settings_controls.push(data.items[x]);
 
@@ -596,7 +599,12 @@ function evaluate(index, condition) {
         }
         else {
             if (settings_controls[index + id].type == "list" || settings_controls[index + id].type == "enum") {
-                control_value = settings_controls[index + id].lvalues[settings_controls[index + id].value];
+				if (settings_controls[index + id].lvalues){
+					control_value = settings_controls[index + id].lvalues[settings_controls[index + id].value];
+				}
+				else {
+					control_value = settings_controls[index + id].values[settings_controls[index + id].value];
+				};
             }
             else {
                 control_value = settings_controls[index + id].value;
@@ -611,16 +619,17 @@ function evaluate(index, condition) {
         };
 
         if (["eq", "!eq"].indexOf(operator) > -1) {
-
-            if (!isNaN(parseInt(value))) {
-                value = parseInt(value);
-            };
-            if (value.toLocaleLowerCase() == "true") {
-                value = true;
-            }
-            else if (value.toLocaleLowerCase() == "false") {
-                value = false;
-            };
+			if (typeof(value) == "string") {
+				if (!isNaN(parseInt(value))) {
+					value = parseInt(value);
+				}
+				else if (value.toLocaleLowerCase() == "true") {
+					value = true;
+				}
+				else if (value.toLocaleLowerCase() == "false") {
+					value = false;
+				};
+			};
         };
 
         if (operator == "eq") {

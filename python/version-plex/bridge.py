@@ -1,7 +1,6 @@
 from core import servertools
 from core import channeltools
 from core.item import Item
-from core import config
 # Passing log and config to an external library
 # All credits to: https://gist.github.com/mikew/5011984
 
@@ -9,18 +8,33 @@ from core import config
 logger = None
 config = None
 localized_strings = None
+dict_global = None
 
-def init(Log,Dict,Locale):
-    global config,logger,localized_strings
-    config = Dict
-    logger = Log
-    localized_strings = Locale
+def init(log, pref, locale, d_global):
+    global config,logger,localized_strings,dict_global
+    config = pref
+    logger = log
+    localized_strings = locale
+    dict_global = d_global
 
-def log_info(texto):
-    logger(texto)
+def log_info(texto, level='Info'):
+    global logger
+    if level.lower() == 'debug':
+        logger.Debug(texto)
+    elif level.lower() == 'error':
+        logger.Error(texto)
+    else:
+        logger(texto)
 
 def get_setting(name):
-    return config[name]
+    global config, dict_global
+    try:
+        value = config[name]
+    except:
+        value = dict_global[name]
+
+    return value if value else ""
+
 
 def get_localized_string(code):
     return localized_strings.LocalString(code)

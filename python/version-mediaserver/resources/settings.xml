@@ -11,8 +11,12 @@
         <setting id="debug" type="bool" label="30003" default="false"/>
         <setting type="sep"/>
         <setting label="Canales para adultos" type="lsep"/>
-        <setting id="adult_mode" type="bool" label="30002" default="false"/>
-        <setting id="adult_pin" type="text" label="PIN para abrir canal de adultos" option="hidden" default=""/>
+        <setting id="adult_aux_intro_password" type="text" label="Contraseña:" option="hidden"  default=""/>
+        <setting id="adult_mode" type="enum" values="Nunca|Siempre|Solo para esta sesión" label="30002" enable="!eq(-1,)" default="0"/>
+        <setting id="adult_request_password" type="bool" label="Solicitar contraseña para abrir canal de adultos"  enable="!eq(-1,0)+!eq(-2,)" default="true"/>
+        <setting id="adult_aux_new_password1" type="text" label="Nueva contraseña:" option="hidden" enable="!eq(-3,)" default=""/>
+        <setting id="adult_aux_new_password2" type="text" label="Confirmar nueva contraseña:" option="hidden" enable="!eq(-1,)" default=""/>
+
         <setting type="sep"/>
         <setting label="Actualizaciones" type="lsep"/>
 

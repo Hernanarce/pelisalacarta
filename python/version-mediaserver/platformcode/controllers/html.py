@@ -410,6 +410,7 @@ class platform(Platformtools):
 
             def update(self, percent=0, heading="", message=""):
                 JsonData = {}
+                message = self.platformtools.kodi_labels_to_html(message)
                 JsonData["action"]="ProgressBGUpdate" 
                 JsonData["data"]={}
                 JsonData["data"]["title"]=self.platformtools.kodi_labels_to_html(heading)
@@ -702,17 +703,30 @@ class platform(Platformtools):
               if data[v] == "true": data[v] = True
               if data[v] == "false": data[v] = False
               if unicode(data[v]).isnumeric():  data[v] =  int(data[v])
-            
-          if not callback:
-            for v in data:
-              config.set_setting(v,data[v],channelname)
-            return None
-            
+              
+          if callback and '.' in callback:
+              package, callback = callback.rsplit('.', 1)
           else:
-            exec "from channels import " + channelname + " as cb_channel"
-            exec "return_value = cb_channel." + callback + "(item, data)"
-            return return_value
+              package = 'channels.%s' % channelname  
+                
+          cb_channel = None
+          try:
+              cb_channel = __import__(package, None, None, [package])
+          except ImportError:
+              logger.error('Imposible importar %s' % package)
 
+          if callback:
+              # Si existe una funcion callback la invocamos ...
+              return getattr(cb_channel, self.callback)(item, data)
+          else:
+              # si no, probamos si en el canal existe una funcion 'cb_validate_config' ...
+              try:
+                  return getattr(cb_channel, 'cb_validate_config')(item, data)
+              except AttributeError:
+                  # ... si tampoco existe 'cb_validate_config'...
+                  for v in data:
+                      config.set_setting(v,data[v],channelname)
+          
         elif data == "custom_button":
           try:
               cb_channel = __import__('channels.%s' % channelname, None, None, ["channels.%s" % channelname])

@@ -27,11 +27,13 @@
 
 import os
 import re
+import threading
 
 PLATFORM_NAME = "mediaserver"
 PLUGIN_NAME = "pelisalacarta"
 
 settings_dic ={}
+adult_setting = {}
 
 
 def get_platform(full_version=False):
@@ -80,7 +82,54 @@ def open_settings():
         Opciones.append(dict(setting.attributes.items() + [(u"category",category.getAttribute("label")),(u"value",get_setting(setting.getAttribute("id")))]))
 
     from platformcode import platformtools
+    global adult_setting
+    adult_password = get_setting('adult_password')
+    if not adult_password:
+        adult_password = set_setting('adult_password', '1111')
+    adult_mode = get_setting('adult_mode')
+    adult_request_password =  get_setting('adult_request_password')
+
     platformtools.open_settings(Opciones)
+
+    # Hemos accedido a la seccion de Canales para adultos
+    if get_setting('adult_aux_intro_password'):
+        # La contraseña de acceso es correcta
+        if get_setting('adult_aux_intro_password') == adult_password:
+            
+            # Cambio de contraseña
+            if get_setting('adult_aux_new_password1'):
+                if get_setting('adult_aux_new_password1') == get_setting('adult_aux_new_password2'):
+                    set_setting('adult_password', get_setting('adult_aux_new_password1'))
+                else:
+                    platformtools.dialog_ok("Canales para adultos", "Los campos 'Nueva contraseña' y 'Confirmar nueva contraseña' no coinciden.",
+                                            "Entre de nuevo en 'Preferencias' para cambiar la contraseña")
+
+            # Fijar adult_pin
+            adult_pin = ""
+            if get_setting("adult_request_password") == "true":
+                adult_pin = get_setting("adult_password")
+            set_setting("adult_pin", adult_pin)
+            
+            #Solo esta sesion:
+            id = threading.current_thread().name
+            if get_setting("adult_mode") == "2":
+              adult_setting[id] = True
+              set_setting("adult_mode", "0")
+            else:
+              adult_setting = {}
+
+        else:
+            platformtools.dialog_ok("Canales para adultos", "La contraseña no es correcta.",
+                                    "Los cambios realizados en esta sección no se guardaran.")
+            # Deshacer cambios
+            set_setting("adult_mode", adult_mode)
+            set_setting("adult_request_password", adult_request_password)
+
+
+        # Borramos settings auxiliares
+        set_setting('adult_aux_intro_password', '')
+        set_setting('adult_aux_new_password1', '')
+        set_setting('adult_aux_new_password2', '')
 
 
 def get_setting(name, channel=""):
@@ -122,6 +171,12 @@ def get_setting(name, channel=""):
         # logger.info("config.get_setting reading main setting '"+name+"'")
         global settings_dic
         value = settings_dic.get(name, "")
+        
+        if name == "adult_mode":
+          global adult_setting
+          id = threading.current_thread().name
+          if adult_setting.get(id) == True:
+            value = "2"
 
         # logger.info("config.get_setting -> '"+value+"'")
         return value

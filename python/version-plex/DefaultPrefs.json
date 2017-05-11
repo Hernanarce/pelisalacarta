@@ -1,15 +1,34 @@
 [
   {
-    "id": "adult_mode",
-    "label": "Mostrar canales para adultos",
-    "type": "bool",
-    "default": "false"
+    "id": "adult_aux_intro_password",
+    "label": "Contraseña para adultos",
+    "type": "text",
+    "option": "hidden",
+    "default": "",
+    "secure": "true"
   },
-{
-    "id": "adult_pin",
-    "label": "PIN para abrir canales adultos",
-    "type": "bool",
-    "default": "true"
+  {
+  "id": "adult_mode",
+  "label": "Mostrar canales para adultos",
+  "type": "enum",
+  "values": ["Nunca","Siempre","Solo hasta que se reinicie Plex Media Server"],
+  "default": "Nunca"
+  },
+  {
+    "id": "adult_aux_new_password1",
+    "label": "Nueva contraseña",
+    "type": "text",
+    "option": "hidden",
+    "default": "",
+    "secure": "true"
+  },
+  {
+    "id": "adult_aux_new_password2",
+    "label": "Confirmar nueva contraseña",
+    "type": "text",
+    "option": "hidden",
+    "default": "",
+    "secure": "true"
   },
   {
     "id": "realdebridpremium",
@@ -118,26 +137,6 @@
     "secure": "true"
   },
   {
-    "id": "serieslyaccount",
-    "label": "Cuenta Series.ly",
-    "type": "bool",
-    "default": "false"
-  },
-  {
-    "id": "serieslyuser",
-    "label": "Usuario",
-    "type": "text",
-    "default": ""
-  },
-  {
-    "id": "serieslypassword",
-    "label": "Password",
-    "type": "text",
-    "option": "hidden",
-    "default": "",
-    "secure": "true"
-  },
-  {
     "id": "pordedeaccount",
     "label": "Cuenta pordede",
     "type": "bool",
@@ -151,26 +150,6 @@
   },
   {
     "id": "pordedepassword",
-    "label": "Password",
-    "type": "text",
-    "option": "hidden",
-    "default": "",
-    "secure": "true"
-  },
-  {
-    "id": "seriesmuaccount",
-    "label": "Cuenta seriesmu",
-    "type": "bool",
-    "default": "false"
-  },
-  {
-    "id": "seriesmuuser",
-    "label": "Usuario",
-    "type": "text",
-    "default": ""
-  },
-  {
-    "id": "seriesmupassword",
     "label": "Password",
     "type": "text",
     "option": "hidden",

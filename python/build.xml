@@ -29,8 +29,8 @@
     <property name="version" value="4.2.0-final"/>
     <property name="versionboxee" value="10.29"/>
     <property name="versiondate" value="30/Abril/2017"/>
-    <property name="channels_version" value="20170430"/>
-    <property name="servers_version" value="20170430"/>
+    <property name="channels_version" value="20170510"/>
+    <property name="servers_version" value="20170510"/>
 
     <property name="target_base_folder" value="../../target/python"/>
 
@@ -142,7 +142,7 @@
         <zip destfile="${target_base_folder}/servers-${servers_version}.zip" basedir="${target_base_folder}/servers"/>
 
         <!-- Copy channel files -->
-        <copy todir="${target_base_folder}/servers-ui/plugin.video.pelisalacarta/servers">
+        <copy todir="${target_base_folder}/servers-ui/plugin.video.pelisalacarta-ui/servers">
             <fileset dir="main-classic/servers">
                 <exclude name="**/.*"/>
                 <exclude name="**/.*/**"/>
