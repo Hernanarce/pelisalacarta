@@ -89,6 +89,11 @@ def play_video(*args, **kwargs):
     id = threading.current_thread().name
     return controllers[id].play_video(*args, **kwargs)
 
+def stop_video(*args, **kwargs):
+    # id = threading.current_thread().name
+    # return controllers[id].play_video(*args, **kwargs)
+    return False
+
 def open_settings(*args, **kwargs):
     id = threading.current_thread().name
     return controllers[id].open_settings(*args, **kwargs)

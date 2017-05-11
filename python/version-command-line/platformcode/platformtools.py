@@ -45,7 +45,10 @@ def is_playing():
 
 def play_video(item):
     pass
-    
+
+def stop_video():
+    pass
+
 def show_channel_settings(list_controls=None, dict_values=None, caption="", callback=None, item=None):
     return None
 
