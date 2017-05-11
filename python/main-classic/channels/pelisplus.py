@@ -87,45 +87,37 @@ def menupeliculas(item):
     logger.info()
     itemlist = []
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Ultimas",
-                 action="lista",
-                 url=host + 'estrenos/pag-1',
-                 thumbnail='https://s31.postimg.org/3ua9kwg23/ultimas.png',
-                 fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png',
-                 extra='estrenos/'
-                 ))
+    itemlist.append(item.clone(title="Todas",
+                               action="lista",
+                               url=host + 'peliculas/pag-1',
+                               thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               extra='peliculas/'
+                               ))
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Todas",
-                 action="lista",
-                 url=host + 'peliculas/pag-1',
-                 thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
-                 fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
-                 extra='peliculas/'
-                 ))
+    itemlist.append(item.clone(title="Ultimas",
+                               action="lista",
+                               url=host + 'estrenos/pag-1',
+                               thumbnail='https://s31.postimg.org/3ua9kwg23/ultimas.png',
+                               fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png',
+                               extra='estrenos/'
+                              ))
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Generos",
-                 action="generos",
-                 url=host + 'peliculas/pag-1',
-                 thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
-                 fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
-                 extra='documentales/'
-                 ))
+    itemlist.append(item.clone(title="Generos",
+                               action="generos",
+                               url=host + 'peliculas/pag-1',
+                               thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               extra='documentales/'
+                              ))
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Buscar",
-                 action="search",
-                 url=host + 'busqueda/?s=',
-                 thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                 fanart='https://s31.postimg.org/qose4p13f/Buscar.png',
-                 extra='peliculas/'
-                 ))
+    itemlist.append(item.clone(title="Buscar",
+                               action="search",
+                               url=host + 'busqueda/?s=',
+                               thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
+                               fanart='https://s31.postimg.org/qose4p13f/Buscar.png',
+                               extra='peliculas/'
+                              ))
 
     return itemlist
 
@@ -134,35 +126,29 @@ def menuseries(item):
     logger.info()
     itemlist = []
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Todas",
-                 action="lista",
-                 url=host + "series/pag-1",
-                 thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
-                 fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
-                 extra='series/'
-                 ))
+    itemlist.append(item.clone(title="Todas",
+                               action="lista",
+                               url=host + "series/pag-1",
+                               thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               fanart='https://s12.postimg.org/iygbg8ip9/todas.png',
+                               extra='series/'
+                              ))
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Generos",
-                 action="generos",
-                 url=host + 'series/pag-1',
-                 thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
-                 fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
-                 extra='series/'
-                 ))
+    itemlist.append(item.clone(title="Generos",
+                               action="generos",
+                               url=host + 'series/pag-1',
+                               thumbnail='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               fanart='https://s31.postimg.org/szbr0gmkb/generos.png',
+                               extra='series/'
+                              ))
 
-    itemlist.append(
-            Item(channel=item.channel,
-                 title="Buscar",
-                 action="search",
-                 url=host + 'busqueda/?s=',
-                 thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                 fanart='https://s31.postimg.org/qose4p13f/Buscar.png',
-                 extra='series/'
-                 ))
+    itemlist.append(item.clone(title="Buscar",
+                               action="search",
+                               url=host + 'busqueda/?s=',
+                               thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
+                               fanart='https://s31.postimg.org/qose4p13f/Buscar.png',
+                               extra='series/'
+                              ))
 
     return itemlist
 
@@ -451,6 +437,7 @@ def findvideos(item):
     for scrapedurl in matches:
 
         if 'elreyxhd' or 'pelisplus.biz' in scrapedurl:
+            patronr = ''
             data = httptools.downloadpage(scrapedurl, headers=headers).data
 
             quote = scrapertools.find_single_match(data, 'sources.*?file.*?http')
@@ -458,28 +445,29 @@ def findvideos(item):
                 patronr = "file:'([^']+)',label:'([^.*?]+)',type:.*?'.*?}"
             elif '"' in quote:
                 patronr = '{file:"(.*?)",label:"(.*?)"}'
-            matchesr = re.compile(patronr, re.DOTALL).findall(data)
+            if patronr != '':
+                matchesr = re.compile(patronr, re.DOTALL).findall(data)
 
-            for scrapedurl, scrapedcalidad in matchesr:
-                url = scrapedurl
-                language = 'latino'
-                quality = scrapedcalidad.decode('cp1252').encode('utf8')
-                title = item.contentTitle + ' (' + str(scrapedcalidad) + ')'
-                thumbnail = item.thumbnail
-                fanart = item.fanart
-                if url not in duplicados:
-                    itemlist.append(item.clone(action="play",
-                                               title=title,
-                                               url=url,
-                                               thumbnail=thumbnail,
-                                               fanart=fanart,
-                                               show= title,
-                                               extra='directo',
-                                               language=language,
-                                               quality=quality,
-                                               server='directo',
-                                              ))
-                    duplicados.append(url)
+                for scrapedurl, scrapedcalidad in matchesr:
+                    url = scrapedurl
+                    language = 'latino'
+                    quality = scrapedcalidad.decode('cp1252').encode('utf8')
+                    title = item.contentTitle + ' (' + str(scrapedcalidad) + ')'
+                    thumbnail = item.thumbnail
+                    fanart = item.fanart
+                    if url not in duplicados:
+                        itemlist.append(item.clone(action="play",
+                                                   title=title,
+                                                   url=url,
+                                                   thumbnail=thumbnail,
+                                                   fanart=fanart,
+                                                   show= title,
+                                                   extra='directo',
+                                                   language=language,
+                                                   quality=quality,
+                                                   server='directo',
+                                                  ))
+                        duplicados.append(url)
 
     url = scrapedurl
     from core import servertools

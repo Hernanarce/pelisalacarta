@@ -304,6 +304,7 @@ def findvideos(item):
             itemlist.append(item.clone(action="play", title=titulo, url=url, extra=idioma,
                                        language=idioma, server=server, quality=calidad_videos.get(calidad)
                                        ))
+            logger.debug('item.context: %s'%item.context)
     # Requerido para FilterTools
 
     itemlist = filtertools.get_links(itemlist, item, list_language)
