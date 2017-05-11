@@ -205,7 +205,7 @@ def context(item, list_language=None, list_quality=None, exist=False):
         added = False
         if type(_context) == list:
             for x in _context:
-                if x:
+                if x and type(x) == dict:
                     if x["channel"] == "filtertools":
                         added = True
                         break
