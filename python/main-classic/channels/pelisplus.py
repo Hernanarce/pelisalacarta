@@ -16,7 +16,7 @@ from core import tmdb
 from core.item import Item
 from core import config
 from core import servertools
-from core import autoplay
+from channels import autoplay
 from channels import filtertools
 
 host = "http://www.pelisplus.tv/"

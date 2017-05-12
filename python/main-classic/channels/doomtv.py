@@ -135,7 +135,9 @@ def lista(item):
         patron += '<\/a>.*?'
         patron += '<span class="ttps">.*?<\/span>.*?'
         patron += '<span class="ytps">(.*?)<\/span><\/div>'
-
+    elif item.extra == 'generos':
+        patron = '<div class=movie>.*?<img src=(.*?) alt=(.*?) \/>'
+        patron += '<a href=(.*?)>.*?<h2>.*?</h2>.*?(?:<span class=year>(.*?)</span>)?</div>'
     else:
         patron = '<div class="imagen">.*?'
         patron += '<img src="(.*?)" alt="(.*?)(?:–.*?|\(.*?|&#8211;|").*?'
@@ -173,7 +175,7 @@ def lista(item):
             itemlist.append(
                 Item(channel=item.channel,
                      action='findvideos',
-                     title=title,
+                     title=url,
                      url=url,
                      thumbnail=thumbnail,
                      plot=plot,
@@ -205,7 +207,7 @@ def seccion(item):
     data = httptools.downloadpage(item.url).data
 
     if item.extra == 'generos':
-        data = re.sub(r"\n|\r|\t|&nbsp;|<br>", "", data)
+        data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>|\s{2,}', "", data)
     accion = 'lista'
     if item.extra == 'masvistas':
         patron = '<b>\d*<\/b>\s*<a href="(.*?)">(.*?<\/a>\s*<span>.*?<\/span>\s*<i>.*?<\/i><\/li>)'
@@ -213,7 +215,7 @@ def seccion(item):
     elif item.extra == 'poraño':
         patron = '<li><a class="ito" HREF="(.*?)">(.*?)<\/a><\/li>'
     else:
-        patron = '<li class="cat-item cat-item-.*?"><a href="(.*?)">(.*?)<\/i><\/li>'
+        patron = '<li class=cat-item cat-item-.*?><a href=(.*?)>(.*?)<\/i>'
 
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -358,6 +360,7 @@ def findvideos(item):
     logger.info()
     itemlist = []
     itemlist = get_url(item)
+    logger.debug('itemlist: %s'%itemlist)
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
             Item(channel=item.channel,

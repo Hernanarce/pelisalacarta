@@ -7,7 +7,7 @@ import re
 import sys
 import urlparse
 
-from core import autoplay
+from channels import autoplay
 from channels import filtertools
 from core import config
 from core import httptools
