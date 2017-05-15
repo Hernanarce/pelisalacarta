@@ -175,7 +175,7 @@ def lista(item):
             itemlist.append(
                 Item(channel=item.channel,
                      action='findvideos',
-                     title=url,
+                     title=title,
                      url=url,
                      thumbnail=thumbnail,
                      plot=plot,
@@ -325,7 +325,7 @@ def get_url(item):
         patron = "{'label':(.*?),.*?'file':'(.*?)'}"
         matches = re.compile(patron, re.DOTALL).findall(unpacked)
         if not matches:
-            patron = "{file:'(.*?redirector.*?),label:'(.*?)'}"
+            patron = "{file:'(.*?redirector.*?)',type.*?,label:'(.*?)'}"
             matches = re.compile(patron, re.DOTALL).findall(unpacked)
 
         for dato_a, dato_b in matches:
@@ -360,7 +360,15 @@ def findvideos(item):
     logger.info()
     itemlist = []
     itemlist = get_url(item)
-    logger.debug('itemlist: %s'%itemlist)
+
+    # Requerido para FilterTools
+
+    itemlist = filtertools.get_links(itemlist, item, list_language)
+
+    # Requerido para AutoPlay
+
+    autoplay.start(itemlist, item)
+
     if config.get_library_support() and len(itemlist) > 0 and item.extra != 'findvideos':
         itemlist.append(
             Item(channel=item.channel,
@@ -371,12 +379,6 @@ def findvideos(item):
                  contentTitle=item.contentTitle,
                  ))
 
-    # Requerido para FilterTools
 
-    itemlist = filtertools.get_links(itemlist, item, list_language)
-
-    # Requerido para AutoPlay
-
-    autoplay.start(itemlist, item)
 
     return itemlist
