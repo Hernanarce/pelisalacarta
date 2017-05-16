@@ -387,7 +387,7 @@ def play(item):
     logger.info()
     itemlist =[]
     logger.debug('item: %s'%item)
-    if 'redirector' not in item.url:
+    if 'juicyapi' not in item.url:
         itemlist = servertools.find_video_items(data=item.url)
 
         for videoitem in itemlist:
