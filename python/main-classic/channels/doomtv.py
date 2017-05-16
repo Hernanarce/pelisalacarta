@@ -135,9 +135,9 @@ def lista(item):
         patron += '<\/a>.*?'
         patron += '<span class="ttps">.*?<\/span>.*?'
         patron += '<span class="ytps">(.*?)<\/span><\/div>'
-    elif item.extra == 'generos':
-        patron = '<div class=movie>.*?<img src=(.*?) alt=(.*?) \/>'
-        patron += '<a href=(.*?)>.*?<h2>.*?</h2>.*?(?:<span class=year>(.*?)</span>)?</div>'
+    elif item.extra in ['generos','poraño', 'buscar']:
+        patron = '<div class=movie>.*?<img src=(.*?) alt=(.*?)(?:\s|\/)><a href=(.*?)>.*?'
+        patron += '<h2>.*?<\/h2>.*?(?:<span class=year>(.*?)<\/span>)?.*?<\/div>'
     else:
         patron = '<div class="imagen">.*?'
         patron += '<img src="(.*?)" alt="(.*?)(?:–.*?|\(.*?|&#8211;|").*?'
@@ -310,48 +310,62 @@ def newest(categoria):
 
 def get_url(item):
     logger.info()
-    itemlist = []
-    duplicado = []
-    patrones = ["{'label':(.*?),.*?'file':'(.*?)'}", "{file:'(.*?redirector.*?),label:'(.*?)'}"]
+    itemlist=[]
+    duplicado =[]
+    patrones =["{'label':(.*?),.*?'file':'(.*?)'}","{file:'(.*?redirector.*?),label:'(.*?)'}"]
     data = httptools.downloadpage(item.url, headers=headers, cookies=False).data
-    url = scrapertools.find_single_match(data, 'class="player-content"><iframe src="(.*?)"')
-    url = 'http:/' + url.replace('//', '/')
-    data = httptools.downloadpage(url, headers=headers, cookies=False).data
-    packed = scrapertools.find_single_match(data, "<script type='text\/javascript'>(eval.*?)\s*jwplayer\(\)")
+    patron = 'class="player-content"><iframe src="(.*?)"'
+    matches = re.compile(patron, re.DOTALL).findall(data)
 
-    if packed:
-        unpacked = unpack(packed)
-        num_patron = 0
-        patron = "{'label':(.*?),.*?'file':'(.*?)'}"
-        matches = re.compile(patron, re.DOTALL).findall(unpacked)
-        if not matches:
-            patron = "{file:'(.*?redirector.*?)',type.*?,label:'(.*?)'}"
-            matches = re.compile(patron, re.DOTALL).findall(unpacked)
+    for option in matches:
+        if 'allplayer' in option:
+            url= 'http:/'+option.replace('//','/')
+            data = httptools.downloadpage(url, headers= headers, cookies=False).data
+            packed = scrapertools.find_single_match(data, "<script type='text\/javascript'>(eval.*?)\s*jwplayer\(\)")
+            if packed:
+              unpacked=unpack(packed)
+              num_patron = 0
+              patron = "{'label':(.*?),.*?'file':'(.*?)'}"
+              matches = re.compile(patron,re.DOTALL).findall(unpacked)
+              if not matches:
+               patron = "{file:'(.*?redirector.*?)',type.*?,label:'(.*?)'}"
+               matches = re.compile(patron,re.DOTALL).findall(unpacked)
 
-        for dato_a, dato_b in matches:
-            if 'http' in dato_a:
-                url = dato_a
-                calidad = dato_b
-            else:
-                url = dato_b
-                calidad = dato_a
-            title = item.contentTitle + ' (' + calidad + ')'
-            if url not in duplicado:
-                itemlist.append(
-                    Item(channel=item.channel,
-                         action='play',
-                         title=title,
-                         url=url,
-                         thumbnail=item.thumbnail,
-                         plot=item.plot,
-                         fanart=item.fanart,
-                         contentTitle=item.contentTitle,
-                         language=IDIOMAS['latino'],
-                         server='directo',
-                         quality=CALIDADES[calidad],
-                         context = autoplay.context
-                         ))
-                duplicado.append(url)
+              for dato_a, dato_b in matches:
+                if 'http' in dato_a:
+                  url = dato_a
+                  calidad = dato_b
+                else:
+                  url = dato_b
+                  calidad = dato_a
+                title = item.contentTitle+' ('+calidad+')'
+                if url not in duplicado:
+                    itemlist.append(
+                        Item(channel=item.channel,
+                             action='play',
+                             title=title,
+                             url=url,
+                             thumbnail=item.thumbnail,
+                             plot=item.plot,
+                             fanart=item.fanart,
+                             contentTitle=item.contentTitle,
+                             language=IDIOMAS['latino'],
+                             server='directo',
+                             quality=CALIDADES[calidad],
+                             context = autoplay.context
+                             ))
+                    duplicado.append(url)
+        else:
+            itemlist.extend(servertools.find_video_items(data=option))
+
+    for videoitem in itemlist:
+
+        if 'Enlace' in videoitem.title:
+            videoitem.channel = item.channel
+            videoitem.title = item.contentTitle + ' (' + videoitem.server + ')'
+            videoitem.language ='latino'
+            videoitem.quality ='default'
+            thumbnail = 'http://media.tvalacarta.info/servers/server_%s.png' % videoitem.server
 
         return itemlist
 
