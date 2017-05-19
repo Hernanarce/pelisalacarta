@@ -380,14 +380,6 @@ def findvideos(item):
             server = servers[server_id]
         logger.debug('server_id: %s'%server_id)
 
-        # if '/opl.' in url:
-        #     server = 'openload'
-        # elif '/your' in url:
-        #     server = 'yourupload'
-        # elif '/sen.' in url:
-        #     server = 'sendvid'
-        # elif '/face' in url:
-        #     server = 'netutv'
         if langs[scrapedlang] in list_language:
             language = IDIOMAS[langs[scrapedlang]]
         else:
