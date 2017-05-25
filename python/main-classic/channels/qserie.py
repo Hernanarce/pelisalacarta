@@ -76,7 +76,7 @@ def todas(item):
     if actual and ultima and siguiente <= int(ultima):
        titlen = 'Pagina Siguiente >>> '+str(actual)+'/'+str(ultima)
        fanart = 'https://s32.postimg.org/4q1u1hxnp/qserie.png'
-       thumbnail ='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+       thumbnail ='https://s16.postimg.org/9okdu7hhx/siguiente.png'
        itemlist.append(Item(channel = item.channel, action = "todas", title =titlen, url = siguiente_url, fanart = fanart, thumbnail=thumbnail))
     return itemlist
 
@@ -333,7 +333,7 @@ def findvideos(item):
        data = httptools.downloadpage(siguiente).data
        existe = scrapertools.find_single_match(data,'<center>La pel.cula que quieres ver no existe.</center>')
        if  not existe:
-           itemlist.append( Item(channel=item.channel, action="findvideos" , title='Capitulo Siguiente' , url=siguiente, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png', folder =True ))
+           itemlist.append( Item(channel=item.channel, action="findvideos" , title='Capitulo Siguiente' , url=siguiente, thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png', folder =True ))
         
     return itemlist    
     

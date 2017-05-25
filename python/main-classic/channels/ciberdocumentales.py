@@ -64,7 +64,7 @@ def lista (item):
         next_page = scrapertools.find_single_match(data,'class=current>.*?<\/span><a href=(.*?)>.*?<\/a>')
         import inspect
         if next_page !='' and item.extra != 'masvistas':
-           itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = host+next_page, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'))
+           itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = host+next_page, thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png'))
     return itemlist
 
 def generos(item):

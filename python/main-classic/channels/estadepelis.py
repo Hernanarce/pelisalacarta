@@ -190,7 +190,7 @@ def lista(item):
                                  action="lista",
                                  title='Siguiente >>>',
                                  url=url,
-                                 thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',
+                                 thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png',
                                  extra=item.extra
                                  ))
     return itemlist

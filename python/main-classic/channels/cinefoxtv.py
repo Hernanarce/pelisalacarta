@@ -107,7 +107,7 @@ def lista (item):
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb = True)
     if next_page_url !='':
-      itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = next_page_url, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',extra=item.extra, next_page = next_page))
+      itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = next_page_url, thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png',extra=item.extra, next_page = next_page))
     return itemlist
 
 def generos (item):

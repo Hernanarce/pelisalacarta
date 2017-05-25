@@ -43,7 +43,7 @@ def lista (item):
         actual_page_url = item.url
         next_page = scrapertools.find_single_match(data,'rel="next" href="([^"]+)"')
         if next_page !='':
-           itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = next_page, thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png',extra=item.extra))
+           itemlist.append(Item(channel = item.channel, action = "lista", title = 'Siguiente >>>', url = next_page, thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png',extra=item.extra))
     return itemlist
 
 def search (item,texto):

@@ -99,7 +99,7 @@ def todas(item):
                              action="todas",
                              title=">> Página siguiente",
                              url=next_page_url,
-                             thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+                             thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png'
                              ))
     return itemlist
 
@@ -271,7 +271,7 @@ def findvideos(item):
                                  action="findvideos",
                                  title='Capitulo Siguiente',
                                  url=siguiente,
-                                 thumbnail='https://s32.postimg.org/4zppxf5j9/siguiente.png'
+                                 thumbnail='https://s16.postimg.org/9okdu7hhx/siguiente.png'
                                  ))
 
     # Requerido para FilterTools
