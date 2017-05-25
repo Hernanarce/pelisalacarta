@@ -38,22 +38,22 @@ def mainlist(item):
     itemlist.append(item.clone(title="Series",
                                action="todas",
                                url="http://metaserie.com/series-agregadas",
-                               thumbnail='https://s32.postimg.org/544rx8n51/series.png',
-                               fanart='https://s32.postimg.org/544rx8n51/series.png'
+                               thumbnail='https://s27.postimg.org/iahczwgrn/series.png',
+                               fanart='https://s27.postimg.org/iahczwgrn/series.png'
                                ))
 
     itemlist.append(item.clone(title="Anime",
                                action="todas",
                                url="http://metaserie.com/animes-agregados",
-                               thumbnail='https://s31.postimg.org/lppob54d7/anime.png',
-                               fanart='https://s31.postimg.org/lppob54d7/anime.png'
+                               thumbnail='https://s2.postimg.org/s38borokp/anime.png',
+                               fanart='https://s2.postimg.org/s38borokp/anime.png'
                                ))
 
     itemlist.append(item.clone(title="Buscar",
                                action="search",
                                url="http://www.metaserie.com/?s=",
-                               thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                               fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                               thumbnail='https://s30.postimg.org/pei7txpa9/buscar.png',
+                               fanart='https://s30.postimg.org/pei7txpa9/buscar.png'
                                ))
 
     autoplay.show_option(item.channel, itemlist)

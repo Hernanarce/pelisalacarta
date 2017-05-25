@@ -15,8 +15,8 @@ host ="http://www.playpornx.net/list-movies/"
 
 def mainlist (item):
     itemlist =[]
-    itemlist.append( Item(channel=item.channel, title="Todas", action="lista", thumbnail='https://s12.postimg.org/iygbg8ip9/todas.png', fanart='https://s12.postimg.org/iygbg8ip9/todas.png'))
-    itemlist.append( Item(channel=item.channel, title="Buscar", action="search", url='http://www.playpornx.net/?s=', thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png', fanart='https://s31.postimg.org/qose4p13f/Buscar.png'))
+    itemlist.append( Item(channel=item.channel, title="Todas", action="lista", thumbnail='https://s18.postimg.org/fwvaeo6qh/todas.png', fanart='https://s18.postimg.org/fwvaeo6qh/todas.png'))
+    itemlist.append( Item(channel=item.channel, title="Buscar", action="search", url='http://www.playpornx.net/?s=', thumbnail='https://s30.postimg.org/pei7txpa9/buscar.png', fanart='https://s30.postimg.org/pei7txpa9/buscar.png'))
 
     return itemlist
 

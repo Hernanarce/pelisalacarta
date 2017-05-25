@@ -65,48 +65,48 @@ def mainlist(item):
                          title="Series",
                          action="todas",
                          url=host,
-                         thumbnail='https://s32.postimg.org/544rx8n51/series.png',
-                         fanart='https://s32.postimg.org/544rx8n51/series.png'
+                         thumbnail='https://s27.postimg.org/iahczwgrn/series.png',
+                         fanart='https://s27.postimg.org/iahczwgrn/series.png'
                          ))
 
     itemlist.append(Item(channel=item.channel,
                          title="Alfabetico",
                          action="letras",
                          url=host,
-                         thumbnail='https://s31.postimg.org/c3bm9cnl7/a_z.png',
-                         fanart='https://s31.postimg.org/c3bm9cnl7/a_z.png'
+                         thumbnail='https://s17.postimg.org/fwi1y99en/a-z.png',
+                         fanart='https://s17.postimg.org/fwi1y99en/a-z.png'
                          ))
 
     itemlist.append(Item(channel=item.channel,
                          title="Mas vistas",
                          action="masvistas",
                          url=host,
-                         thumbnail='https://s32.postimg.org/466gt3ipx/vistas.png',
-                         fanart='https://s32.postimg.org/466gt3ipx/vistas.png'
+                         thumbnail='https://s9.postimg.org/wmhzu9d7z/vistas.png',
+                         fanart='https://s9.postimg.org/wmhzu9d7z/vistas.png'
                          ))
 
     itemlist.append(Item(channel=item.channel,
                          title="Recomendadas",
                          action="recomendadas",
                          url=host,
-                         thumbnail='https://s31.postimg.org/4bsjyc4iz/recomendadas.png',
-                         fanart='https://s31.postimg.org/4bsjyc4iz/recomendadas.png'
+                         thumbnail='https://s12.postimg.org/s881laywd/recomendadas.png',
+                         fanart='https://s12.postimg.org/s881laywd/recomendadas.png'
                          ))
 
     itemlist.append(Item(channel=item.channel,
                          title="Ultimas Agregadas",
                          action="ultimas",
                          url=host,
-                         thumbnail='https://s31.postimg.org/3ua9kwg23/ultimas.png',
-                         fanart='https://s31.postimg.org/3ua9kwg23/ultimas.png'
+                         thumbnail='https://s22.postimg.org/cb7nmhwv5/ultimas.png',
+                         fanart='https://s22.postimg.org/cb7nmhwv5/ultimas.png'
                          ))
 
     itemlist.append(Item(channel=item.channel,
                          title="Buscar",
                          action="search",
                          url='http://mundoflv.com/?s=',
-                         thumbnail='https://s31.postimg.org/qose4p13f/Buscar.png',
-                         fanart='https://s31.postimg.org/qose4p13f/Buscar.png'
+                         thumbnail='https://s30.postimg.org/pei7txpa9/buscar.png',
+                         fanart='https://s30.postimg.org/pei7txpa9/buscar.png'
                          ))
 
     if autoplay.context:

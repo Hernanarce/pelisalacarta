@@ -44,8 +44,8 @@ def mainlist(item):
                  title="Todos",
                  action="todas",
                  url=host,
-                 thumbnail='https://s32.postimg.org/544rx8n51/series.png',
-                 fanart='https://s32.postimg.org/544rx8n51/series.png',
+                 thumbnail='https://s27.postimg.org/iahczwgrn/series.png',
+                 fanart='https://s27.postimg.org/iahczwgrn/series.png',
                  language='latino'
                  ))
     autoplay.show_option(item.channel, itemlist)
