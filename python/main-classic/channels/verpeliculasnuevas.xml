@@ -12,8 +12,13 @@
 	<bannermenu>https://s23.postimg.org/4uyyz6w4b/verpeliculasnuevas_banner.png</bannermenu>
 	
 	<update_url>https://raw.githubusercontent.com/tvalacarta/pelisalacarta/master/python/main-classic/channels/</update_url>
-	<version>4</version>
+	<version>5</version>
 	<changes>
+		<change>
+				<date>06/06/2017</date>
+				<autor>Hernan_ar_c</autor>
+				<description>compatibilidad con AutoPlay</description>
+	   	</change>
 		<change>
 				<date>25/05/2017</date>
 				<autor>Hernan_ar_c</autor>
@@ -45,7 +50,21 @@
 		<enabled>false</enabled>
 		<visible>false</visible>
 	</settings>
+
 	<settings>
+		<id>filter_languages</id>
+		<type>list</type>
+		<label>Mostrar enlaces en idioma...</label>
+		<default>0</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+		<lvalues>No filtrar</lvalues>
+		<lvalues>Latino</lvalues>
+		<lvalues>Español</lvalues>
+		<lvalues>VOS</lvalues>
+	</settings>
+
+<settings>
 		<id>include_in_newest_peliculas</id>
 		<type>bool</type>
 		<label>Incluir en Novedades - Peliculas</label>
@@ -62,3 +81,4 @@
 		<visible>true</visible>
 	</settings>
 </channel>
+
