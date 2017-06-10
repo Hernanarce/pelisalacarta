@@ -20,13 +20,13 @@ from channels import filtertools
 IDIOMAS = {'latino': 'Latino'}
 list_language = IDIOMAS.values()
 
-CALIDADES = {'1080':'1080p', '720':'720p', '480':'480p', '360':'360p'}
+CALIDADES = {'1080p':'1080p', '720p':'720p', '480p':'480p', '360p':'360p'}
 list_quality = CALIDADES.values()
 list_servers =['directo']
 
 host = 'http://doomtv.net/'
-headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
-           ['Referer', host]]
+headers = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0 Chrome/58.0.3029.110',
+           'Referer': host}
 
 tgenero = {"Comedia":"https://s7.postimg.org/ne9g9zgwb/comedia.png",
            "Suspenso":"https://s13.postimg.org/wmw6vl1cn/suspenso.png",
@@ -317,29 +317,57 @@ def get_url(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for option in matches:
+        logger.debug('option: %s'%option)
         if 'allplayer' in option:
             url= 'http:/'+option.replace('//','/')
             data = httptools.downloadpage(url, headers= headers, cookies=False).data
-            packed = scrapertools.find_single_match(data, "<script type='text\/javascript'>(eval.*?)\s*jwplayer\(\)")
+            packed = scrapertools.find_single_match(data, "<script>\s+(eval.*?)\s+jQuery")
             if packed:
               unpacked=unpack(packed)
-              num_patron = 0
-              patron = "{'label':(.*?),.*?'file':'(.*?)'}"
-              matches = re.compile(patron,re.DOTALL).findall(unpacked)
-              if not matches:
-               patron = "{file:'(.*?redirector.*?)',type.*?,label:'(.*?)'}"
-               matches = re.compile(patron,re.DOTALL).findall(unpacked)
+              logger.debug('UnPacked: %s' % unpacked)
+              doc_id = scrapertools.find_single_match(unpacked, '<iframe src=".*?docid=(.*?)" width="100%"')
+              YT_url = 'https://docs.google.com/get_video_info?docid=%s&eurl=%s'%(doc_id, url)
 
-              for dato_a, dato_b in matches:
-                if 'http' in dato_a:
-                  url = dato_a
-                  calidad = dato_b
-                else:
-                  url = dato_b
-                  calidad = dato_a
-                title = item.contentTitle+' ('+calidad+')'
-                if url not in duplicado:
-                    itemlist.append(
+              #headers['Origin']='https://youtube.googleapis.com'
+              #headers['Referer']='https://youtube.googleapis.com/embed/?status=ok&allow_embed=0&ps=docs&partnerid=30' \
+              #                  '&autoplay=0&docid=%s'%doc_id
+              #headers['Accept-Encoding']= 'gzip, deflate, sdch, br'
+              #headers['path']='/get_video_info?docid=0Bx9dQZvjD8FNZWNyWU11YVJhS2s&eurl=%s'%url
+              #headers['Accept']='text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+              headers['cookie']='ONSENT=YES+ES.es+V9;SID=vwTz'\
+                               '-0kKDNZNhtp2uuOBv7BADDHrFCJNKq03wA8V5Cfx9Bw_BpMDLRDE1n4CHbl_MA2Txw.;'\
+                               ' HSID=AWFT-GFbqF523aB8d; SSID=AnzUIlM4cxD-V7a8y;'\
+                               ' APISID=WZpiant-VX_rPuVy/AXru7iu7U1Q2P60PX;'\
+                               ' SAPISID=0mqr0mcjTVfMpK4Y/A_tQPNn0YmqskHxB0;'\
+                               ' DRIVE_STREAM=lG0JTPpW33A;'\
+                               ' NID=105=lcROJj0JyJB0Ng4gNUB190ajgqsOgjdzP9GN9sn0pSbzJ_JsrqHQjZhGEgITgJ57Q0t1oES3n'\
+                               '-odq32U9TAshk_n1bj8UeOgRXnGtGiiWZIFdJEAj636ABbfMtXRKH0DgPN_UjY15nUrIG5gWhqPeb2OYIw'\
+                               '_7N7Uvr1I_mCLNUmgFgbYKucpb9elXYBb_ztZEqzhSdyCkV20b00R9cD4xtMnbp8OJD68zZvTNwK6koF8eX'\
+                               'CEJ5ioet6OYm_mlRbIUlkZVpQ; S=explorer=eScpiXVYdCnMu82PboAITZTPt7y0c7JQ'
+              encoded_data = httptools.downloadpage(YT_url, headers=headers).data
+              encoded_data1 = urllib.unquote(encoded_data)
+              data = urllib.unquote(encoded_data1)
+
+              logger.debug('este data: %s'%data)
+              patron = '\|(https:.*?)&app'
+              matches = re.compile(patron, re.DOTALL).findall(data)
+              #headers['Referer'] = 'https://youtube.googleapis.com/embed/?status=ok&allow_embed=0&ps=docs&partnerid
+              # =30&autoplay=0&docid=%s'%doc_id
+              for scrapedurl in matches:
+
+              # for dato_a, dato_b in matches:
+              #   if 'http' in dato_a:
+              #     url = dato_a
+              #     calidad = dato_b
+              #   else:
+              #     url = dato_b
+              #     calidad = dato_a
+              #   title = item.contentTitle+' ('+calidad+')'
+              #   if url not in duplicado:
+
+                   title = scrapedurl
+                   url = scrapedurl
+                   itemlist.append(
                         Item(channel=item.channel,
                              action='play',
                              title=title,
@@ -350,10 +378,10 @@ def get_url(item):
                              contentTitle=item.contentTitle,
                              language=IDIOMAS['latino'],
                              server='directo',
-                             quality=CALIDADES[calidad],
+                             quality='',#CALIDADES[calidad],
                              context = autoplay.context
                              ))
-                    duplicado.append(url)
+                   duplicado.append(url)
         else:
             itemlist.extend(servertools.find_video_items(data=option))
 

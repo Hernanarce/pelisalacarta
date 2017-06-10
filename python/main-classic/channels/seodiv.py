@@ -57,8 +57,8 @@ def todas(item):
     itemlist = []
     data = httptools.downloadpage(item.url).data
     data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>|\s{2,}', "", data)
-    patron = '<div class=shortf><div><div class=shortf-img><a href=(.*?)><img src=(.*?) alt=.*?quality>(' \
-             '.*?)<.*?series transition>(.*?) <\/span>'
+    patron = '<div class=shortf><div><div class=shortf-img><a href=(.*?)><img src=(.*?) alt=.*?quality>(.*?)<.*?Ver ' \
+             'Serie><span>(.*?)<\/span>'
 
     matches = re.compile(patron, re.DOTALL).findall(data)
     for scrapedurl, scrapedthumbnail, scrapedcalidad, scrapedtitle in matches:
@@ -86,19 +86,19 @@ def todas(item):
 def temporadas(item):
     logger.info()
     itemlist = []
-    data = httptools.downloadpage(item.url).data
+    data = get_source(item.url)
     url_base = item.url
-    patron = '<li class="item\d+"><a href="#">(.*?)<\/a>'
+    patron = '<li class=item\d+><a href=#>(.*?) <\/a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
     temp = 1
-    if 'Temporada' in str(matches):
+    if matches:
         for scrapedtitle in matches:
             url = url_base
             tempo = re.findall(r'\d+', scrapedtitle)
-            if tempo:
-                title = 'Temporada' + ' ' + tempo[0]
-            else:
-                title = scrapedtitle.lower()
+            #if tempo:
+            #    title = 'Temporada' + ' ' + tempo[0]
+            #else:
+            title = scrapedtitle
             thumbnail = item.thumbnail
             plot = item.plot
             fanart = scrapertools.find_single_match(data, '<img src="([^"]+)"/>.*?</a>')
@@ -155,27 +155,35 @@ def episodios(item):
     return itemlist
 
 
+def get_source(url):
+    logger.info()
+    data = httptools.downloadpage(url, add_referer=True).data
+    data = re.sub(r'"|\n|\r|\t|&nbsp;|<br>|\s{2,}', "", data)
+    return data
+
 def episodiosxtemp(item):
     logger.info()
 
     logger.info()
     itemlist = []
-    data = httptools.downloadpage(item.url).data
+    patron_temp = '<li class=item\d+><a href=#>%s <\/a><ul><!--initiate accordion-->.*?<!--initiate ' \
+                  'accordion-->'%item.title
+    all_data = get_source(item.url)
+    data = scrapertools.find_single_match(all_data, patron_temp)
     tempo = item.title
     if 'Temporada' in item.title:
         item.title = item.title.replace('Temporada', 'temporada')
         item.title = item.title.strip()
         item.title = item.title.replace(' ', '-')
 
-    patron = '<li><a href="([^"]+)">.*?(Capitulo|Pelicula).*?([\d]+)'
+    patron = '<li><a href=(.*?)>.*?(Capitulo|Pelicula).*?(\d+).*?<'
 
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtipo, scrapedtitle in matches:
         url = host + scrapedurl
         plot = item.plot
-
-        if 'temporada' in item.title and item.title in scrapedurl and scrapedtipo == 'Capitulo' and item.temp != '':
+        if scrapedtipo == 'Capitulo' and item.temp != '':
             title = item.contentSerieName + ' ' + item.temp + 'x' + scrapedtitle
             itemlist.append(
                     Item(channel=item.channel,
@@ -190,7 +198,7 @@ def episodiosxtemp(item):
                          contentSerieName=item.contentSerieName,
                          ))
 
-        if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Capitulo' and item.temp\
+        if item.title not in scrapedurl and scrapedtipo == 'Capitulo' and item.temp\
                 == '':
             if item.temp == '': temp = '1'
             title = item.contentSerieName + ' ' + temp + 'x' + scrapedtitle
