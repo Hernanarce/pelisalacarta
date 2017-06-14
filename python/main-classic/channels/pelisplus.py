@@ -296,7 +296,8 @@ def temporadas(item):
                      extra=scrapedtitle.rstrip('\n'),
                      contentSerieName=item.contentSerieName,
                      contentSeasonNumber=contentSeasonNumber,
-                     infoLabels={'season': contentSeasonNumber}
+                     infoLabels={'season': contentSeasonNumber},
+                     context = item.context
                      ))
 
     if item.extra == 'temporadas':
@@ -354,7 +355,8 @@ def episodios(item):
                          fanart=fanart,
                          extra=scrapedtitle,
                          contentSeasonNumber=item.contentSeasonNumber,
-                         infoLabels=infoLabels
+                         infoLabels=infoLabels,
+                         context = item.context
                          ))
     if item.extra != 'temporadas':
         tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)

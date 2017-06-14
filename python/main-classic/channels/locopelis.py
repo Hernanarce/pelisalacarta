@@ -130,8 +130,12 @@ def todas(item):
     for scrapedurl, scrapedtitle, scrapedthumbnail, scrapedplot, scrapedyear, scrapedidioma in matches:
 
         year = scrapedyear
-        idioma_id = scrapedidioma.strip()
+        idioma_id = scrapertools.decodeHtmlentities(scrapedidioma.strip())
         idioma = scrapertools.decodeHtmlentities(idioma_id)
+        #if idioma == 'Espa&ntilde;ol':
+        #    idioma ='Español'
+        logger.debug('idioma original: %s'%idioma_id)
+        logger.debug('idioma: %s' % idioma)
         if idioma in audio:
             idioma = audio[idioma]
 
@@ -155,7 +159,8 @@ def todas(item):
                              extra=idioma,
                              contentTitle=contentTitle,
                              infoLabels={'year': year},
-                             language = idioma_id
+                             language = idioma_id,
+                             context = autoplay.context
                              ))
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
     # Paginacion
@@ -347,6 +352,8 @@ def findvideos(item):
 
     from core import servertools
     itemlist.extend(servertools.find_video_items(data=data))
+    if item.language=='Espa&ntilde;ol':
+        item.language == 'Español'
     for videoitem in itemlist:
         videoitem.language = IDIOMAS[item.language]
         videoitem.title = item.contentTitle+' ('+videoitem.server+') ('+videoitem.language+')'

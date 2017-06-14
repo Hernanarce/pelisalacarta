@@ -148,6 +148,7 @@ def todas(item):
                  infoLabels={'year': year},
                  show=title,
                  list_language=list_language,
+                 context = autoplay.context
                  ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -268,7 +269,8 @@ def masvistas(item):
                  plot=plot,
                  fanart=fanart,
                  contentSerieName=contentSerieName,
-                 infoLabels={'year': year}
+                 infoLabels={'year': year},
+                 context= autoplay.context
                  ))
 
 
@@ -302,7 +304,8 @@ def recomendadas(item):
                  thumbnail=thumbnail,
                  plot=plot,
                  fanart=fanart,
-                 contentSerieName=title
+                 contentSerieName=title,
+                 context = autoplay.context
                  ))
 
     return itemlist
@@ -335,7 +338,8 @@ def ultimas(item):
                  thumbnail=thumbnail,
                  plot=plot,
                  fanart=fanart,
-                 contentSerieName=title
+                 contentSerieName=title,
+                 context = autoplay.context
                  ))
 
 
@@ -378,7 +382,8 @@ def temporadas(item):
                      extra1=item.extra1,
                      contentSerieName=item.contentSerieName,
                      contentSeasonNumber=contentSeasonNumber,
-                     infoLabels={'season': contentSeasonNumber}
+                     infoLabels={'season': contentSeasonNumber},
+                     context = item.context
                      ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -437,7 +442,8 @@ def episodiosxtemp(item):
                      contentSeasonNumber=item.contentSeasonNumber,
                      infoLabels=infoLabels,
                      show=item.contentSerieName,
-                     list_language=list_language
+                     list_language=list_language,
+                     context= item.context
                      ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -562,7 +568,8 @@ def busqueda(item):
                  thumbnail=thumbnail,
                  plot=plot,
                  contentSerieName=title,
-                 infoLabels={'year': year}
+                 infoLabels={'year': year},
+                 context = autoplay.context
                  ))
 
 

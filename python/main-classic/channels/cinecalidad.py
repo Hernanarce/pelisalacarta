@@ -227,7 +227,8 @@ def peliculas(item):
                  fanart='https://s31.postimg.org/puxmvsi7v/cinecalidad.png',
                  contentTitle=contentTitle,
                  infoLabels={'year': year},
-                 language=item.language
+                 language=item.language,
+                 context = autoplay.context
                  ))
 
     try:

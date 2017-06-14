@@ -275,7 +275,8 @@ def lista(item):
                  extra=item.extra,
                  infoLabels={'year': year},
                  show = scrapedtitle,
-                 list_language=list_language
+                 list_language=list_language,
+                 context = autoplay.context
                  ))
 
     # #Paginacion

@@ -180,7 +180,8 @@ def lista(item):
                      plot=plot,
                      fanart=fanart,
                      contentTitle=title,
-                     infoLabels={'year': year}
+                     infoLabels={'year': year},
+                     context = autoplay.context
                      ))
 
     tmdb.set_infoLabels_itemlist(itemlist, seekTmdb=True)
@@ -306,7 +307,6 @@ def newest(categoria):
 
     return itemlist
 
-
 def get_url(item):
     logger.info()
     itemlist=[]
@@ -317,71 +317,62 @@ def get_url(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for option in matches:
-        logger.debug('option: %s'%option)
         if 'allplayer' in option:
             url= 'http:/'+option.replace('//','/')
             data = httptools.downloadpage(url, headers= headers, cookies=False).data
-            packed = scrapertools.find_single_match(data, "<script>\s+(eval.*?)\s+jQuery")
+            packed = scrapertools.find_single_match(data, "<div id='allplayer'>.*?(eval\(function\(p,a,c,k.*?\)\)\))")
             if packed:
               unpacked=unpack(packed)
-              logger.debug('UnPacked: %s' % unpacked)
-              doc_id = scrapertools.find_single_match(unpacked, '<iframe src=".*?docid=(.*?)" width="100%"')
-              YT_url = 'https://docs.google.com/get_video_info?docid=%s&eurl=%s'%(doc_id, url)
+              video_urls = []
+              if "vimeocdn" in unpacked:
 
-              #headers['Origin']='https://youtube.googleapis.com'
-              #headers['Referer']='https://youtube.googleapis.com/embed/?status=ok&allow_embed=0&ps=docs&partnerid=30' \
-              #                  '&autoplay=0&docid=%s'%doc_id
-              #headers['Accept-Encoding']= 'gzip, deflate, sdch, br'
-              #headers['path']='/get_video_info?docid=0Bx9dQZvjD8FNZWNyWU11YVJhS2s&eurl=%s'%url
-              #headers['Accept']='text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-              headers['cookie']='ONSENT=YES+ES.es+V9;SID=vwTz'\
-                               '-0kKDNZNhtp2uuOBv7BADDHrFCJNKq03wA8V5Cfx9Bw_BpMDLRDE1n4CHbl_MA2Txw.;'\
-                               ' HSID=AWFT-GFbqF523aB8d; SSID=AnzUIlM4cxD-V7a8y;'\
-                               ' APISID=WZpiant-VX_rPuVy/AXru7iu7U1Q2P60PX;'\
-                               ' SAPISID=0mqr0mcjTVfMpK4Y/A_tQPNn0YmqskHxB0;'\
-                               ' DRIVE_STREAM=lG0JTPpW33A;'\
-                               ' NID=105=lcROJj0JyJB0Ng4gNUB190ajgqsOgjdzP9GN9sn0pSbzJ_JsrqHQjZhGEgITgJ57Q0t1oES3n'\
-                               '-odq32U9TAshk_n1bj8UeOgRXnGtGiiWZIFdJEAj636ABbfMtXRKH0DgPN_UjY15nUrIG5gWhqPeb2OYIw'\
-                               '_7N7Uvr1I_mCLNUmgFgbYKucpb9elXYBb_ztZEqzhSdyCkV20b00R9cD4xtMnbp8OJD68zZvTNwK6koF8eX'\
-                               'CEJ5ioet6OYm_mlRbIUlkZVpQ; S=explorer=eScpiXVYdCnMu82PboAITZTPt7y0c7JQ'
-              encoded_data = httptools.downloadpage(YT_url, headers=headers).data
-              encoded_data1 = urllib.unquote(encoded_data)
-              data = urllib.unquote(encoded_data1)
+                streams = scrapertools.find_multiple_matches(unpacked, "{file:'(.*?)',type:'video/.*?',label:'(.*?)'")
+                for video_url, quality in streams:
+                    video_urls.append([video_url, quality])
+              else:
+                doc_id = scrapertools.find_single_match(unpacked, 'driveid=(.*?)&')
+                doc_url = "http://docs.google.com/get_video_info?docid=%s" % doc_id
+                response = httptools.downloadpage(doc_url, cookies=False)
+                cookies = ""
+                cookie = response.headers["set-cookie"].split("HttpOnly, ")
+                for c in cookie:
+                    cookies += c.split(";", 1)[0] + "; "
 
-              logger.debug('este data: %s'%data)
-              patron = '\|(https:.*?)&app'
-              matches = re.compile(patron, re.DOTALL).findall(data)
-              #headers['Referer'] = 'https://youtube.googleapis.com/embed/?status=ok&allow_embed=0&ps=docs&partnerid
-              # =30&autoplay=0&docid=%s'%doc_id
-              for scrapedurl in matches:
+                data = response.data.decode('unicode-escape')
+                data = urllib.unquote_plus(urllib.unquote_plus(data))
+                headers_string = "|Cookie=" + cookies
 
-              # for dato_a, dato_b in matches:
-              #   if 'http' in dato_a:
-              #     url = dato_a
-              #     calidad = dato_b
-              #   else:
-              #     url = dato_b
-              #     calidad = dato_a
-              #   title = item.contentTitle+' ('+calidad+')'
-              #   if url not in duplicado:
+                url_streams = scrapertools.find_single_match(data, 'url_encoded_fmt_stream_map=(.*)')
+                streams = scrapertools.find_multiple_matches(url_streams,
+                                                 'itag=(\d+)&url=(.*?)(?:;.*?quality=.*?(?:,|&)|&quality=.*?(?:,|&))')
 
-                   title = scrapedurl
-                   url = scrapedurl
-                   itemlist.append(
-                        Item(channel=item.channel,
-                             action='play',
-                             title=title,
-                             url=url,
-                             thumbnail=item.thumbnail,
-                             plot=item.plot,
-                             fanart=item.fanart,
-                             contentTitle=item.contentTitle,
-                             language=IDIOMAS['latino'],
-                             server='directo',
-                             quality='',#CALIDADES[calidad],
-                             context = autoplay.context
-                             ))
-                   duplicado.append(url)
+                itags = {'18':'360p', '22':'720p', '34':'360p', '35':'480p', '37':'1080p', '59':'480p'}
+                for itag, video_url in streams:
+                    video_url += headers_string
+                    video_urls.append([video_url, itags[itag]])
+
+              for video_item in video_urls:
+                  calidad = video_item[1]
+                  title = '%s [%s]'%(item.contentTitle, calidad)
+                  url = video_item[0]
+
+                  if url not in duplicado:
+
+                      itemlist.append(
+                            Item(channel=item.channel,
+                                 action='play',
+                                 title=title,
+                                 url= url,
+                                 thumbnail=item.thumbnail,
+                                 plot=item.plot,
+                                 fanart=item.fanart,
+                                 contentTitle=item.contentTitle,
+                                 language=IDIOMAS['latino'],
+                                 server='directo',
+                                 quality=CALIDADES[calidad],
+                                 context = item.context
+                                 ))
+                      duplicado.append(url)
         else:
             itemlist.extend(servertools.find_video_items(data=option))
 
@@ -400,7 +391,6 @@ def findvideos(item):
     logger.info()
     itemlist = []
     itemlist = get_url(item)
-    logger.debug(itemlist)
 
     # Requerido para FilterTools
 

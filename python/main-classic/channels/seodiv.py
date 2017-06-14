@@ -77,7 +77,8 @@ def todas(item):
                      contentSerieName=title,
                      extra='',
                      language=item.language,
-                     quality='default'
+                     quality='default',
+                     context=autoplay.context
                      ))
 
     return itemlist
@@ -113,7 +114,8 @@ def temporadas(item):
                          temp=str(temp),
                          contentSerieName=item.contentSerieName,
                          language=item.language,
-                         quality=item.quality
+                         quality=item.quality,
+                         context=item.context
                          ))
             temp = temp + 1
 
@@ -196,6 +198,7 @@ def episodiosxtemp(item):
                          language=item.language,
                          quality=item.quality,
                          contentSerieName=item.contentSerieName,
+                         context=item.context
                          ))
 
         if item.title not in scrapedurl and scrapedtipo == 'Capitulo' and item.temp\
@@ -211,7 +214,8 @@ def episodiosxtemp(item):
                          url=url,
                          thumbnail=item.thumbnail,
                          plot=plot,
-                         contentSerieName=item.contentSerieName
+                         contentSerieName=item.contentSerieName,
+                         context=item.context
                          ))
 
         if 'temporada' not in item.title and item.title not in scrapedurl and scrapedtipo == 'Pelicula':
@@ -225,7 +229,8 @@ def episodiosxtemp(item):
                          thumbnail=item.thumbnail,
                          plot=plot,
                          language=item.language,
-                         contentSerieName=item.contentSerieName
+                         contentSerieName=item.contentSerieName,
+                         context=item.context
                          ))
 
     return itemlist
@@ -243,7 +248,7 @@ def findvideos(item):
                                                                   'class="f-info-text">(.*?)<\/span>')
         videoitem.title = item.contentSerieName + ' (' + videoitem.server + ') (' + videoitem.language + ')'
         videoitem.quality = 'default'
-        videoitem.context = autoplay.context
+        videoitem.context = item.context
         itemlist.append(videoitem)
 
     # Requerido para FilterTools

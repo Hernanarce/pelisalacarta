@@ -42,12 +42,12 @@ def mainlist(item):
                                fanart='https://s27.postimg.org/iahczwgrn/series.png'
                                ))
 
-    itemlist.append(item.clone(title="Anime",
-                               action="todas",
-                               url="http://metaserie.com/animes-agregados",
-                               thumbnail='https://s2.postimg.org/s38borokp/anime.png',
-                               fanart='https://s2.postimg.org/s38borokp/anime.png'
-                               ))
+    # itemlist.append(item.clone(title="Anime",
+    #                            action="todas",
+    #                            url="http://metaserie.com/animes-agregados",
+    #                            thumbnail='https://s2.postimg.org/s38borokp/anime.png',
+    #                            fanart='https://s2.postimg.org/s38borokp/anime.png'
+    #                            ))
 
     itemlist.append(item.clone(title="Buscar",
                                action="search",
@@ -65,16 +65,21 @@ def todas(item):
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
+    logger.debug(data)
 
     patron = '<div class="poster">[^<]'
-    patron += '<a href="([^"]+)" title="([^"]+)">[^<]'
+    patron += '<a href="([^"]+)" title="([^"]+)en(.*?)">[^<]'
     patron += '<div class="poster_efecto"><span>([^<]+)<.*?div>[^<]'
     patron += '<img.*?src="([^"]+)"'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedtitle, scrapedplot, scrapedthumbnail in matches:
+    for scrapedurl, scrapedtitle, lang, scrapedplot, scrapedthumbnail in matches:
+        if 'latino' in lang:
+            idioma = 'Latino'
+        elif 'español' in lang:
+            idioma = 'Español'
         url = urlparse.urljoin(item.url, scrapedurl)
-        title = scrapertools.decodeHtmlentities(scrapedtitle)
+        title = scrapertools.decodeHtmlentities(scrapedtitle)+' (%s)'%idioma
         thumbnail = scrapedthumbnail
         plot = scrapedplot
         fanart = 'https://s32.postimg.org/7g50yo39h/metaserie.png'
@@ -86,7 +91,8 @@ def todas(item):
                  thumbnail=thumbnail,
                  plot=plot,
                  fanart=fanart,
-                 contentSerieName=title
+                 contentSerieName=title,
+                 context = autoplay.context
                  ))
 
     # Paginacion
@@ -131,7 +137,8 @@ def temporadas(item):
                  plot=plot,
                  fanart=fanart,
                  contentSerieName=item.contentSerieName,
-                 contentSeasonNumber=contentSeasonNumber
+                 contentSeasonNumber=contentSeasonNumber,
+                 context = item.context
                  ))
 
     if config.get_library_support() and len(itemlist) > 0:
@@ -156,11 +163,19 @@ def episodios(item):
 
     return itemlist
 
+def more_episodes(item, itemlist, url):
+    logger.info()
+    templist=[]
+    item.url = url
+    templist = episodiosxtemp(item)
+    itemlist += templist
+    return itemlist
 
 def episodiosxtemp(item):
     logger.info()
     itemlist = []
     data = httptools.downloadpage(item.url).data
+    logger.debug(data)
     patron = '<td><h3 class=".*?href="([^"]+)".*?">([^<]+).*?td>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -182,9 +197,13 @@ def episodiosxtemp(item):
                              plot=plot,
                              contentSerieName=item.contentSerieName,
                              contentSeasonNumber=item.contentSeasonNumber,
-                             contentEpisodeNumber=contentEpisodeNumber
+                             contentEpisodeNumber=contentEpisodeNumber,
+                             context = item.context
                              ))
-
+    more_pages= scrapertools.find_single_match(data,'<li><a class="next page-numbers local-link" href="(.*?)">&raquo;')
+    logger.debug('more_pages: %s'%more_pages)
+    if more_pages:
+        itemlist = more_episodes(item, itemlist, more_pages)
     return itemlist
 
 
