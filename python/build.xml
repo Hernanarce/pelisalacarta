@@ -26,11 +26,11 @@
 <project name="pelisalacarta" default="package">
     <description>pelisalacarta</description>
 
-    <property name="version" value="4.2.0-final"/>
-    <property name="versionboxee" value="10.29"/>
-    <property name="versiondate" value="30/Abril/2017"/>
-    <property name="channels_version" value="20170510"/>
-    <property name="servers_version" value="20170510"/>
+    <property name="version" value="4.3.0-beta1"/>
+    <property name="versionboxee" value="10.30"/>
+    <property name="versiondate" value="30/Junio/2017"/>
+    <property name="channels_version" value="20170630"/>
+    <property name="servers_version" value="20170630"/>
 
     <property name="target_base_folder" value="../../target/python"/>
 
