@@ -109,7 +109,7 @@ patrones = ['', '<span class="clms">Sinopsis:<\/span>([^<]+)<div class="info_mov
 def mainlist(item):
     logger.info()
 
-    autoplay.prepare_autoplay_settings(item.channel, list_servers, list_quality)
+    autoplay.init(item.channel, list_servers, list_quality)
     itemlist = []
 
     itemlist.append(
@@ -356,7 +356,7 @@ def findvideos(item):
                  ))
 
     itemlist = servertools.get_servers_itemlist(itemlist, lambda
-        i: item.contentTitle + ' | ' + i.calidad + ' | ' + i.idioma + ' (' + i.server + ')')
+        i: item.contentTitle + ' | ' + i.calidad + ' | ' + i.idioma + ' (' + i.server + ')', True)
 
     # Requerido para FilterTools
 
